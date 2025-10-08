@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-upwork-500 hover:bg-upwork-600 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg relative overflow-hidden;
+  }
+  
+  .btn-primary:hover {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-upwork-600 font-semibold py-3 px-6 rounded-xl border-2 border-upwork-200 hover:border-upwork-300 transition-all duration-300 ease-in-out transform hover:scale-105;
+  }
+  
+  .card-modern {
+    @apply bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:scale-[1.02];
+  }
+  
+  .input-modern {
+    @apply w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-upwork-500 focus:border-upwork-500 transition-all duration-200;
+  }
+}
