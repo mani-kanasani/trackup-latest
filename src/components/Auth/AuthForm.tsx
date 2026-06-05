@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { AnimatedLogo } from '../UI/AnimatedLogo';
+import { Flame } from 'lucide-react';
 
 export const AuthForm: React.FC = () => {
   const { login, signup } = useAuth();
@@ -38,20 +38,19 @@ export const AuthForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-upwork-50 to-upwork-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-ember-50 via-orange-50 to-ember-100 dark:from-gray-900 dark:to-gray-950 flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8 animate-fade-in">
         <div className="text-center">
-          <div className="w-20 h-20 bg-upwork-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-upwork-200/20">
-            <AnimatedLogo size="lg" />
+          <div className="w-20 h-20 bg-gradient-to-br from-ember-400 to-ember-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-ember-500/30">
+            <Flame className="w-10 h-10 text-white" />
           </div>
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            {mode === 'login' ? 'Sign in to TrackUp' : 'Create your account'}
+            {mode === 'login' ? 'Sign in to Ember' : 'Create your account'}
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            {mode === 'login' 
-              ? 'Welcome back! Please sign in to continue.' 
-              : 'Start tracking your Upwork proposals today.'
-            }
+            {mode === 'login'
+              ? 'Welcome back to your AI outreach suite.'
+              : 'AI-powered outreach — Upwork proposals, LinkedIn DMs and more.'}
           </p>
         </div>
 
@@ -117,7 +116,7 @@ export const AuthForm: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full flex justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100"
+            className="w-full flex justify-center items-center px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-ember-500 to-ember-600 hover:from-ember-600 hover:to-ember-700 shadow-md shadow-ember-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Please wait...' : (mode === 'login' ? 'Sign in' : 'Create account')}
           </button>
@@ -126,7 +125,7 @@ export const AuthForm: React.FC = () => {
             <button
               type="button"
               onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-              className="text-sm text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300 font-medium transition-colors duration-200"
+              className="text-sm text-ember-600 dark:text-ember-400 hover:text-ember-700 dark:hover:text-ember-300 font-medium transition-colors duration-200"
             >
               {mode === 'login' 
                 ? "Don't have an account? Sign up" 

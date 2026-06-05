@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import { AuthForm } from './components/Auth/AuthForm';
-import { Sidebar } from './components/Layout/Sidebar';
-import { Header } from './components/Layout/Header';
-import { Dashboard } from './pages/Dashboard';
-import { Apply } from './pages/Apply';
-import { Track } from './pages/Track';
-import { Settings } from './pages/Settings';
 import { SupabaseSetup } from './components/Setup/SupabaseSetup';
 import { isSupabaseConfigured } from './lib/supabaseConfig';
+import { Home } from './pages/Home';
+import { Settings } from './pages/Settings';
+import { TrackUpApp } from './apps/trackup/TrackUpApp';
+import { LinkedInApp } from './apps/linkedin/LinkedInApp';
+import { AppId } from './apps/registry';
+
+// Shared platform settings (AI provider, database connection, theme).
+const PlatformSettings: React.FC<{ onExit: () => void }> = ({ onExit }) => (
+  <div className="min-h-screen bg-gradient-to-br from-ember-50 to-orange-100 dark:from-gray-900 dark:to-gray-950">
+    <div className="h-9 bg-ember-500 text-white flex items-center px-4">
+      <button onClick={onExit} className="flex items-center text-sm font-semibold hover:opacity-90">
+        <ArrowLeft className="w-4 h-4 mr-1.5" /> All apps
+      </button>
+    </div>
+    <Settings />
+  </div>
+);
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
-  const [currentPage, setCurrentPage] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeApp, setActiveApp] = useState<AppId | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   if (loading) {
     return (
@@ -29,38 +41,16 @@ const AppContent: React.FC = () => {
     return <AuthForm />;
   }
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'apply':
-        return <Apply />;
-      case 'track':
-        return <Track />;
-      case 'settings':
-        return <Settings />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
-  return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <Sidebar 
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-        isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
-      />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header currentPage={currentPage} />
-        <main className="flex-1 overflow-y-auto animate-fade-in">
-          {renderPage()}
-        </main>
-      </div>
-    </div>
-  );
+  if (showSettings) {
+    return <PlatformSettings onExit={() => setShowSettings(false)} />;
+  }
+  if (activeApp === 'trackup') {
+    return <TrackUpApp onExit={() => setActiveApp(null)} />;
+  }
+  if (activeApp === 'linkedin') {
+    return <LinkedInApp onExit={() => setActiveApp(null)} />;
+  }
+  return <Home onOpenApp={setActiveApp} onOpenSettings={() => setShowSettings(true)} />;
 };
 
 function App() {

@@ -32,6 +32,32 @@ export default {
           800: '#1e40af',
           900: '#1e3a8a',
         },
+        // Ember platform brand (orange)
+        ember: {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+        },
+        // LinkedIn DM Generator app accent
+        linkedin: {
+          50: '#eef6fc',
+          100: '#d4e8f6',
+          200: '#a9d1ed',
+          300: '#7fb6dd',
+          400: '#4a93cb',
+          500: '#0a66c2',
+          600: '#0959ab',
+          700: '#074a8f',
+          800: '#063a70',
+          900: '#042a52',
+        },
         gray: {
           50: '#F9FAFB',
           100: '#F3F4F6',
