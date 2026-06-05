@@ -1,8 +1,11 @@
-# TrackUp
+# Ember
 
-Generate and track Upwork proposals. Paste a job, generate a cover letter, a
-Mermaid workflow diagram, a shareable proposal PDF, and a Loom video script, then
-track each application through to won/lost.
+An AI outreach suite — one login, multiple apps:
+
+- **TrackUp** — generate & track Upwork proposals (cover letter, workflow diagram, shareable PDF, video script).
+- **LinkedIn DM Generator** — turn leads into personalized connection requests + a branching DM flow.
+
+Bring your own AI key (Google Gemini free tier, OpenAI, or Anthropic).
 
 > **Want to run your own copy?** Follow **[SETUP.md](SETUP.md)** — a ~15-minute,
 > copy-paste self-hosting guide written for non-technical users.

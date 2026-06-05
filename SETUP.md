@@ -1,6 +1,6 @@
-# Self-hosting TrackUp
+# Self-hosting Ember
 
-This guide walks you through running your **own** copy of TrackUp — your own
+This guide walks you through running your **own** copy of Ember — your own
 database, your own deployment. It takes about **15 minutes**. You'll use the
 command line for one step, but every command is copy-paste.
 
@@ -25,7 +25,7 @@ When you're done you'll have:
 
 ## Step 1 — Get the code
 
-1. Open the TrackUp repo on GitHub and click **Fork** (top-right) to copy it into your account.
+1. Open the Ember repo on GitHub and click **Fork** (top-right) to copy it into your account.
 2. Clone your fork to your computer and open it:
 
    ```bash
