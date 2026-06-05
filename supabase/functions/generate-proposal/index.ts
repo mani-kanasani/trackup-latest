@@ -78,22 +78,28 @@ async function callOpenAICompatible(
   apiKey: string,
   model: string,
   userPrompt: string,
+  useJsonMode: boolean,
 ): Promise<string> {
+  const body: Record<string, unknown> = {
+    model,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userPrompt },
+    ],
+    temperature: 0.7,
+  };
+  // Only OpenAI reliably supports JSON mode on this endpoint; Gemini's
+  // OpenAI-compatible endpoint can reject it, so there we rely on the prompt
+  // plus defensive parsing instead.
+  if (useJsonMode) body.response_format = { type: 'json_object' };
+
   const res = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: userPrompt },
-      ],
-      temperature: 0.7,
-      response_format: { type: 'json_object' },
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
@@ -154,6 +160,7 @@ async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 
       input.apiKey,
       input.model,
       userPrompt,
+      false,
     );
   } else {
     raw = await callOpenAICompatible(
@@ -161,6 +168,7 @@ async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 
       input.apiKey,
       input.model,
       userPrompt,
+      true,
     );
   }
 
@@ -370,6 +378,7 @@ Deno.serve(async (req: Request) => {
       video_script: content.video_script,
     });
   } catch (err) {
+    console.error('generate-proposal failed:', err);
     const message = err instanceof Error ? err.message : 'Unexpected error generating proposal.';
     return json({ error: message }, 500);
   }

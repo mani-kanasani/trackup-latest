@@ -72,10 +72,12 @@ When it prints **✓ Backend ready!**, this step is done.
 
 1. **Database:** In Supabase, open **SQL Editor → New query**. Open each file in
    `supabase/migrations/` (in date order), paste its contents, and click **Run**.
-2. **Function:** Open **Edge Functions → Deploy a new function → Via editor**.
-   The dashboard pre-fills a random name (like `swift-handler`) — **change it to
-   exactly `generate-proposal`**, paste the contents of
-   `supabase/functions/generate-proposal/index.ts`, and click **Deploy**.
+2. **Functions:** Open **Edge Functions → Deploy a new function → Via editor** and
+   create **two** functions — `generate-proposal` and `generate-outreach`. For each:
+   change the dashboard's random name (e.g. `swift-handler`) to the exact name, paste
+   the contents of the matching `supabase/functions/<name>/index.ts`, **turn OFF
+   "Verify JWT"**, and click **Deploy**. (New Supabase projects reject the gateway JWT
+   check, so it must be off or every call returns 401.)
 
 </details>
 
