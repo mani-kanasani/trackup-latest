@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Send, ExternalLink, Copy, FileText, Video, BarChart3, Eye, EyeOff, DollarSign, Briefcase } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
-import { WebhookRequest, WebhookResponse, JobLevel, CompensationType } from '../types';
+import { GenerateResponse, JobLevel, CompensationType } from '../types';
+import { supabase } from '../lib/supabase';
+import { loadAIConfig } from '../lib/aiConfig';
 
 export const Apply: React.FC = () => {
   const { addMaterial } = useData();
@@ -12,7 +14,7 @@ export const Apply: React.FC = () => {
   const [proposedAmount, setProposedAmount] = useState('');
   const [actualAmount, setActualAmount] = useState('');
   const [loading, setLoading] = useState(false);
-  const [generatedData, setGeneratedData] = useState<WebhookResponse | null>(null);
+  const [generatedData, setGeneratedData] = useState<GenerateResponse | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,56 +24,47 @@ export const Apply: React.FC = () => {
       return;
     }
 
+    const aiConfig = loadAIConfig();
+    if (!aiConfig) {
+      setError('Add your AI provider and API key in Settings before generating.');
+      return;
+    }
+
     setLoading(true);
     setError('');
-    
-    console.log('Starting webhook request...');
 
     try {
-      const payload: WebhookRequest = {
-        job_title: jobTitle,
-        job_summary: jobSummary
-      };
-      
-      console.log('Payload:', payload);
-
-      const response = await fetch(
-        import.meta.env.VITE_WEBHOOK_URL,
+      const { data, error: fnError } = await supabase.functions.invoke<GenerateResponse>(
+        'generate-proposal',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
+          body: {
+            job_title: jobTitle,
+            job_summary: jobSummary,
+            provider: aiConfig.provider,
+            model: aiConfig.model,
+            apiKey: aiConfig.apiKey,
           },
-          body: JSON.stringify(payload),
-          mode: 'cors'
         }
       );
-      
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error:', errorText);
-        throw new Error(`Failed to generate proposal: ${response.status} ${response.statusText}`);
+      if (fnError) {
+        // Our function returns { error } as JSON on failure — surface that message.
+        let message = fnError.message;
+        const context = (fnError as { context?: Response }).context;
+        if (context && typeof context.json === 'function') {
+          const body = await context.json().catch(() => null);
+          if (body?.error) message = body.error;
+        }
+        throw new Error(message);
       }
 
-      const responseText = await response.text();
-      console.log('Raw response:', responseText);
-      
-      let data: WebhookResponse;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        throw new Error('Invalid response format from server');
+      if (!data) {
+        throw new Error('No response from the proposal generator.');
       }
-      
-      console.log('Parsed data:', data);
+
       setGeneratedData(data);
     } catch (err) {
-      console.error('Webhook error:', err);
+      console.error('Generation error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate proposal';
       setError(`Error: ${errorMessage}`);
     } finally {
@@ -89,7 +82,7 @@ export const Apply: React.FC = () => {
       title: jobTitle,
       summary: jobSummary,
       cover_letter: generatedData.cover_letter,
-      proposal_document: generatedData.google_doc_link,
+      proposal_document: generatedData.proposal_url,
       mermaid_code: generatedData.mermaid_code,
       video_script: generatedData.video_script,
       status: 'drafted',
@@ -357,7 +350,7 @@ export const Apply: React.FC = () => {
                 <h3 className="font-semibold text-gray-900 dark:text-white">Proposal Document</h3>
               </div>
               <a
-                href={generatedData.google_doc_link}
+                href={generatedData.proposal_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-full px-6 py-8 border-2 border-dashed border-upwork-300 dark:border-upwork-600 rounded-xl hover:border-upwork-500 dark:hover:border-upwork-400 transition-all duration-300 text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300 bg-upwork-50/50 dark:bg-upwork-900/10 hover:bg-upwork-100 dark:hover:bg-upwork-900/20 transform hover:scale-105 font-medium"

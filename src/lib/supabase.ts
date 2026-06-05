@@ -1,10 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseConfig } from './supabaseConfig';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const config = getSupabaseConfig();
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// When there is no config yet, App renders the Supabase setup screen and none of
+// the auth/data providers mount, so this client is never dereferenced until the
+// user has connected a project (after which the app reloads with a real client).
+export const supabase: SupabaseClient = config
+  ? createClient(config.url, config.anonKey)
+  : (null as unknown as SupabaseClient);

@@ -9,6 +9,8 @@ import { Dashboard } from './pages/Dashboard';
 import { Apply } from './pages/Apply';
 import { Track } from './pages/Track';
 import { Settings } from './pages/Settings';
+import { SupabaseSetup } from './components/Setup/SupabaseSetup';
+import { isSupabaseConfigured } from './lib/supabaseConfig';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
@@ -62,6 +64,16 @@ const AppContent: React.FC = () => {
 };
 
 function App() {
+  // Before a Supabase project is connected, show the setup screen instead of
+  // mounting the auth/data providers (which need a live client).
+  if (!isSupabaseConfigured()) {
+    return (
+      <ThemeProvider>
+        <SupabaseSetup />
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider>
       <AuthProvider>
