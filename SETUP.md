@@ -46,7 +46,8 @@ When you're done you'll have:
 3. Pick a region near you and click **Create new project**. Wait ~2 minutes for it to finish setting up.
 4. Once ready, go to **Project Settings → API** and keep this tab open. You'll need two values shortly:
    - **Project URL** (looks like `https://abcd1234efgh5678.supabase.co`)
-   - **anon public** key (a long string starting with `eyJ...`)
+   - **API key** — for **newer projects** use the **publishable** key (`sb_publishable_…`); the AI
+     functions reject the legacy anon key. Older projects can use the **anon** key (`eyJ…`).
 
 ---
 
@@ -141,7 +142,8 @@ Netlify automatically rebuilds when you push to your GitHub fork.
 
 | Symptom | Cause & fix |
 |---|---|
-| **"Failed to send a request to the Edge Function"** | The function isn't on the project you're connected to, or it has the wrong name. It must be named exactly `generate-proposal`. If the dashboard created it as `swift-handler` (or similar), delete that and recreate it with the correct name. Or re-run `npm run setup`. |
+| **"Failed to send a request to the Edge Function"** | The function isn't on the project you're connected to, or it has the wrong name. It must be named exactly `generate-proposal` / `generate-outreach`. If the dashboard created it as `swift-handler` (or similar), delete that and recreate with the correct name. Or re-run `npm run setup`. |
+| **401 / "Invalid credentials" / "Invalid JWT" when generating** | On newer Supabase projects: (a) use the **publishable** key (`sb_publishable_…`), not the legacy anon key — the Functions gateway rejects the anon key; and (b) turn **OFF "Verify JWT"** on both functions. |
 | **Blank page / "Connect Supabase" keeps showing** | The URL or anon key is wrong. In the app, the URL must start with `https://` and end in `.supabase.co`; the anon key starts with `eyJ`. |
 | **`npm run setup` fails at "Linking"** | Wrong project ref or database password. The ref is the part of your URL before `.supabase.co`. Reset the DB password under **Project Settings → Database** if you forgot it. |
 | **"permission denied" / login issues** | Run `npx supabase login` on its own, finish the browser flow, then re-run `npm run setup`. |
