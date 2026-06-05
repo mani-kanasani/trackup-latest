@@ -81,31 +81,27 @@ async function callOpenAICompatible(
   userPrompt: string,
   useJsonMode: boolean,
 ): Promise<string> {
-  const body: Record<string, unknown> = {
-    model,
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: userPrompt },
-    ],
-    temperature: 0.7,
+  const send = (jsonMode: boolean) => {
+    const body: Record<string, unknown> = {
+      model,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.7,
+    };
+    if (jsonMode) body.response_format = { type: 'json_object' };
+    return fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
   };
-  // Only OpenAI reliably supports JSON mode on this endpoint; Gemini's
-  // OpenAI-compatible endpoint can reject it, so there we rely on the prompt
-  // plus defensive parsing instead.
-  if (useJsonMode) body.response_format = { type: 'json_object' };
 
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    throw new Error(`Provider request failed (${res.status}): ${await res.text()}`);
-  }
+  // Ask for strict JSON; if the model rejects response_format, retry without it.
+  let res = await send(useJsonMode);
+  if (!res.ok && useJsonMode) res = await send(false);
+  if (!res.ok) throw new Error(`Provider request failed (${res.status}): ${await res.text()}`);
 
   const data = await res.json();
   return data?.choices?.[0]?.message?.content ?? '';
@@ -162,7 +158,7 @@ async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 
       input.apiKey,
       input.model,
       userPrompt,
-      false,
+      true,
     );
   } else {
     raw = await callOpenAICompatible(
