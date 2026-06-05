@@ -88,12 +88,17 @@ try {
   fail('Applying migrations failed. See the error above.');
 }
 
-// 4. Deploy the Edge Function.
-console.log(color.bold('\n  [4/4] Deploying the generate-proposal function...'));
-try {
-  run('npx supabase functions deploy generate-proposal');
-} catch {
-  fail('Function deploy failed. See the error above.');
+// 4. Deploy the Edge Functions with JWT verification off. New Supabase projects
+// enforce the new API-key system, whose gateway rejects the legacy JWT check —
+// so the functions must be deployed with --no-verify-jwt or every call 401s.
+console.log(color.bold('\n  [4/4] Deploying Edge Functions (JWT verification off)...'));
+for (const fn of ['generate-proposal', 'generate-outreach']) {
+  console.log('  deploying ' + color.cyan(fn) + '…');
+  try {
+    run(`npx supabase functions deploy ${fn} --no-verify-jwt`);
+  } catch {
+    fail(`Deploying ${fn} failed. See the error above.`);
+  }
 }
 
 console.log(color.green(color.bold('\n  ✓ Backend ready!\n')));

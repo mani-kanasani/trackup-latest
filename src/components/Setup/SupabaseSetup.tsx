@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import functionSource from '../../../supabase/functions/generate-proposal/index.ts?raw';
+import outreachSource from '../../../supabase/functions/generate-outreach/index.ts?raw';
 import {
   Database,
   ExternalLink,
@@ -36,7 +37,7 @@ const setupSql = Object.keys(migrationModules)
 const STEPS = ['Create database', 'Set up backend', 'Connect'];
 
 const linkClass =
-  'inline-flex items-center text-sm font-semibold text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300';
+  'inline-flex items-center text-sm font-semibold text-ember-600 dark:text-ember-400 hover:text-ember-700 dark:hover:text-ember-300';
 
 export const SupabaseSetup: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -121,9 +122,9 @@ export const SupabaseSetup: React.FC = () => {
                   <span
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
                       active
-                        ? 'bg-upwork-500 text-white'
+                        ? 'bg-ember-500 text-white'
                         : done
-                        ? 'bg-upwork-100 dark:bg-upwork-900/40 text-upwork-600 dark:text-upwork-400'
+                        ? 'bg-ember-100 dark:bg-ember-900/40 text-ember-600 dark:text-ember-400'
                         : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                     }`}
                   >
@@ -148,7 +149,7 @@ export const SupabaseSetup: React.FC = () => {
           {step === 1 && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-ember-500 rounded-lg flex items-center justify-center">
                   <Database className="w-4 h-4 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create your database</h2>
@@ -157,9 +158,9 @@ export const SupabaseSetup: React.FC = () => {
                 TrackUp stores your data in your own free Supabase project. This takes about 2 minutes.
               </p>
               <ol className="space-y-3 text-gray-700 dark:text-gray-300">
-                <li className="flex"><span className="font-bold text-upwork-500 mr-3">1.</span>Open Supabase and click <span className="font-semibold mx-1">New project</span>.</li>
-                <li className="flex"><span className="font-bold text-upwork-500 mr-3">2.</span>Give it a name and <span className="font-semibold mx-1">set a database password</span> — write it down, you'll need it.</li>
-                <li className="flex"><span className="font-bold text-upwork-500 mr-3">3.</span>Pick a region and create it. Wait until it finishes provisioning.</li>
+                <li className="flex"><span className="font-bold text-ember-500 mr-3">1.</span>Open Supabase and click <span className="font-semibold mx-1">New project</span>.</li>
+                <li className="flex"><span className="font-bold text-ember-500 mr-3">2.</span>Give it a name and <span className="font-semibold mx-1">set a database password</span> — write it down, you'll need it.</li>
+                <li className="flex"><span className="font-bold text-ember-500 mr-3">3.</span>Pick a region and create it. Wait until it finishes provisioning.</li>
               </ol>
               <a href="https://supabase.com/dashboard/new" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 <ExternalLink className="w-4 h-4 mr-2" />
@@ -177,7 +178,7 @@ export const SupabaseSetup: React.FC = () => {
           {step === 2 && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-ember-500 rounded-lg flex items-center justify-center">
                   <Database className="w-4 h-4 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Set up the backend</h2>
@@ -189,7 +190,7 @@ export const SupabaseSetup: React.FC = () => {
 
               <div className="space-y-3">
                 <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
-                  <span className="w-6 h-6 rounded-full bg-upwork-100 dark:bg-upwork-900/40 text-upwork-600 dark:text-upwork-400 text-sm font-bold flex items-center justify-center mr-2">1</span>
+                  <span className="w-6 h-6 rounded-full bg-ember-100 dark:bg-ember-900/40 text-ember-600 dark:text-ember-400 text-sm font-bold flex items-center justify-center mr-2">1</span>
                   Create the tables &amp; storage
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -204,19 +205,25 @@ export const SupabaseSetup: React.FC = () => {
 
               <div className="space-y-3 pt-2">
                 <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
-                  <span className="w-6 h-6 rounded-full bg-upwork-100 dark:bg-upwork-900/40 text-upwork-600 dark:text-upwork-400 text-sm font-bold flex items-center justify-center mr-2">2</span>
-                  Deploy the proposal generator
+                  <span className="w-6 h-6 rounded-full bg-ember-100 dark:bg-ember-900/40 text-ember-600 dark:text-ember-400 text-sm font-bold flex items-center justify-center mr-2">2</span>
+                  Deploy the two functions
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  In <span className="font-semibold">Edge Functions</span>, click{' '}
-                  <span className="font-semibold">Deploy a new function → Via editor</span>. The dashboard suggests a
-                  random name like{' '}
-                  <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">swift-handler</code>{' '}
-                  — <span className="font-semibold">change it to exactly</span>{' '}
-                  <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-upwork-600 dark:text-upwork-400 font-mono text-xs">generate-proposal</code>,
-                  replace the starter code with the code below, and click <span className="font-semibold">Deploy</span>.
+                  In <span className="font-semibold">Edge Functions → Deploy a new function → Via editor</span>, create{' '}
+                  <span className="font-semibold">two</span> functions. For each one: set the name <span className="font-semibold">exactly</span>{' '}
+                  as shown (the dashboard suggests a random name like{' '}
+                  <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">swift-handler</code> — change it),
+                  paste the code, and click <span className="font-semibold">Deploy</span>.
                 </p>
-                <CopyBlock id="fn" text={functionSource} label="Copy function code" />
+                <div className="text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 rounded-xl p-3">
+                  <span className="font-semibold">Important:</span> after deploying each function, open its settings and
+                  turn <span className="font-semibold">OFF “Verify JWT”</span>. New Supabase projects reject the gateway
+                  JWT check, so calls fail with a 401 unless it's off.
+                </div>
+                <p className="text-sm font-mono text-gray-700 dark:text-gray-300 pt-1">generate-proposal</p>
+                <CopyBlock id="fn" text={functionSource} label="Copy generate-proposal" />
+                <p className="text-sm font-mono text-gray-700 dark:text-gray-300 pt-1">generate-outreach</p>
+                <CopyBlock id="fn2" text={outreachSource} label="Copy generate-outreach" />
                 <a href="https://supabase.com/dashboard/project/_/functions" target="_blank" rel="noopener noreferrer" className={linkClass}>
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Open Edge Functions
@@ -224,7 +231,7 @@ export const SupabaseSetup: React.FC = () => {
               </div>
 
               <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 flex items-start">
-                <Terminal className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-upwork-500" />
+                <Terminal className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-ember-500" />
                 <span>
                   Cloned the repo instead? Skip the two steps above and just run{' '}
                   <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">npm run setup</code>.
@@ -246,7 +253,7 @@ export const SupabaseSetup: React.FC = () => {
           {step === 3 && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-ember-500 rounded-lg flex items-center justify-center">
                   <Database className="w-4 h-4 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Connect your project</h2>
@@ -285,7 +292,7 @@ export const SupabaseSetup: React.FC = () => {
                   autoComplete="off"
                 />
                 <p className="flex items-start mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  <ShieldCheck className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-upwork-500" />
+                  <ShieldCheck className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-ember-500" />
                   This key is meant to be public — it's safe in the browser. Your data is protected by Supabase
                   Row Level Security.
                 </p>
