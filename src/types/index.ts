@@ -44,14 +44,14 @@ export interface DateRange {
 
 export type DateFilter = 'today' | 'week' | 'month' | 'custom';
 
-export interface WebhookRequest {
+export interface GenerateRequest {
   job_title: string;
   job_summary: string;
 }
 
-export interface WebhookResponse {
+export interface GenerateResponse {
   cover_letter: string;
-  google_doc_link: string;
+  proposal_url: string;
   mermaid_code: string;
   video_script: string;
 }

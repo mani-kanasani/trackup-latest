@@ -1,13 +1,171 @@
-import React from 'react';
-import { Moon, Sun, HelpCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Moon, Sun, Sparkles, Key, ExternalLink, Check, Database, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { AnimatedLogo } from '../components/UI/AnimatedLogo';
+import { AIProvider, PROVIDER_META, loadAIConfig, saveAIConfig } from '../lib/aiConfig';
+import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
 
 export const Settings: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
 
+  const [provider, setProvider] = useState<AIProvider>('gemini');
+  const [model, setModel] = useState(PROVIDER_META.gemini.defaultModel);
+  const [apiKey, setApiKey] = useState('');
+  const [showKey, setShowKey] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const existing = loadAIConfig();
+    if (existing) {
+      setProvider(existing.provider);
+      setModel(existing.model);
+      setApiKey(existing.apiKey);
+    }
+  }, []);
+
+  const handleProviderChange = (next: AIProvider) => {
+    setProvider(next);
+    setModel(PROVIDER_META[next].defaultModel);
+  };
+
+  const handleSaveAI = () => {
+    saveAIConfig({
+      provider,
+      model: model.trim() || PROVIDER_META[provider].defaultModel,
+      apiKey: apiKey.trim(),
+    });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const meta = PROVIDER_META[provider];
+
+  const supabaseConfig = getSupabaseConfig();
+  const handleReconfigure = () => {
+    clearSupabaseConfig();
+    window.location.reload();
+  };
+
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-8 animate-fade-in">
+      {/* AI Provider */}
+      <div className="card-modern p-8">
+        <div className="flex items-center space-x-3 mb-2">
+          <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">AI Provider</h3>
+        </div>
+        <p className="text-base text-gray-600 dark:text-gray-400 mb-6">
+          Choose who writes your proposals and paste your own API key. Your key is stored only in this
+          browser and is never saved on our servers.
+        </p>
+
+        <div className="space-y-6">
+          <div>
+            <label htmlFor="ai-provider" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Provider
+            </label>
+            <select
+              id="ai-provider"
+              value={provider}
+              onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
+              className="input-modern"
+            >
+              {(Object.keys(PROVIDER_META) as AIProvider[]).map((key) => (
+                <option key={key} value={key}>
+                  {PROVIDER_META[key].label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="ai-model" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Model
+            </label>
+            <input
+              id="ai-model"
+              list="ai-model-options"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="input-modern"
+              placeholder={meta.defaultModel}
+            />
+            <datalist id="ai-model-options">
+              {meta.modelOptions.map((m) => (
+                <option key={m} value={m} />
+              ))}
+            </datalist>
+          </div>
+
+          <div>
+            <label htmlFor="ai-key" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+              <Key className="w-4 h-4 mr-2 text-upwork-500" />
+              {meta.keyLabel}
+            </label>
+            <div className="relative">
+              <input
+                id="ai-key"
+                type={showKey ? 'text' : 'password'}
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="input-modern pr-20"
+                placeholder="Paste your API key"
+                autoComplete="off"
+              />
+              <button
+                type="button"
+                onClick={() => setShowKey(!showKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-upwork-600 dark:text-upwork-400"
+              >
+                {showKey ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </div>
+
+          <div className="text-sm text-gray-600 dark:text-gray-400 bg-upwork-50/60 dark:bg-upwork-900/10 border border-upwork-100 dark:border-upwork-800/40 rounded-xl p-4">
+            <p className="leading-relaxed">{meta.hint}</p>
+            <a
+              href={meta.keyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center mt-3 font-semibold text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300"
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Get {meta.free ? 'a free' : 'an'} {meta.keyLabel}
+            </a>
+          </div>
+
+          <button onClick={handleSaveAI} className="btn-primary flex items-center">
+            {saved ? <Check className="w-4 h-4 mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+            {saved ? 'Saved' : 'Save AI Settings'}
+          </button>
+        </div>
+      </div>
+
+      {/* Database Connection */}
+      <div className="card-modern p-8">
+        <div className="flex items-center space-x-3 mb-2">
+          <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+            <Database className="w-4 h-4 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Database Connection</h3>
+        </div>
+        <p className="text-base text-gray-600 dark:text-gray-400 mb-6">
+          The Supabase project this app reads from and writes to.
+        </p>
+        <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 break-all">
+          <p className="font-mono text-sm text-gray-700 dark:text-gray-300">
+            {supabaseConfig?.url ?? 'Not configured'}
+          </p>
+        </div>
+        <button onClick={handleReconfigure} className="btn-secondary flex items-center mt-6">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Reconfigure
+        </button>
+      </div>
+
       {/* Dark Mode Toggle */}
       <div className="card-modern p-8">
         <div className="flex items-center justify-between">
