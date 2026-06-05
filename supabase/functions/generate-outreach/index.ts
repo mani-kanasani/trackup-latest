@@ -74,21 +74,26 @@ async function callOpenAICompatible(
   prompt: string,
   useJsonMode: boolean,
 ): Promise<string> {
-  const body: Record<string, unknown> = {
-    model,
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: prompt },
-    ],
-    temperature: 0.8,
+  const send = (jsonMode: boolean) => {
+    const body: Record<string, unknown> = {
+      model,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.8,
+    };
+    if (jsonMode) body.response_format = { type: 'json_object' };
+    return fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
   };
-  if (useJsonMode) body.response_format = { type: 'json_object' };
 
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  // Ask for strict JSON; if the model rejects response_format, retry without it.
+  let res = await send(useJsonMode);
+  if (!res.ok && useJsonMode) res = await send(false);
   if (!res.ok) throw new Error(`Provider request failed (${res.status}): ${await res.text()}`);
   const data = await res.json();
   return data?.choices?.[0]?.message?.content ?? '';
@@ -177,7 +182,7 @@ Deno.serve(async (req: Request) => {
         apiKey,
         model,
         prompt,
-        false,
+        true,
       );
     } else {
       raw = await callOpenAICompatible('https://api.openai.com/v1', apiKey, model, prompt, true);
