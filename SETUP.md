@@ -72,8 +72,9 @@ When it prints **✓ Backend ready!**, this step is done.
 
 1. **Database:** In Supabase, open **SQL Editor → New query**. Open each file in
    `supabase/migrations/` (in date order), paste its contents, and click **Run**.
-2. **Function:** Open **Edge Functions → Create a function**, name it
-   `generate-proposal`, paste the contents of
+2. **Function:** Open **Edge Functions → Deploy a new function → Via editor**.
+   The dashboard pre-fills a random name (like `swift-handler`) — **change it to
+   exactly `generate-proposal`**, paste the contents of
    `supabase/functions/generate-proposal/index.ts`, and click **Deploy**.
 
 </details>
@@ -138,7 +139,7 @@ Netlify automatically rebuilds when you push to your GitHub fork.
 
 | Symptom | Cause & fix |
 |---|---|
-| **"Failed to send a request to the Edge Function"** | The function isn't on the project you're connected to. Re-run `npm run setup` and make sure you pasted the **same** project URL you connect with in the app. |
+| **"Failed to send a request to the Edge Function"** | The function isn't on the project you're connected to, or it has the wrong name. It must be named exactly `generate-proposal`. If the dashboard created it as `swift-handler` (or similar), delete that and recreate it with the correct name. Or re-run `npm run setup`. |
 | **Blank page / "Connect Supabase" keeps showing** | The URL or anon key is wrong. In the app, the URL must start with `https://` and end in `.supabase.co`; the anon key starts with `eyJ`. |
 | **`npm run setup` fails at "Linking"** | Wrong project ref or database password. The ref is the part of your URL before `.supabase.co`. Reset the DB password under **Project Settings → Database** if you forgot it. |
 | **"permission denied" / login issues** | Run `npx supabase login` on its own, finish the browser flow, then re-run `npm run setup`. |
