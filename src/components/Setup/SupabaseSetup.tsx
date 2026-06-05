@@ -208,9 +208,13 @@ export const SupabaseSetup: React.FC = () => {
                   Deploy the proposal generator
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  In <span className="font-semibold">Edge Functions</span>, click <span className="font-semibold">Create a function</span>, name it exactly{' '}
+                  In <span className="font-semibold">Edge Functions</span>, click{' '}
+                  <span className="font-semibold">Deploy a new function → Via editor</span>. The dashboard suggests a
+                  random name like{' '}
+                  <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">swift-handler</code>{' '}
+                  — <span className="font-semibold">change it to exactly</span>{' '}
                   <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-upwork-600 dark:text-upwork-400 font-mono text-xs">generate-proposal</code>,
-                  paste the code below, and click <span className="font-semibold">Deploy</span>.
+                  replace the starter code with the code below, and click <span className="font-semibold">Deploy</span>.
                 </p>
                 <CopyBlock id="fn" text={functionSource} label="Copy function code" />
                 <a href="https://supabase.com/dashboard/project/_/functions" target="_blank" rel="noopener noreferrer" className={linkClass}>
