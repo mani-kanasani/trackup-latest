@@ -13,8 +13,8 @@ import {
   ArrowRight,
   ArrowLeft,
   Terminal,
+  Flame,
 } from 'lucide-react';
-import { AnimatedLogo } from '../UI/AnimatedLogo';
 import {
   SupabaseConfig,
   saveSupabaseConfig,
@@ -103,8 +103,10 @@ export const SupabaseSetup: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-6">
       <div className="w-full max-w-2xl">
         <div className="flex flex-col items-center mb-8">
-          <AnimatedLogo size="lg" />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-4">Welcome to TrackUp</h1>
+          <div className="w-16 h-16 bg-gradient-to-br from-ember-400 to-ember-600 rounded-2xl flex items-center justify-center shadow-lg shadow-ember-500/30">
+            <Flame className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-4">Welcome to Ember</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">A quick one-time setup and you're ready.</p>
         </div>
 
@@ -156,7 +158,7 @@ export const SupabaseSetup: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create your database</h2>
               </div>
               <p className="text-base text-gray-600 dark:text-gray-400">
-                TrackUp stores your data in your own free Supabase project. This takes about 2 minutes.
+                Ember stores your data in your own free Supabase project. This takes about 2 minutes.
               </p>
               <ol className="space-y-3 text-gray-700 dark:text-gray-300">
                 <li className="flex"><span className="font-bold text-ember-500 mr-3">1.</span>Open Supabase and click <span className="font-semibold mx-1">New project</span>.</li>
@@ -185,7 +187,7 @@ export const SupabaseSetup: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Set up the backend</h2>
               </div>
               <p className="text-base text-gray-600 dark:text-gray-400">
-                Install the tables, storage, and proposal generator on your new project. No terminal needed —
+                Install the tables, storage, and AI functions on your new project. No terminal needed —
                 just copy &amp; paste in the Supabase dashboard.
               </p>
 
@@ -207,7 +209,7 @@ export const SupabaseSetup: React.FC = () => {
               <div className="space-y-3 pt-2">
                 <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
                   <span className="w-6 h-6 rounded-full bg-ember-100 dark:bg-ember-900/40 text-ember-600 dark:text-ember-400 text-sm font-bold flex items-center justify-center mr-2">2</span>
-                  Deploy the two functions
+                  Deploy the three functions
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   In <span className="font-semibold">Edge Functions → Deploy a new function → Via editor</span>, create{' '}
@@ -217,9 +219,9 @@ export const SupabaseSetup: React.FC = () => {
                   paste the code, and click <span className="font-semibold">Deploy</span>.
                 </p>
                 <div className="text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 rounded-xl p-3">
-                  <span className="font-semibold">Important:</span> after deploying each function, open its settings and
-                  turn <span className="font-semibold">OFF “Verify JWT”</span>. New Supabase projects reject the gateway
-                  JWT check, so calls fail with a 401 unless it's off.
+                  <span className="font-semibold">Recommended:</span> after deploying each function, open its settings and
+                  turn <span className="font-semibold">OFF “Verify JWT”</span>. These functions use your own AI key (safe to
+                  expose), and on newer Supabase projects this avoids the JWT gateway rejecting the request.
                 </div>
                 <p className="text-sm font-mono text-gray-700 dark:text-gray-300 pt-1">generate-proposal</p>
                 <CopyBlock id="fn" text={functionSource} label="Copy generate-proposal" />
