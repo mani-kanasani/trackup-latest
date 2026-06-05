@@ -24,6 +24,10 @@ const envConfig = (): SupabaseConfig | null => {
 };
 
 export const getSupabaseConfig = (): SupabaseConfig | null => {
+  // Build-time env (a developer's .env, or a pre-connected deploy) wins, so a
+  // stale browser-cached connection can never override it or wedge the app.
+  const env = envConfig();
+  if (env) return env;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
@@ -33,9 +37,9 @@ export const getSupabaseConfig = (): SupabaseConfig | null => {
       }
     }
   } catch {
-    // fall through to env
+    // ignore
   }
-  return envConfig();
+  return null;
 };
 
 export const isSupabaseConfigured = (): boolean => getSupabaseConfig() !== null;

@@ -26,14 +26,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
+    // Get initial session, but never let a slow/failed session check (e.g. a
+    // stale token pointing at a deleted project) wedge the loading screen.
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await ensureUserRecord(session.user);
-        setUser(mapSupabaseUser(session.user));
+      try {
+        const result = (await Promise.race([
+          supabase.auth.getSession(),
+          new Promise((resolve) => setTimeout(() => resolve(null), 4000)),
+        ])) as { data: { session: { user?: SupabaseUser } | null } } | null;
+        const session = result?.data?.session ?? null;
+        if (session?.user) {
+          await ensureUserRecord(session.user as SupabaseUser);
+          setUser(mapSupabaseUser(session.user as SupabaseUser));
+        }
+      } catch (e) {
+        console.error('Session init error:', e);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getInitialSession();
