@@ -280,7 +280,7 @@ export const SupabaseSetup: React.FC = () => {
 
               <div>
                 <label htmlFor="sb-key" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                  Anon / public key
+                  Publishable key (or anon key)
                 </label>
                 <textarea
                   id="sb-key"
@@ -288,13 +288,14 @@ export const SupabaseSetup: React.FC = () => {
                   onChange={(e) => setAnonKey(e.target.value)}
                   rows={3}
                   className="input-modern resize-none font-mono text-xs"
-                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+                  placeholder="sb_publishable_…  (or the legacy anon key, eyJ…)"
                   autoComplete="off"
                 />
                 <p className="flex items-start mt-2 text-xs text-gray-500 dark:text-gray-400">
                   <ShieldCheck className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-ember-500" />
-                  This key is meant to be public — it's safe in the browser. Your data is protected by Supabase
-                  Row Level Security.
+                  Use the <span className="font-semibold">publishable</span> key
+                  (<span className="font-mono">sb_publishable_…</span>) for newer projects — the AI functions reject the
+                  legacy anon key. Either key is public and safe in the browser; your data is protected by Row Level Security.
                 </p>
               </div>
 
