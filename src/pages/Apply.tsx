@@ -4,6 +4,7 @@ import { useData } from '../contexts/DataContext';
 import { GenerateResponse, JobLevel, CompensationType } from '../types';
 import { supabase } from '../lib/supabase';
 import { loadAIConfig } from '../lib/aiConfig';
+import { loadUserContext, contextToPrompt } from '../lib/userContext';
 
 export const Apply: React.FC = () => {
   const { addMaterial } = useData();
@@ -40,6 +41,7 @@ export const Apply: React.FC = () => {
           body: {
             job_title: jobTitle,
             job_summary: jobSummary,
+            context: contextToPrompt(loadUserContext()),
             provider: aiConfig.provider,
             model: aiConfig.model,
             apiKey: aiConfig.apiKey,

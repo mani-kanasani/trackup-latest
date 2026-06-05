@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import functionSource from '../../../supabase/functions/generate-proposal/index.ts?raw';
 import outreachSource from '../../../supabase/functions/generate-outreach/index.ts?raw';
+import listModelsSource from '../../../supabase/functions/list-models/index.ts?raw';
 import {
   Database,
   ExternalLink,
@@ -210,7 +211,7 @@ export const SupabaseSetup: React.FC = () => {
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   In <span className="font-semibold">Edge Functions → Deploy a new function → Via editor</span>, create{' '}
-                  <span className="font-semibold">two</span> functions. For each one: set the name <span className="font-semibold">exactly</span>{' '}
+                  <span className="font-semibold">three</span> functions. For each one: set the name <span className="font-semibold">exactly</span>{' '}
                   as shown (the dashboard suggests a random name like{' '}
                   <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">swift-handler</code> — change it),
                   paste the code, and click <span className="font-semibold">Deploy</span>.
@@ -224,6 +225,8 @@ export const SupabaseSetup: React.FC = () => {
                 <CopyBlock id="fn" text={functionSource} label="Copy generate-proposal" />
                 <p className="text-sm font-mono text-gray-700 dark:text-gray-300 pt-1">generate-outreach</p>
                 <CopyBlock id="fn2" text={outreachSource} label="Copy generate-outreach" />
+                <p className="text-sm font-mono text-gray-700 dark:text-gray-300 pt-1">list-models</p>
+                <CopyBlock id="fn3" text={listModelsSource} label="Copy list-models" />
                 <a href="https://supabase.com/dashboard/project/_/functions" target="_blank" rel="noopener noreferrer" className={linkClass}>
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Open Edge Functions

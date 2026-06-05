@@ -1,5 +1,16 @@
 export type LeadStatus = 'new' | 'requested' | 'connected' | 'replied' | 'meeting';
 
+export interface OutreachFlow {
+  connection_note: string;
+  blank_strategy: string;
+  opener: string;
+  value: string;
+  cta: string;
+  bump: string;
+  reply_positive: string;
+  reply_objection: string;
+}
+
 export interface Lead {
   id: string;
   user_id: string;
@@ -13,19 +24,9 @@ export interface Lead {
   company_linkedin_url?: string | null;
   company_website?: string | null;
   potential_services?: string | null;
-  connection_request?: string | null;
-  dm_2?: string | null;
-  dm_3?: string | null;
+  outreach?: OutreachFlow | null;
+  sent_steps?: string[] | null;
   status: LeadStatus;
-  connection_request_sent: boolean;
-  dm_2_sent: boolean;
-  dm_3_sent: boolean;
   created_at: string;
   updated_at: string;
-}
-
-export interface OutreachResponse {
-  connection_request: string;
-  dm_2: string;
-  dm_3: string;
 }

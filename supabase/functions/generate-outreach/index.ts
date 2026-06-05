@@ -1,12 +1,9 @@
 // Supabase Edge Function: generate-outreach
 //
-// Generates a LinkedIn outreach sequence (connection request + two follow-up
-// DMs) from a lead's details, using the user's chosen bring-your-own-key
-// provider (Gemini / OpenAI / Anthropic). Replaces the Dream 100 n8n webhooks.
-//
-// Deploy with verify_jwt OFF (new Supabase projects enforce the new API-key
-// system, which the gateway JWT check rejects). The key is supplied per-request
-// and never stored.
+// Generates a complete LinkedIn outreach FLOW for a lead — connection note + a
+// blank-request strategy, an opener/value/CTA DM sequence, a bump, and two
+// conditional reply branches (positive vs objection) — grounded in the user's
+// own context. BYOK (Gemini / OpenAI / Anthropic). Deploy with verify_jwt OFF.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -28,6 +25,7 @@ interface LeadInput {
 
 interface RequestInput {
   lead?: LeadInput;
+  context?: string;
   provider?: Provider;
   model?: string;
   apiKey?: string;
@@ -40,29 +38,34 @@ const DEFAULT_MODEL: Record<Provider, string> = {
 };
 
 const SYSTEM_PROMPT =
-  'You are an expert B2B LinkedIn outreach copywriter for an AI automation agency. ' +
-  'You write concise, human, specific, non-salesy messages that get replies. ' +
-  'You always reply with a single valid JSON object and nothing else.';
+  'You are an expert B2B LinkedIn outreach strategist and copywriter. You write concise, human, ' +
+  'specific, non-salesy messages that get replies, and you design smart multi-step flows with ' +
+  'branches for how prospects respond. You always reply with a single valid JSON object and nothing else.';
 
-const buildPrompt = (lead: LeadInput): string =>
-  `Write a LinkedIn outreach sequence for this lead.
-
+const buildPrompt = (lead: LeadInput, context: string): string =>
+  `Design a complete LinkedIn outreach FLOW for this lead.
+${context ? `\nBackground about me / my agency (use for credibility, proof and specifics):\n${context}\n` : ''}
 Lead details:
 - Name: ${lead.name ?? ''}
 - Job title: ${lead.job_title ?? ''}
 - Company: ${lead.company_name ?? ''}
 - Industry: ${lead.industry ?? ''}
 - Company website: ${lead.company_website ?? ''}
-- Services we could offer them: ${lead.potential_services ?? ''}
+- Services I could offer them: ${lead.potential_services ?? ''}
 
 Return ONLY a JSON object with exactly these keys:
 {
-  "connection_request": "LinkedIn connection-request note, MAX 280 characters. Personal, references something specific about them or their company, NO pitch.",
-  "dm_2": "Follow-up DM after they accept. 2-4 sentences. Build rapport, hint at how you help companies like theirs, end with a soft question.",
-  "dm_3": "Second follow-up DM. 2-4 sentences. Offer a concrete, relevant idea or resource and propose a quick call."
+  "connection_note": "Connection-request note, MAX 280 chars. Personal, specific to them, NO pitch.",
+  "blank_strategy": "One sentence of advice: blank (no-note) requests often accept higher — say whether to send blank for this person and how to open if so.",
+  "opener": "First DM once they accept. Warm, references them, no pitch. 2-3 sentences.",
+  "value": "Follow-up DM with a concrete, relevant proof point or result (use my wins/testimonials if provided). 2-4 sentences.",
+  "cta": "Follow-up DM proposing a specific next step (a quick call). 1-3 sentences.",
+  "bump": "A light, friendly nudge to send if they haven't replied. 1-2 sentences.",
+  "reply_positive": "What to send if they reply POSITIVELY / show interest — move toward booking a call. 2-3 sentences.",
+  "reply_objection": "What to send if they push back, hesitate, or say no — reframe gracefully, zero pressure, keep the door open. 2-3 sentences."
 }
 
-Be specific to THIS lead. Avoid generic openers like "I came across your profile".`;
+Be specific to THIS lead and sound human. Avoid generic openers like "I came across your profile".`;
 
 async function callOpenAICompatible(
   baseUrl: string,
@@ -101,7 +104,7 @@ async function callAnthropic(apiKey: string, model: string, prompt: string): Pro
     },
     body: JSON.stringify({
       model,
-      max_tokens: 1500,
+      max_tokens: 2000,
       temperature: 0.8,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: `${prompt}\n\nRespond with ONLY the raw JSON object.` }],
@@ -112,7 +115,7 @@ async function callAnthropic(apiKey: string, model: string, prompt: string): Pro
   return data?.content?.[0]?.text ?? '';
 }
 
-function parseOutreach(raw: string): { connection_request: string; dm_2: string; dm_3: string } {
+function parseFlow(raw: string): Record<string, string> {
   let text = (raw ?? '').trim();
   if (text.startsWith('```')) text = text.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
   const first = text.indexOf('{');
@@ -125,10 +128,16 @@ function parseOutreach(raw: string): { connection_request: string; dm_2: string;
   } catch {
     throw new Error('The AI returned a response that was not valid JSON. Try again.');
   }
+  const s = (k: string) => String(parsed[k] ?? '');
   return {
-    connection_request: String(parsed.connection_request ?? ''),
-    dm_2: String(parsed.dm_2 ?? ''),
-    dm_3: String(parsed.dm_3 ?? ''),
+    connection_note: s('connection_note'),
+    blank_strategy: s('blank_strategy'),
+    opener: s('opener'),
+    value: s('value'),
+    cta: s('cta'),
+    bump: s('bump'),
+    reply_positive: s('reply_positive'),
+    reply_objection: s('reply_objection'),
   };
 }
 
@@ -157,7 +166,7 @@ Deno.serve(async (req: Request) => {
     if (!apiKey) return json({ error: 'An API key is required. Add one in Settings.' }, 400);
 
     const model = (input.model ?? '').trim() || DEFAULT_MODEL[provider];
-    const prompt = buildPrompt(lead);
+    const prompt = buildPrompt(lead, (input.context ?? '').trim());
 
     let raw: string;
     if (provider === 'anthropic') {
@@ -174,7 +183,7 @@ Deno.serve(async (req: Request) => {
       raw = await callOpenAICompatible('https://api.openai.com/v1', apiKey, model, prompt, true);
     }
 
-    return json(parseOutreach(raw));
+    return json(parseFlow(raw));
   } catch (err) {
     console.error('generate-outreach failed:', err);
     const message = err instanceof Error ? err.message : 'Unexpected error generating outreach.';

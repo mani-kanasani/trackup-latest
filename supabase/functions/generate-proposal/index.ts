@@ -23,6 +23,7 @@ type Provider = 'gemini' | 'openai' | 'anthropic';
 interface GenerateInput {
   job_title?: string;
   job_summary?: string;
+  context?: string;
   provider?: Provider;
   model?: string;
   apiKey?: string;
@@ -47,9 +48,9 @@ const SYSTEM_PROMPT =
   'Your voice is professional, confident, clear, and intelligent — never casual, generic, or filler-heavy. ' +
   'You always reply with a single valid JSON object and nothing else (no markdown, no code fences).';
 
-const buildUserPrompt = (jobTitle: string, jobSummary: string): string =>
+const buildUserPrompt = (jobTitle: string, jobSummary: string, context: string): string =>
   `Write proposal materials for this Upwork job.
-
+${context ? `\nBackground about me / my agency (weave in for credibility, proof and specifics):\n${context}\n` : ''}
 Job title:
 ${jobTitle}
 
@@ -148,8 +149,9 @@ async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 
   model: string;
   jobTitle: string;
   jobSummary: string;
+  context: string;
 }): Promise<ProposalContent> {
-  const userPrompt = buildUserPrompt(input.jobTitle, input.jobSummary);
+  const userPrompt = buildUserPrompt(input.jobTitle, input.jobSummary, input.context);
 
   let raw: string;
   if (input.provider === 'anthropic') {
@@ -353,6 +355,7 @@ Deno.serve(async (req: Request) => {
       model,
       jobTitle,
       jobSummary,
+      context: (input.context ?? '').trim(),
     });
 
     const pdfBytes = await buildProposalPDF(content);

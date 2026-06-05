@@ -26,7 +26,7 @@ export const PROVIDER_META: Record<AIProvider, ProviderMeta> = {
   gemini: {
     label: 'Google Gemini (free tier)',
     defaultModel: 'gemini-2.5-flash',
-    modelOptions: ['gemini-2.5-flash', 'gemini-3-flash', 'gemini-2.0-flash'],
+    modelOptions: ['gemini-2.5-flash', 'gemini-3-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash'],
     keyLabel: 'Gemini API key',
     keyUrl: 'https://aistudio.google.com/app/apikey',
     free: true,
@@ -37,7 +37,7 @@ export const PROVIDER_META: Record<AIProvider, ProviderMeta> = {
   openai: {
     label: 'OpenAI',
     defaultModel: 'gpt-4o-mini',
-    modelOptions: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'],
+    modelOptions: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'o3-mini'],
     keyLabel: 'OpenAI API key',
     keyUrl: 'https://platform.openai.com/api-keys',
     free: false,
@@ -46,7 +46,7 @@ export const PROVIDER_META: Record<AIProvider, ProviderMeta> = {
   anthropic: {
     label: 'Anthropic Claude',
     defaultModel: 'claude-haiku-4-5',
-    modelOptions: ['claude-haiku-4-5', 'claude-sonnet-4-5'],
+    modelOptions: ['claude-haiku-4-5', 'claude-sonnet-4-6', 'claude-opus-4-8', 'claude-3-5-haiku-latest'],
     keyLabel: 'Anthropic API key',
     keyUrl: 'https://console.anthropic.com/settings/keys',
     free: false,
