@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Moon, Sun, Sparkles, Key, ExternalLink, Check, Database, RefreshCw } from 'lucide-react';
+import { Moon, Sun, Sparkles, Key, ExternalLink, Check, Database, RefreshCw, Loader2, UserRound } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { AnimatedLogo } from '../components/UI/AnimatedLogo';
 import { AIProvider, PROVIDER_META, loadAIConfig, saveAIConfig } from '../lib/aiConfig';
 import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
+import { loadUserContext, saveUserContext, UserContext } from '../lib/userContext';
+import { supabase } from '../lib/supabase';
 
 export const Settings: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -14,6 +16,13 @@ export const Settings: React.FC = () => {
   const [showKey, setShowKey] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const [loadedModels, setLoadedModels] = useState<string[]>([]);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [modelsError, setModelsError] = useState('');
+
+  const [context, setContext] = useState<UserContext>({ about: '', wins: '', testimonials: '' });
+  const [contextSaved, setContextSaved] = useState(false);
+
   useEffect(() => {
     const existing = loadAIConfig();
     if (existing) {
@@ -21,11 +30,42 @@ export const Settings: React.FC = () => {
       setModel(existing.model);
       setApiKey(existing.apiKey);
     }
+    setContext(loadUserContext());
   }, []);
 
   const handleProviderChange = (next: AIProvider) => {
     setProvider(next);
     setModel(PROVIDER_META[next].defaultModel);
+    setLoadedModels([]);
+    setModelsError('');
+  };
+
+  const handleLoadModels = async () => {
+    if (!apiKey.trim()) { setModelsError('Enter your API key first.'); return; }
+    setModelsError('');
+    setLoadingModels(true);
+    try {
+      const { data, error } = await supabase.functions.invoke<{ models: string[] }>('list-models', {
+        body: { provider, apiKey: apiKey.trim() },
+      });
+      if (error) {
+        let message = error.message;
+        const ctx = (error as { context?: Response }).context;
+        if (ctx?.json) { const b = await ctx.json().catch(() => null); if (b?.error) message = b.error; }
+        throw new Error(message);
+      }
+      setLoadedModels(data?.models ?? []);
+    } catch (e) {
+      setModelsError(e instanceof Error ? e.message : 'Could not load models.');
+    } finally {
+      setLoadingModels(false);
+    }
+  };
+
+  const handleSaveContext = () => {
+    saveUserContext(context);
+    setContextSaved(true);
+    setTimeout(() => setContextSaved(false), 2000);
   };
 
   const handleSaveAI = () => {
@@ -39,6 +79,7 @@ export const Settings: React.FC = () => {
   };
 
   const meta = PROVIDER_META[provider];
+  const modelChoices = Array.from(new Set([...meta.modelOptions, ...loadedModels]));
 
   const supabaseConfig = getSupabaseConfig();
   const handleReconfigure = () => {
@@ -81,9 +122,20 @@ export const Settings: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="ai-model" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Model
-            </label>
+            <div className="flex items-center justify-between mb-3">
+              <label htmlFor="ai-model" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Model
+              </label>
+              <button
+                type="button"
+                onClick={handleLoadModels}
+                disabled={loadingModels}
+                className="inline-flex items-center text-xs font-semibold text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 disabled:opacity-50"
+              >
+                {loadingModels ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-1" />}
+                {loadedModels.length ? `${loadedModels.length} models loaded` : 'Load models from my key'}
+              </button>
+            </div>
             <input
               id="ai-model"
               list="ai-model-options"
@@ -93,10 +145,11 @@ export const Settings: React.FC = () => {
               placeholder={meta.defaultModel}
             />
             <datalist id="ai-model-options">
-              {meta.modelOptions.map((m) => (
+              {modelChoices.map((m) => (
                 <option key={m} value={m} />
               ))}
             </datalist>
+            {modelsError && <p className="text-xs text-red-500 mt-2">{modelsError}</p>}
           </div>
 
           <div>
@@ -140,6 +193,56 @@ export const Settings: React.FC = () => {
           <button onClick={handleSaveAI} className="btn-primary flex items-center">
             {saved ? <Check className="w-4 h-4 mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
             {saved ? 'Saved' : 'Save AI Settings'}
+          </button>
+        </div>
+      </div>
+
+      {/* Your context */}
+      <div className="card-modern p-8">
+        <div className="flex items-center space-x-3 mb-2">
+          <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+            <UserRound className="w-4 h-4 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Your context</h3>
+        </div>
+        <p className="text-base text-gray-600 dark:text-gray-400 mb-6">
+          Tell the AI about you and your agency. This is woven into every proposal and LinkedIn DM so
+          they're grounded in your real background, wins and proof. Stored in this browser.
+        </p>
+        <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">About you / your agency</label>
+            <textarea
+              value={context.about}
+              onChange={(e) => setContext((c) => ({ ...c, about: e.target.value }))}
+              rows={3}
+              className="input-modern resize-none"
+              placeholder="e.g. I run an AI automation agency that builds custom workflows and AI systems for B2B teams…"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Wins & results</label>
+            <textarea
+              value={context.wins}
+              onChange={(e) => setContext((c) => ({ ...c, wins: e.target.value }))}
+              rows={3}
+              className="input-modern resize-none"
+              placeholder="e.g. Saved a client 20 hrs/week with a lead-routing system; shipped 30+ automations; 3x'd a team's reply rate…"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Testimonials</label>
+            <textarea
+              value={context.testimonials}
+              onChange={(e) => setContext((c) => ({ ...c, testimonials: e.target.value }))}
+              rows={3}
+              className="input-modern resize-none"
+              placeholder={'e.g. "Mani completely transformed our outreach." — Jane, CEO of Acme'}
+            />
+          </div>
+          <button onClick={handleSaveContext} className="btn-primary flex items-center">
+            {contextSaved ? <Check className="w-4 h-4 mr-2" /> : <UserRound className="w-4 h-4 mr-2" />}
+            {contextSaved ? 'Saved' : 'Save context'}
           </button>
         </div>
       </div>

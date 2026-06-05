@@ -92,7 +92,7 @@ try {
 // enforce the new API-key system, whose gateway rejects the legacy JWT check —
 // so the functions must be deployed with --no-verify-jwt or every call 401s.
 console.log(color.bold('\n  [4/4] Deploying Edge Functions (JWT verification off)...'));
-for (const fn of ['generate-proposal', 'generate-outreach']) {
+for (const fn of ['generate-proposal', 'generate-outreach', 'list-models']) {
   console.log('  deploying ' + color.cyan(fn) + '…');
   try {
     run(`npx supabase functions deploy ${fn} --no-verify-jwt`);
