@@ -6,6 +6,7 @@ import { AIProvider, PROVIDER_META, loadAIConfig, saveAIConfig } from '../lib/ai
 import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
 import { loadUserContext, saveUserContext, UserContext } from '../lib/userContext';
 import { supabase } from '../lib/supabase';
+import { ModelSelect } from '../components/UI/ModelSelect';
 
 export const Settings: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -136,19 +137,7 @@ export const Settings: React.FC = () => {
                 {loadedModels.length ? `${loadedModels.length} models loaded` : 'Load models from my key'}
               </button>
             </div>
-            <input
-              id="ai-model"
-              list="ai-model-options"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="input-modern"
-              placeholder={meta.defaultModel}
-            />
-            <datalist id="ai-model-options">
-              {modelChoices.map((m) => (
-                <option key={m} value={m} />
-              ))}
-            </datalist>
+            <ModelSelect value={model} onChange={setModel} options={modelChoices} placeholder={meta.defaultModel} />
             {modelsError && <p className="text-xs text-red-500 mt-2">{modelsError}</p>}
           </div>
 
