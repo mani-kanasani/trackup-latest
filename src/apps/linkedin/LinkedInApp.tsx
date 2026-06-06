@@ -8,6 +8,7 @@ import { Lead, LeadStatus, OutreachFlow } from './types';
 import { supabase } from '../../lib/supabase';
 import { loadAIConfig } from '../../lib/aiConfig';
 import { loadUserContext, contextToPrompt } from '../../lib/userContext';
+import { effectivePrompt } from '../../lib/prompts';
 
 const STATUS_LABELS: Record<LeadStatus, string> = {
   new: 'New', requested: 'Requested', connected: 'Connected', replied: 'Replied', meeting: 'Meeting',
@@ -153,6 +154,7 @@ const LeadDetail: React.FC<{
             company_website: lead.company_website, potential_services: lead.potential_services,
           },
           context: contextToPrompt(loadUserContext()),
+          systemPrompt: effectivePrompt('outreach'),
           provider: cfg.provider, model: cfg.model, apiKey: cfg.apiKey,
         },
       });

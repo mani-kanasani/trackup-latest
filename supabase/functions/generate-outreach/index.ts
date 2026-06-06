@@ -26,6 +26,7 @@ interface LeadInput {
 interface RequestInput {
   lead?: LeadInput;
   context?: string;
+  systemPrompt?: string;
   provider?: Provider;
   model?: string;
   apiKey?: string;
@@ -71,6 +72,7 @@ async function callOpenAICompatible(
   baseUrl: string,
   apiKey: string,
   model: string,
+  system: string,
   prompt: string,
   useJsonMode: boolean,
 ): Promise<string> {
@@ -78,7 +80,7 @@ async function callOpenAICompatible(
     const body: Record<string, unknown> = {
       model,
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: system },
         { role: 'user', content: prompt },
       ],
       temperature: 0.8,
@@ -99,7 +101,7 @@ async function callOpenAICompatible(
   return data?.choices?.[0]?.message?.content ?? '';
 }
 
-async function callAnthropic(apiKey: string, model: string, prompt: string): Promise<string> {
+async function callAnthropic(apiKey: string, model: string, system: string, prompt: string): Promise<string> {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -111,7 +113,7 @@ async function callAnthropic(apiKey: string, model: string, prompt: string): Pro
       model,
       max_tokens: 2000,
       temperature: 0.8,
-      system: SYSTEM_PROMPT,
+      system: system,
       messages: [{ role: 'user', content: `${prompt}\n\nRespond with ONLY the raw JSON object.` }],
     }),
   });
@@ -171,21 +173,25 @@ Deno.serve(async (req: Request) => {
     if (!apiKey) return json({ error: 'An API key is required. Add one in Settings.' }, 400);
 
     const model = (input.model ?? '').trim() || DEFAULT_MODEL[provider];
+    const system =
+      ((input.systemPrompt ?? '').trim() || SYSTEM_PROMPT) +
+      ' Always reply with a single valid JSON object and nothing else.';
     const prompt = buildPrompt(lead, (input.context ?? '').trim());
 
     let raw: string;
     if (provider === 'anthropic') {
-      raw = await callAnthropic(apiKey, model, prompt);
+      raw = await callAnthropic(apiKey, model, system, prompt);
     } else if (provider === 'gemini') {
       raw = await callOpenAICompatible(
         'https://generativelanguage.googleapis.com/v1beta/openai',
         apiKey,
         model,
+        system,
         prompt,
         true,
       );
     } else {
-      raw = await callOpenAICompatible('https://api.openai.com/v1', apiKey, model, prompt, true);
+      raw = await callOpenAICompatible('https://api.openai.com/v1', apiKey, model, system, prompt, true);
     }
 
     return json(parseFlow(raw));
