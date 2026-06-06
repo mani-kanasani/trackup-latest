@@ -56,11 +56,11 @@ cp .env.example .env   # optional: VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
 npm run setup
 ```
 
-This links your Supabase project and installs the `users`/`jobs` tables, the
-public `proposals` Storage bucket, and the `generate-proposal` Edge Function. It
-wraps the Supabase CLI (installed locally by `npm install` — no global install or
-Docker needed). The function needs no extra secrets: each request carries the
-user's own AI key.
+This links your Supabase project and installs the `users`/`jobs`/`leads` tables,
+the public `proposals` Storage bucket, and the three Edge Functions. It runs the
+Supabase CLI via `npx` (downloaded on first use — no global install or Docker
+needed). The functions need no extra secrets: each request carries the user's own
+AI key.
 
 ### 3. Run
 

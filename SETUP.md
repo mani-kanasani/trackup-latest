@@ -34,8 +34,8 @@ When you're done you'll have:
    npm install
    ```
 
-   `npm install` also installs the Supabase command-line tool locally, so there's
-   nothing else to install.
+   The setup script runs the Supabase CLI via `npx` (downloaded on first use), so
+   there's nothing else to install globally.
 
 ---
 
