@@ -95,9 +95,13 @@ The easiest path uses your GitHub fork — no commands:
    - **Publish directory:** `dist`
 4. Click **Deploy**. After a minute you'll get a public URL like `https://your-app.netlify.app`.
 
-> No environment variables are required — you'll connect Supabase from inside the
-> app in the next step. (Cloudflare Pages and Vercel work the same way with the
-> same build command and publish directory.)
+> **Sharing this with other people?** Bake your connection in as environment
+> variables so every visitor connects automatically — the in-app wizard only saves
+> it in *your* browser. In **Netlify → Site configuration → Environment variables**,
+> add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (your **publishable** key),
+> then redeploy. The 1-click "Deploy to Netlify" button prompts for these. Skip them
+> for personal use and connect via the wizard (Step 5). (Cloudflare Pages and Vercel
+> work the same way.)
 
 ---
 

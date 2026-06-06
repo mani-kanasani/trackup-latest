@@ -302,6 +302,12 @@ export const SupabaseSetup: React.FC = () => {
                   (<span className="font-mono">sb_publishable_…</span>) for newer projects — the AI functions reject the
                   legacy anon key. Either key is public and safe in the browser; your data is protected by Row Level Security.
                 </p>
+                <p className="flex items-start mt-2 text-xs text-gray-400 dark:text-gray-500">
+                  <Database className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-ember-500" />
+                  Deploying this for others? Set these as <span className="font-mono">VITE_SUPABASE_URL</span> /{' '}
+                  <span className="font-mono">VITE_SUPABASE_ANON_KEY</span> environment variables on your host instead, so
+                  every visitor connects automatically (this screen only saves to your browser).
+                </p>
               </div>
 
               {error && (

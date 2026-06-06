@@ -10,3 +10,10 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# The "Deploy to Netlify" 1-click flow prompts the deployer for these, so the
+# deployed app connects to their own Supabase. (If left blank, the in-app
+# onboarding wizard collects them instead.)
+[template.environment]
+  VITE_SUPABASE_URL = "Your Supabase project URL — https://YOUR-REF.supabase.co"
+  VITE_SUPABASE_ANON_KEY = "Your Supabase publishable key — sb_publishable_…"
