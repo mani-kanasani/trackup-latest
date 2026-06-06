@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Moon, Sun, Sparkles, Key, ExternalLink, Check, Database, RefreshCw, Loader2, UserRound } from 'lucide-react';
+import { Moon, Sun, Sparkles, Key, ExternalLink, Check, Database, RefreshCw, Loader2, UserRound, Wand2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { AnimatedLogo } from '../components/UI/AnimatedLogo';
 import { AIProvider, PROVIDER_META, loadAIConfig, saveAIConfig } from '../lib/aiConfig';
 import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
 import { loadUserContext, saveUserContext, UserContext } from '../lib/userContext';
+import { CustomPrompts, DEFAULT_PROMPTS, PROMPT_META, PromptKey, loadPrompts, savePrompts } from '../lib/prompts';
 import { supabase } from '../lib/supabase';
 import { ModelSelect } from '../components/UI/ModelSelect';
 
@@ -24,6 +25,9 @@ export const Settings: React.FC = () => {
   const [context, setContext] = useState<UserContext>({ about: '', wins: '', testimonials: '' });
   const [contextSaved, setContextSaved] = useState(false);
 
+  const [prompts, setPrompts] = useState<CustomPrompts>({ proposal: '', outreach: '' });
+  const [promptsSaved, setPromptsSaved] = useState(false);
+
   useEffect(() => {
     const existing = loadAIConfig();
     if (existing) {
@@ -32,6 +36,11 @@ export const Settings: React.FC = () => {
       setApiKey(existing.apiKey);
     }
     setContext(loadUserContext());
+    const sp = loadPrompts();
+    setPrompts({
+      proposal: sp.proposal || DEFAULT_PROMPTS.proposal,
+      outreach: sp.outreach || DEFAULT_PROMPTS.outreach,
+    });
   }, []);
 
   const handleProviderChange = (next: AIProvider) => {
@@ -68,6 +77,13 @@ export const Settings: React.FC = () => {
     setContextSaved(true);
     setTimeout(() => setContextSaved(false), 2000);
   };
+
+  const handleSavePrompts = () => {
+    savePrompts(prompts);
+    setPromptsSaved(true);
+    setTimeout(() => setPromptsSaved(false), 2000);
+  };
+  const resetPrompt = (key: PromptKey) => setPrompts((p) => ({ ...p, [key]: DEFAULT_PROMPTS[key] }));
 
   const handleSaveAI = () => {
     saveAIConfig({
@@ -232,6 +248,49 @@ export const Settings: React.FC = () => {
           <button onClick={handleSaveContext} className="btn-primary flex items-center">
             {contextSaved ? <Check className="w-4 h-4 mr-2" /> : <UserRound className="w-4 h-4 mr-2" />}
             {contextSaved ? 'Saved' : 'Save context'}
+          </button>
+        </div>
+      </div>
+
+      {/* System prompts */}
+      <div className="card-modern p-8">
+        <div className="flex items-center space-x-3 mb-2">
+          <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+            <Wand2 className="w-4 h-4 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">System prompts</h3>
+        </div>
+        <p className="text-base text-gray-600 dark:text-gray-400 mb-6">
+          Rewrite how the AI thinks for each generator — its voice, strategy, and what to emphasize. The
+          required output format is enforced automatically, so edits can't break generation. Stored in this browser.
+        </p>
+        <div className="space-y-6">
+          {(Object.keys(PROMPT_META) as PromptKey[]).map((key) => (
+            <div key={key}>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {PROMPT_META[key].label}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => resetPrompt(key)}
+                  className="text-xs font-medium text-upwork-600 dark:text-upwork-400 hover:text-upwork-700"
+                >
+                  Reset to default
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{PROMPT_META[key].description}</p>
+              <textarea
+                value={prompts[key]}
+                onChange={(e) => setPrompts((p) => ({ ...p, [key]: e.target.value }))}
+                rows={4}
+                className="input-modern resize-none text-sm"
+              />
+            </div>
+          ))}
+          <button onClick={handleSavePrompts} className="btn-primary flex items-center">
+            {promptsSaved ? <Check className="w-4 h-4 mr-2" /> : <Wand2 className="w-4 h-4 mr-2" />}
+            {promptsSaved ? 'Saved' : 'Save prompts'}
           </button>
         </div>
       </div>

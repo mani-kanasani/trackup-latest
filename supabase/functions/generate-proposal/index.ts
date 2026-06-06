@@ -24,6 +24,7 @@ interface GenerateInput {
   job_title?: string;
   job_summary?: string;
   context?: string;
+  systemPrompt?: string;
   provider?: Provider;
   model?: string;
   apiKey?: string;
@@ -78,6 +79,7 @@ async function callOpenAICompatible(
   baseUrl: string,
   apiKey: string,
   model: string,
+  system: string,
   userPrompt: string,
   useJsonMode: boolean,
 ): Promise<string> {
@@ -85,7 +87,7 @@ async function callOpenAICompatible(
     const body: Record<string, unknown> = {
       model,
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: system },
         { role: 'user', content: userPrompt },
       ],
       temperature: 0.7,
@@ -110,6 +112,7 @@ async function callOpenAICompatible(
 async function callAnthropic(
   apiKey: string,
   model: string,
+  system: string,
   userPrompt: string,
 ): Promise<string> {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -123,7 +126,7 @@ async function callAnthropic(
       model,
       max_tokens: 4096,
       temperature: 0.7,
-      system: SYSTEM_PROMPT,
+      system: system,
       messages: [
         {
           role: 'user',
@@ -146,17 +149,19 @@ async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 
   jobTitle: string;
   jobSummary: string;
   context: string;
+  system: string;
 }): Promise<ProposalContent> {
   const userPrompt = buildUserPrompt(input.jobTitle, input.jobSummary, input.context);
 
   let raw: string;
   if (input.provider === 'anthropic') {
-    raw = await callAnthropic(input.apiKey, input.model, userPrompt);
+    raw = await callAnthropic(input.apiKey, input.model, input.system, userPrompt);
   } else if (input.provider === 'gemini') {
     raw = await callOpenAICompatible(
       'https://generativelanguage.googleapis.com/v1beta/openai',
       input.apiKey,
       input.model,
+      input.system,
       userPrompt,
       true,
     );
@@ -165,6 +170,7 @@ async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 
       'https://api.openai.com/v1',
       input.apiKey,
       input.model,
+      input.system,
       userPrompt,
       true,
     );
@@ -345,6 +351,9 @@ Deno.serve(async (req: Request) => {
     const { data: userData } = await userClient.auth.getUser();
     const userId = userData?.user?.id ?? 'anonymous';
 
+    const system =
+      ((input.systemPrompt ?? '').trim() || SYSTEM_PROMPT) +
+      ' Always reply with a single valid JSON object and nothing else (no markdown, no code fences).';
     const content = await generateContent({
       provider,
       apiKey,
@@ -352,6 +361,7 @@ Deno.serve(async (req: Request) => {
       jobTitle,
       jobSummary,
       context: (input.context ?? '').trim(),
+      system,
     });
 
     const pdfBytes = await buildProposalPDF(content);
