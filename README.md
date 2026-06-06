@@ -56,11 +56,11 @@ cp .env.example .env   # optional: VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
 npm run setup
 ```
 
-This links your Supabase project and installs the `users`/`jobs` tables, the
-public `proposals` Storage bucket, and the `generate-proposal` Edge Function. It
-wraps the Supabase CLI (installed locally by `npm install` — no global install or
-Docker needed). The function needs no extra secrets: each request carries the
-user's own AI key.
+This links your Supabase project and installs the `users`/`jobs`/`leads` tables,
+the public `proposals` Storage bucket, and the three Edge Functions. It runs the
+Supabase CLI via `npx` (downloaded on first use — no global install or Docker
+needed). The functions need no extra secrets: each request carries the user's own
+AI key.
 
 ### 3. Run
 
@@ -78,18 +78,25 @@ add your AI provider + key in **Settings** before generating your first proposal
 &nbsp;
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/mani-kanasani/trackup-latest)
 
-This is a static Vite site — build command `npm run build`, publish directory
-`dist`, **no environment variables required**.
+Static Vite site — build `npm run build`, publish `dist` (set in `netlify.toml`).
 
-**After deploying, the site opens straight into a 3-step onboarding wizard** that
-walks the user through: ① create a Supabase project → ② set up the backend
-(copy-paste SQL + function, no terminal needed) → ③ connect. Then they sign up and
-add a free AI key in Settings. The full click-by-click walkthrough is in
-**[SETUP.md](SETUP.md)**.
+**Connecting Supabase — pick one:**
 
-> The deploy buttons build whatever is on this repo's default branch, so they only
-> work once these changes are pushed. (Set `VITE_SUPABASE_*` at build time if you'd
-> rather pre-connect a project and skip the wizard's connect step.)
+- **Sharing with other people (recommended):** bake the connection in as
+  **environment variables** so every visitor connects automatically. The 1-click
+  button prompts for them; for a manual deploy add them in **Netlify → Site
+  configuration → Environment variables** (then redeploy):
+  - `VITE_SUPABASE_URL` = your project URL (`https://YOUR-REF.supabase.co`)
+  - `VITE_SUPABASE_ANON_KEY` = your **publishable** key (`sb_publishable_…`)
+- **Personal / quick:** leave them unset — the app opens into a 3-step onboarding
+  wizard that collects the connection (stored in **that browser only**).
+
+Either way, your Supabase project must have the backend set up first (schema + the
+three Edge Functions) — the wizard's **Copy SQL** + function steps, or
+`npm run setup`. Full walkthrough: **[SETUP.md](SETUP.md)**.
+
+> Deploy buttons build this repo's default branch — they only reflect changes once
+> they're pushed.
 
 ## Local development (optional)
 
