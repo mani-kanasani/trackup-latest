@@ -31,6 +31,23 @@ export interface Check {
 /** Created by the migrations, in the order a person would notice them missing. */
 const REQUIRED_TABLES = ['users', 'jobs', 'leads', 'case_studies'] as const;
 
+/**
+ * One column from each of the later migrations.
+ *
+ * Checking only that the tables exist would pass an install that ran the first
+ * few migrations and stopped — which is the most likely partial failure, because
+ * they are pasted in order and a person stops at the first one that errors. The
+ * tables would all be there and three features would be quietly missing.
+ *
+ * PostgREST answers 400 for a column that does not exist, which is distinct from
+ * the 404 it gives for a missing table.
+ */
+const REQUIRED_COLUMNS: { table: string; column: string; feature: string }[] = [
+  { table: 'leads', column: 'qualification', feature: 'the qualification screen' },
+  { table: 'leads', column: 'status_changed_at', feature: 'cadence timing' },
+  { table: 'jobs', column: 'proposal_path', feature: 'reopening proposal PDFs after their link expires' },
+];
+
 /** Deployed by `npm run setup`, or pasted from the wizard. */
 const REQUIRED_FUNCTIONS = ['generate-proposal', 'generate-outreach', 'list-models'] as const;
 
@@ -133,6 +150,37 @@ const checkTables = async (config: SupabaseConfig): Promise<Check> => {
   };
 };
 
+/** Are the LATER migrations applied, not just the first few? */
+const checkColumns = async (config: SupabaseConfig): Promise<Check> => {
+  const stale: string[] = [];
+
+  for (const { table, column, feature } of REQUIRED_COLUMNS) {
+    try {
+      const res = await withTimeout(
+        `${base(config)}/rest/v1/${table}?select=${column}&limit=0`,
+        { headers: { apikey: config.anonKey.trim() } },
+      );
+      if (res.status === 400) stale.push(`${table}.${column} (${feature})`);
+    } catch {
+      // A transport failure here is not evidence about the schema. The table
+      // check has already established the project answers, so stay quiet rather
+      // than reporting a migration as missing on the strength of a dropped
+      // connection.
+    }
+  }
+
+  if (stale.length) {
+    return {
+      id: 'columns',
+      label: 'Schema up to date',
+      status: 'fail',
+      detail: `${stale.length} later migration${stale.length === 1 ? '' : 's'} not applied: ${stale.join('; ')}.`,
+      fix: 'The tables exist but the newer migrations did not run. Work through the SQL below from the top — every migration is idempotent, so re-running the ones that already applied is harmless.',
+    };
+  }
+  return { id: 'columns', label: 'Schema up to date', status: 'ok', detail: 'All migrations applied.' };
+};
+
 /**
  * Is each function deployed?
  *
@@ -194,10 +242,25 @@ export const runReadinessChecks = async (config: SupabaseConfig): Promise<Check[
     return [
       connection,
       { id: 'tables', label: 'Database tables', status: 'warn', detail: 'Not checked — no connection yet.' },
+      { id: 'columns', label: 'Schema up to date', status: 'warn', detail: 'Not checked — no connection yet.' },
       { id: 'functions', label: 'Edge functions', status: 'warn', detail: 'Not checked — no connection yet.' },
     ];
   }
-  return [connection, await checkTables(config), await checkFunctions(config)];
+
+  const tables = await checkTables(config);
+  // Asking about columns on tables that are not there would report every later
+  // migration as missing, burying the one fact that matters.
+  const columns =
+    tables.status === 'ok'
+      ? await checkColumns(config)
+      : {
+          id: 'columns',
+          label: 'Schema up to date',
+          status: 'warn' as const,
+          detail: 'Not checked — the tables have to exist first.',
+        };
+
+  return [connection, tables, columns, await checkFunctions(config)];
 };
 
 export const isReady = (checks: Check[]): boolean =>
