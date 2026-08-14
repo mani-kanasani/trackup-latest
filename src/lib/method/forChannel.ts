@@ -38,6 +38,14 @@ const CHANNEL_AUDIENCE: Record<ChannelId, Audience> = {
 export interface BuildOptions {
   /** The user's vault. Omitted means fall back to the free-text wins field. */
   cases?: CaseStudy[];
+  /**
+   * Set when the vault could not be READ, which is a different thing from the
+   * vault being empty and must never be treated as the same. An empty array
+   * from a failed query is indistinguishable from a genuinely empty vault, and
+   * telling someone with three saved case studies that they have none — after
+   * charging them for the generation — is the failure this prevents.
+   */
+  vaultUnavailable?: boolean;
   /** What we know about the reader, used to match a case study to their world. */
   target?: Target;
   /** Override the channel's default audience. */
@@ -87,6 +95,8 @@ export interface ChannelPrompt {
   contextEmpty: boolean;
   /** True when no proof is available, which several laws depend on. */
   proofEmpty: boolean;
+  /** True when proof might exist but could not be read. Never say "you have none". */
+  proofUnknown: boolean;
   /** The case study chosen, so the UI can show and explain the pick. */
   chosen: ScoredCase | null;
   /** Runners-up, so the user can swap without leaving the page. */
@@ -136,7 +146,8 @@ export const buildChannelPrompt = (
     systemPrompt: composeSystemPrompt({ pack, qualification, context: about, proof, userPrompt }),
     steps: outputSteps(pack),
     contextEmpty: !contextToPrompt(ctx).trim(),
-    proofEmpty: !proof,
+    proofEmpty: !proof && !options.vaultUnavailable,
+    proofUnknown: Boolean(options.vaultUnavailable),
     chosen,
     alternatives,
     declined: options.qualification?.verdict === 'decline',

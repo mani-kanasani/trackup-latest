@@ -11,14 +11,31 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { PDFDocument, StandardFonts, rgb } from 'npm:pdf-lib@1.17.1';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+/**
+ * Origins allowed to call this function.
+ *
+ * Set ALLOWED_ORIGINS as a comma-separated list of your deployed app's origins
+ * to lock this down. Left unset it allows any origin, which is safe enough only
+ * because the user check below rejects anyone without a valid session for THIS
+ * project.
+ */
+const ALLOWED = (Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((o) => o.trim()).filter(Boolean);
+
+const corsFor = (req: Request) => {
+  const origin = req.headers.get('Origin') ?? '';
+  const allow = ALLOWED.length === 0 ? '*' : ALLOWED.includes(origin) ? origin : '';
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    Vary: 'Origin',
+  };
 };
 
 type Provider = 'gemini' | 'openai' | 'anthropic';
+
+/** A Mermaid document has to open with a diagram directive. Anything else is prose. */
+const MERMAID_HEADER = /^(graph|flowchart)\s+(TD|TB|LR|RL|BT)\b/i;
 
 /** One key the model must return, sent by the caller from the method pack. */
 interface OutputStep {
@@ -269,7 +286,13 @@ function parseProposal(raw: string, steps: OutputStep[], letterKeys: string[]): 
     cover_letter: assembled || String(parsed.cover_letter ?? ''),
     steps: stepValues,
     proposal_sections: sections,
-    mermaid_code: String(parsed.mermaid_code ?? ''),
+    // Only keep diagram source that is actually a diagram. Models regularly
+    // return prose, a fenced block, or an apology here, and the app has no
+    // renderer to fail loudly — so invalid source would sit in the UI looking
+    // like a deliverable until someone pasted it somewhere and found out.
+    mermaid_code: MERMAID_HEADER.test(String(parsed.mermaid_code ?? '').trim())
+      ? String(parsed.mermaid_code).trim()
+      : '',
     video_script: String(parsed.video_script ?? ''),
   };
 }
@@ -366,19 +389,20 @@ async function buildProposalPDF(content: ProposalContent): Promise<Uint8Array> {
 
 // --- Handler -----------------------------------------------------------------
 
-const json = (body: unknown, status = 200) =>
+const json = (body: unknown, status = 200, cors: Record<string, string> = {}) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { ...cors, 'Content-Type': 'application/json' },
   });
 
 Deno.serve(async (req: Request) => {
+  const cors = corsFor(req);
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: cors });
   }
 
   if (req.method !== 'POST') {
-    return json({ error: 'Method not allowed' }, 405);
+    return json({ error: 'Method not allowed' }, 405, cors);
   }
 
   try {
@@ -389,13 +413,13 @@ Deno.serve(async (req: Request) => {
     const apiKey = (input.apiKey ?? '').trim();
 
     if (!jobTitle || !jobSummary) {
-      return json({ error: 'job_title and job_summary are required.' }, 400);
+      return json({ error: 'job_title and job_summary are required.' }, 400, cors);
     }
     if (provider !== 'gemini' && provider !== 'openai' && provider !== 'anthropic') {
-      return json({ error: 'A valid provider (gemini, openai, anthropic) is required.' }, 400);
+      return json({ error: 'A valid provider (gemini, openai, anthropic) is required.' }, 400, cors);
     }
     if (!apiKey) {
-      return json({ error: 'An API key is required. Add one in Settings.' }, 400);
+      return json({ error: 'An API key is required. Add one in Settings.' }, 400, cors);
     }
 
     const model = (input.model ?? '').trim() || DEFAULT_MODEL[provider];
@@ -416,7 +440,7 @@ Deno.serve(async (req: Request) => {
     const { data: userData } = await userClient.auth.getUser();
     const userId = userData?.user?.id;
     if (!userId) {
-      return json({ error: 'Sign in before generating a proposal.' }, 401);
+      return json({ error: 'Sign in before generating a proposal.' }, 401, cors);
     }
 
     // The contract comes from the caller's method pack. Guessing a shape here is
@@ -426,6 +450,7 @@ Deno.serve(async (req: Request) => {
       return json(
         { error: 'No output steps were supplied. Update the app so it sends the method pack structure.' },
         400,
+        cors,
       );
     }
     const stepKeys = new Set(steps.map((s) => s.key));
@@ -481,10 +506,10 @@ Deno.serve(async (req: Request) => {
       proposal_url: signed.signedUrl,
       mermaid_code: content.mermaid_code,
       video_script: content.video_script,
-    });
+    }, 200, cors);
   } catch (err) {
     console.error('generate-proposal failed:', err);
     const message = err instanceof Error ? err.message : 'Unexpected error generating proposal.';
-    return json({ error: message }, 500);
+    return json({ error: message }, 500, cors);
   }
 });

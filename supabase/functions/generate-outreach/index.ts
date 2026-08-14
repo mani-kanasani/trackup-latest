@@ -13,11 +13,57 @@
 // as "came back empty. Regenerate." on top of perfectly good copy. One contract,
 // derived from the doctrine, is the only way that stays fixed.
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+import { createClient } from 'npm:@supabase/supabase-js@2';
+
+/**
+ * Origins allowed to call this function.
+ *
+ * Set ALLOWED_ORIGINS as a comma-separated list of your deployed app's origins
+ * to lock this down. Left unset it allows any origin, which is safe enough only
+ * because requireUser below rejects anyone without a valid session for THIS
+ * project — but setting it is worth the thirty seconds.
+ */
+const ALLOWED = (Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((o) => o.trim()).filter(Boolean);
+
+const corsFor = (req: Request) => {
+  const origin = req.headers.get('Origin') ?? '';
+  const allow = ALLOWED.length === 0 ? '*' : ALLOWED.includes(origin) ? origin : '';
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    Vary: 'Origin',
+  };
 };
+
+/**
+ * Identify the caller and REQUIRE a real signed-in user.
+ *
+ * These functions deploy with verify_jwt off, because the browser calls them
+ * with the anon key. The platform therefore performs no auth at all and this is
+ * the only gate. Without it the function is an open relay: anyone who finds the
+ * URL can post an arbitrary provider, key and prompt and have someone else's
+ * project make the outbound call, burning their invocation quota and lending
+ * their domain to whatever the caller is doing.
+ *
+ * Deliberately duplicated rather than shared: the setup wizard hands these
+ * sources to the user as copy-paste text, so a cross-file import would not
+ * survive the install.
+ */
+async function requireUser(req: Request): Promise<string | null> {
+  try {
+    const client = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } },
+    );
+    const { data } = await client.auth.getUser();
+    return data?.user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 
 type Provider = 'gemini' | 'openai' | 'anthropic';
 
@@ -177,15 +223,19 @@ function parseFlow(raw: string, steps: OutputStep[]): Record<string, string> {
   return out;
 }
 
-const json = (body: unknown, status = 200) =>
+const json = (body: unknown, status = 200, cors: Record<string, string> = {}) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { ...cors, 'Content-Type': 'application/json' },
   });
 
 Deno.serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+  const cors = corsFor(req);
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, cors);
+
+  const userId = await requireUser(req);
+  if (!userId) return json({ error: 'Sign in before generating outreach.' }, 401, cors);
 
   try {
     const input = (await req.json()) as RequestInput;
@@ -194,12 +244,12 @@ Deno.serve(async (req: Request) => {
     const apiKey = (input.apiKey ?? '').trim();
 
     if (!lead.name || !lead.linkedin_url) {
-      return json({ error: 'Lead name and LinkedIn URL are required.' }, 400);
+      return json({ error: 'Lead name and LinkedIn URL are required.' }, 400, cors);
     }
     if (provider !== 'gemini' && provider !== 'openai' && provider !== 'anthropic') {
-      return json({ error: 'A valid provider (gemini, openai, anthropic) is required.' }, 400);
+      return json({ error: 'A valid provider (gemini, openai, anthropic) is required.' }, 400, cors);
     }
-    if (!apiKey) return json({ error: 'An API key is required. Add one in Settings.' }, 400);
+    if (!apiKey) return json({ error: 'An API key is required. Add one in Settings.' }, 400, cors);
 
     // The contract comes from the caller's method pack. Without it there is no
     // honest shape to ask for, and guessing one is what produced the drift this
@@ -209,6 +259,7 @@ Deno.serve(async (req: Request) => {
       return json(
         { error: 'No output steps were supplied. Update the app so it sends the method pack structure.' },
         400,
+        cors,
       );
     }
 
@@ -234,10 +285,10 @@ Deno.serve(async (req: Request) => {
       raw = await callOpenAICompatible('https://api.openai.com/v1', apiKey, model, system, prompt, true);
     }
 
-    return json(parseFlow(raw, steps));
+    return json(parseFlow(raw, steps), 200, cors);
   } catch (err) {
     console.error('generate-outreach failed:', err);
     const message = err instanceof Error ? err.message : 'Unexpected error generating outreach.';
-    return json({ error: message }, 500);
+    return json({ error: message }, 500, cors);
   }
 });

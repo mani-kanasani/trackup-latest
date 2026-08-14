@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Send, ExternalLink, Copy, FileText, Video, BarChart3, Eye, EyeOff, DollarSign, Briefcase, AlertTriangle } from 'lucide-react';
+import { Send, ExternalLink, Copy, FileText, Video, BarChart3, DollarSign, Briefcase, AlertTriangle } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { GenerateResponse, JobLevel, CompensationType } from '../types';
 import { supabase } from '../lib/supabase';
@@ -22,7 +22,7 @@ const LETTER_KEYS = ['hook', 'diagnosis', 'demonstration', 'proof', 'roiFrame', 
 
 export const Apply: React.FC = () => {
   const { addMaterial } = useData();
-  const { cases } = useCaseStudies();
+  const { cases, loadError: vaultError } = useCaseStudies();
   const [jobTitle, setJobTitle] = useState('');
   const [jobSummary, setJobSummary] = useState('');
   const [jobLevel, setJobLevel] = useState<JobLevel>('intermediate');
@@ -31,7 +31,6 @@ export const Apply: React.FC = () => {
   const [actualAmount, setActualAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [generatedData, setGeneratedData] = useState<GenerateResponse | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
   const [error, setError] = useState('');
 
   // --- the method engine and the screen --------------------------------------
@@ -55,6 +54,14 @@ export const Apply: React.FC = () => {
       setError('Add your AI provider and API key in Settings before generating.');
       return;
     }
+    // A vault that could not be READ is not an empty vault. See LinkedInApp.
+    if (vaultError) {
+      setError(
+        `Your case studies could not be loaded, so this would be written as if you had none: ${vaultError}. ` +
+          'Reload, or check the connection in Settings.',
+      );
+      return;
+    }
 
     setLoading(true);
     setError('');
@@ -68,6 +75,7 @@ export const Apply: React.FC = () => {
     // what it is allowed to claim about them.
     const method = buildChannelPrompt('upwork', {
       cases,
+      vaultUnavailable: Boolean(vaultError),
       target: { notes: `${jobTitle}\n\n${jobSummary}` },
       qualification: verdict,
     });
@@ -165,7 +173,6 @@ export const Apply: React.FC = () => {
     setProposedAmount('');
     setActualAmount('');
     setGeneratedData(null);
-    setShowPreview(false);
     // The screen was answered about the job just saved. Carrying those answers
     // onto the next one would silently qualify a job nobody looked at.
     setQual(null);
@@ -434,47 +441,44 @@ export const Apply: React.FC = () => {
               />
             </div>
 
-            {/* Mermaid Diagram */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
-                    <BarChart3 className="w-3 h-3 text-upwork-600 dark:text-upwork-400" />
+            {/* Workflow diagram source.
+
+                There is no renderer here and there deliberately isn't one: the
+                library is ~500KB and the diagram never appears in the PDF the
+                buyer receives. What was here before was a button labelled "Show
+                Preview" that revealed the sentence "Mermaid diagram preview
+                would be rendered here" — a promise the app could not keep. The
+                source is a real deliverable to paste into a doc tool, so it is
+                labelled as exactly that. */}
+            {generatedData.mermaid_code && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
+                      <BarChart3 className="w-3 h-3 text-upwork-600 dark:text-upwork-400" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Workflow diagram source</h3>
                   </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Diagram Code</h3>
+                  <button
+                    onClick={() => copyToClipboard(generatedData.mermaid_code)}
+                    className="flex items-center px-3 py-2 text-sm text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300 bg-upwork-50 dark:bg-upwork-900/20 rounded-lg transition-all duration-200 font-medium"
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowPreview(!showPreview)}
-                  className="flex items-center px-3 py-2 text-sm text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300 bg-upwork-50 dark:bg-upwork-900/20 rounded-lg transition-all duration-200 font-medium"
-                >
-                  {showPreview ? (
-                    <>
-                      <EyeOff className="w-4 h-4 mr-2" />
-                      Hide Preview
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="w-4 h-4 mr-2" />
-                      Show Preview
-                    </>
-                  )}
-                </button>
-              </div>
-              
-              {showPreview ? (
-                <div className="p-6 bg-gradient-to-br from-upwork-50 to-upwork-100 dark:from-upwork-900/20 dark:to-upwork-800/20 rounded-xl text-sm text-gray-700 dark:text-gray-300 border border-upwork-200 dark:border-upwork-700">
-                  <p className="italic">Mermaid diagram preview would be rendered here</p>
-                  <p className="text-xs mt-3 text-upwork-600 dark:text-upwork-400 font-medium">Use the raw code in your proposal documents</p>
-                </div>
-              ) : (
                 <textarea
                   value={generatedData.mermaid_code}
                   readOnly
                   rows={8}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono resize-none focus:ring-2 focus:ring-upwork-500 focus:border-upwork-500 transition-all duration-200"
                 />
-              )}
-            </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Mermaid source. Paste it into Notion, GitHub, or mermaid.live to render it. It is not
+                  in the PDF above.
+                </p>
+              </div>
+            )}
 
             {/* Proposal Document */}
             <div className="space-y-4">

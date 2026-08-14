@@ -347,20 +347,23 @@ export const Track: React.FC = () => {
                 </a>
               </div>
 
-              {/* Diagram Code */}
-              <div>
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-8 h-8 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
-                    <BarChart3 className="w-4 h-4 text-upwork-600 dark:text-upwork-400" />
+              {/* Workflow diagram source. Hidden when absent: an empty panel
+                  under a heading reads as a generation that failed. */}
+              {selectedMaterial.mermaid_code?.trim() && (
+                <div>
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-8 h-8 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
+                      <BarChart3 className="w-4 h-4 text-upwork-600 dark:text-upwork-400" />
+                    </div>
+                    <h4 className="font-bold text-lg text-gray-900 dark:text-white">Workflow diagram source</h4>
                   </div>
-                  <h4 className="font-bold text-lg text-gray-900 dark:text-white">Diagram Code</h4>
+                  <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-xl max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600">
+                    <pre className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap font-mono leading-relaxed">
+                      {selectedMaterial.mermaid_code}
+                    </pre>
+                  </div>
                 </div>
-                <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-xl max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600">
-                  <pre className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap font-mono leading-relaxed">
-                    {selectedMaterial.mermaid_code}
-                  </pre>
-                </div>
-              </div>
+              )}
 
               {/* Video Script */}
               <div>

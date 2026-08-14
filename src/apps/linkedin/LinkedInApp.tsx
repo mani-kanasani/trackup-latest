@@ -145,7 +145,7 @@ const LeadDetail: React.FC<{
   onUpdate: (id: string, updates: Partial<Lead>) => Promise<MutationResult>;
   onDelete: (id: string) => void;
 }> = ({ lead, onUpdate, onDelete }) => {
-  const { cases } = useCaseStudies();
+  const { cases, loadError: vaultError } = useCaseStudies();
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
@@ -207,6 +207,16 @@ const LeadDetail: React.FC<{
       setError('Add your AI provider and key first (Settings, top-right on the Ember home screen).');
       return;
     }
+    // A vault that could not be READ is not an empty vault. Generating anyway
+    // spends the user's money and then tells someone with saved case studies
+    // that they have none.
+    if (vaultError) {
+      setError(
+        `Your case studies could not be loaded, so this would be written as if you had none: ${vaultError}. ` +
+          'Reload, or check the connection in Settings.',
+      );
+      return;
+    }
     setError('');
     setWarnings([]);
     setSoftNotes([]);
@@ -217,6 +227,7 @@ const LeadDetail: React.FC<{
     // vault. "One proof, matched to the reader" is a law in every pack.
     const method = buildChannelPrompt('linkedin', {
       cases,
+      vaultUnavailable: Boolean(vaultError),
       target: {
         industry: lead.industry,
         buyer_role: lead.job_title,
