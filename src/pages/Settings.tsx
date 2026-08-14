@@ -7,7 +7,7 @@ import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
 import { loadUserContext, saveUserContext, UserContext } from '../lib/userContext';
 import { CustomPrompts, DEFAULT_PROMPTS, PROMPT_META, PromptKey, loadPrompts, savePrompts } from '../lib/prompts';
 import { supabase } from '../lib/supabase';
-import { contractOf, EXPECTED_CONTRACT } from '../lib/deployment';
+import { contractOf, EXPECTED_CONTRACT, probeFunctionVersions, type FunctionVersion } from '../lib/deployment';
 import { ModelSelect } from '../components/UI/ModelSelect';
 import { CaseStudyVault } from '../components/Settings/CaseStudyVault';
 
@@ -49,6 +49,18 @@ export const Settings: React.FC = () => {
     setModel(PROVIDER_META[next].defaultModel);
     setLoadedModels([]);
     setModelsError('');
+  };
+
+  const [versions, setVersions] = useState<FunctionVersion[] | null>(null);
+  const [checkingVersions, setCheckingVersions] = useState(false);
+
+  /** Answers "which code is actually live" without spending a token. */
+  const handleCheckBackend = async () => {
+    setCheckingVersions(true);
+    setVersions(
+      await probeFunctionVersions((name) => supabase.functions.invoke(name, { body: {} })),
+    );
+    setCheckingVersions(false);
   };
 
   const [testing, setTesting] = useState(false);
@@ -248,6 +260,33 @@ export const Settings: React.FC = () => {
             </a>
           </div>
 
+          {versions && (
+            <div className="text-sm p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 space-y-1">
+              <p className="font-semibold text-gray-800 dark:text-gray-200 mb-1">
+                Deployed function versions (this app needs {EXPECTED_CONTRACT})
+              </p>
+              {versions.map((v) => (
+                <p
+                  key={v.name}
+                  className={
+                    v.version !== null && v.version >= EXPECTED_CONTRACT
+                      ? 'text-green-700 dark:text-green-400'
+                      : 'text-amber-700 dark:text-amber-400'
+                  }
+                >
+                  <span className="font-mono">{v.name}</span>{' '}
+                  {!v.reachable
+                    ? 'did not respond. It may not be deployed.'
+                    : v.version === null
+                      ? 'is running code older than this check. Redeploy it.'
+                      : v.version >= EXPECTED_CONTRACT
+                        ? `is version ${v.version}, up to date.`
+                        : `is version ${v.version}. Redeploy it.`}
+                </p>
+              ))}
+            </div>
+          )}
+
           {testResult && (
             <div
               className={`flex items-start text-sm p-4 rounded-xl border ${
@@ -267,6 +306,14 @@ export const Settings: React.FC = () => {
             <button onClick={handleSaveAI} className="btn-primary flex items-center">
               {saved ? <Check className="w-4 h-4 mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
               {saved ? 'Saved' : 'Save AI Settings'}
+            </button>
+            <button
+              onClick={handleCheckBackend}
+              disabled={checkingVersions}
+              className="btn-secondary flex items-center disabled:opacity-50"
+            >
+              {checkingVersions ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Database className="w-4 h-4 mr-2" />}
+              {checkingVersions ? 'Checking…' : 'Check backend'}
             </button>
             <button
               onClick={handleTestKey}

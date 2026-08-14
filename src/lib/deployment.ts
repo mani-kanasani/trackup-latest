@@ -55,3 +55,40 @@ export const stripContract = <T extends Record<string, unknown>>(payload: T): T 
   delete copy.__contract;
   return copy;
 };
+
+/**
+ * Which revision of each function is actually live.
+ *
+ * Every response is stamped, including errors, so this deliberately sends an
+ * EMPTY body: each function rejects it with a 400 that still carries its
+ * version. No model call, no tokens, and it works even when generation is the
+ * thing that is broken.
+ */
+export interface FunctionVersion {
+  name: string;
+  version: number | null;
+  reachable: boolean;
+}
+
+export const probeFunctionVersions = async (
+  invoke: (name: string) => Promise<{ data: unknown; error: unknown }>,
+): Promise<FunctionVersion[]> => {
+  const names = ['generate-proposal', 'generate-outreach', 'list-models'];
+  const out: FunctionVersion[] = [];
+  for (const name of names) {
+    try {
+      const { data, error } = await invoke(name);
+      // A rejected call still answers the question, as long as the body came
+      // back. supabase-js puts a non-2xx body behind error.context.
+      let payload: unknown = data;
+      if (!payload && error && typeof error === 'object' && 'context' in error) {
+        const ctx = (error as { context?: Response }).context;
+        if (ctx?.json) payload = await ctx.json().catch(() => null);
+      }
+      out.push({ name, version: contractOf(payload), reachable: payload !== null && payload !== undefined });
+    } catch {
+      out.push({ name, version: null, reachable: false });
+    }
+  }
+  return out;
+};

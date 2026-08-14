@@ -70,11 +70,23 @@ const CONTRACT = 2;
 
 type Provider = 'gemini' | 'openai' | 'anthropic';
 
+/**
+ * Every response carries the deployed version, including errors.
+ *
+ * Stamping only the success path meant a function could only be identified by
+ * generating successfully, which is exactly what you cannot do when something is
+ * wrong. Now a 400 answers "which revision is live?" just as well as a 200, so
+ * the app can check all three functions without spending a single token.
+ */
 const json = (body: unknown, status = 200, cors: Record<string, string> = {}) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...cors, 'Content-Type': 'application/json' },
-  });
+  new Response(
+    JSON.stringify(
+      body && typeof body === 'object' && !Array.isArray(body)
+        ? { ...(body as Record<string, unknown>), __contract: CONTRACT }
+        : body,
+    ),
+    { status, headers: { ...cors, 'Content-Type': 'application/json' } },
+  );
 
 async function openaiModels(apiKey: string): Promise<string[]> {
   const res = await fetch('https://api.openai.com/v1/models', {
