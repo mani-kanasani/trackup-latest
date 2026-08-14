@@ -291,7 +291,9 @@ export const Settings: React.FC = () => {
                   }
                 >
                   <span className="font-mono">{v.name}</span>{' '}
-                  {v.gatewayRejected
+                  {v.isTemplate
+                    ? 'still contains Supabase’s default hello-world template. Ember’s code was never saved into it: pasting is not enough, you have to press Deploy.'
+                    : v.gatewayRejected
                     ? 'was blocked before it ran. Turn OFF "Verify JWT" in that function’s settings.'
                     : !v.reachable
                       ? 'did not respond. It may not be deployed.'

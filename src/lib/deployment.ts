@@ -69,6 +69,15 @@ export interface FunctionVersion {
   version: number | null;
   reachable: boolean;
   /**
+   * The function still holds Supabase's `supabase functions new` scaffold.
+   *
+   * It exists, in the right project, and contains none of our code. This is what
+   * happens when a function is created in the dashboard and the pasted source is
+   * never actually deployed, and from the outside it is indistinguishable from
+   * "running old code" unless you look at what came back.
+   */
+  isTemplate: boolean;
+  /**
    * The platform rejected the call before the function ran.
    *
    * Distinguishable because our own 401 carries a version stamp and the
@@ -98,16 +107,18 @@ export const probeFunctionVersions = async (
         }
       }
       const version = contractOf(payload);
+      const asText = payload && typeof payload === 'object' ? JSON.stringify(payload) : String(payload ?? '');
       out.push({
         name,
         version,
+        isTemplate: version === null && /"message"\s*:\s*"Hello/.test(asText),
         reachable: payload !== null && payload !== undefined,
         // Our own 401 is stamped. An unstamped one came from the platform,
         // which means the request never reached the function at all.
         gatewayRejected: status === 401 && version === null,
       });
     } catch {
-      out.push({ name, version: null, reachable: false, gatewayRejected: false });
+      out.push({ name, version: null, isTemplate: false, reachable: false, gatewayRejected: false });
     }
   }
   return out;

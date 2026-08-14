@@ -27,6 +27,7 @@ const url = rawUrl.trim().replace(/\/+$/, '');
 console.log(`\nProject: ${url}\nThis build expects version ${EXPECTED}.\n`);
 
 let stale = 0;
+let templated = 0;
 
 for (const name of FUNCTIONS) {
   const label = name.padEnd(19);
@@ -64,6 +65,13 @@ for (const name of FUNCTIONS) {
       // means the request never reached the function.
       console.log(`${label} was blocked before it ran (401, no version). Turn OFF "Verify JWT" on it.`);
       stale++;
+    } else if (/"message"\s*:\s*"Hello/.test(text)) {
+      // Supabase's scaffold. The function exists, in the right project, and
+      // still runs the starter index.ts, which is what you get when the code is
+      // pasted into a NEW file beside index.ts rather than replacing it.
+      console.log(`${label} is still Supabase's HELLO WORLD TEMPLATE.`);
+      templated++;
+      stale++;
     } else {
       console.log(`${label} answered ${res.status} with no version. It predates the version marker.`);
       console.log(`${' '.repeat(20)}It replied: ${text.slice(0, 120)}`);
@@ -75,7 +83,26 @@ for (const name of FUNCTIONS) {
   }
 }
 
-if (stale) {
+if (templated) {
+  const ref = url.replace(/^https?:\/\//, '').split('.')[0];
+  console.log(
+    [
+      '',
+      `${templated} of ${FUNCTIONS.length} still run Supabase's default template.`,
+      '',
+      'The entrypoint is index.ts. Adding a new file beside it changes nothing, because',
+      'index.ts is still what runs. You have to REPLACE everything inside index.ts and',
+      'then press Deploy.',
+      '',
+      'Or skip the editor entirely and deploy from your local files:',
+      '',
+      '  npx supabase login',
+      `  npx supabase link --project-ref ${ref}`,
+      '  npm run setup',
+      '',
+    ].join('\n'),
+  );
+} else if (stale) {
   console.log(
     `\n${stale} of ${FUNCTIONS.length} need attention.\n` +
       'If you are certain you deployed, check that the project above is the SAME project you deployed to.\n' +

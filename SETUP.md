@@ -77,7 +77,16 @@ When it prints **✓ Backend ready!**, this step is done.
    create **three** functions — `generate-proposal`, `generate-outreach`, and `list-models`. For each:
    change the dashboard's random name (e.g. `swift-handler`) to the exact name, paste
    the contents of the matching `supabase/functions/<name>/index.ts`, **turn OFF
-   "Verify JWT"**, and click **Deploy**. (New Supabase projects reject the gateway JWT
+   "Verify JWT"**, and click **Deploy**.
+
+   > **Replace the contents of `index.ts`.** The editor opens with a hello-world
+   > `index.ts` already in it. Select all of it and paste over it. Adding a NEW file
+   > beside `index.ts` does nothing, because `index.ts` is the entrypoint: the template
+   > keeps answering and every call returns `{"message":"Hello undefined!"}`, which from
+   > the outside looks like broken or out-of-date code rather than a file that was never
+   > replaced.
+
+   (New Supabase projects reject the gateway JWT
    check, so it must be off or every call returns 401.)
 
 </details>

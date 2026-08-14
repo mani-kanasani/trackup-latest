@@ -251,8 +251,20 @@ export const SupabaseSetup: React.FC = () => {
                   <span className="font-semibold">three</span> functions. For each one: set the name <span className="font-semibold">exactly</span>{' '}
                   as shown (the dashboard suggests a random name like{' '}
                   <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">swift-handler</code>, change it),
-                  paste the code, and click <span className="font-semibold">Deploy</span>.
+                  then click <span className="font-semibold">Deploy</span>.
                 </p>
+                {/* The failure this exists to prevent, found the hard way. The
+                    editor opens on a hello-world index.ts. Pasting into a NEW
+                    file leaves index.ts as the entrypoint, so the template keeps
+                    answering and every call returns {"message":"Hello undefined!"}
+                    while looking, from the outside, like broken or stale code. */}
+                <div className="text-sm bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-xl p-3">
+                  <span className="font-semibold">Replace the contents of <code className="font-mono">index.ts</code>.</span>{' '}
+                  The editor opens with a hello-world <code className="font-mono">index.ts</code> already in it. Select all
+                  of that and paste over it. Do <span className="font-semibold">not</span> add a new file beside it:{' '}
+                  <code className="font-mono">index.ts</code> is the entrypoint, so a new file is never run and the
+                  template keeps answering every request.
+                </div>
                 {/* This was worded as "Recommended", which was wrong. With it on,
                     Supabase rejects the call before the function runs, so the
                     failure looks like a broken function rather than a setting. */}
