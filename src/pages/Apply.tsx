@@ -435,11 +435,22 @@ export const Apply: React.FC = () => {
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Cover Letter */}
             <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
-                  <FileText className="w-3 h-3 text-upwork-600 dark:text-upwork-400" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
+                    <FileText className="w-3 h-3 text-upwork-600 dark:text-upwork-400" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Cover Letter</h3>
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Cover Letter</h3>
+                {/* The one thing on this screen that gets pasted somewhere else,
+                    and it was the only panel with no way to copy it. */}
+                <button
+                  onClick={() => copyToClipboard(generatedData.cover_letter)}
+                  className="flex items-center px-3 py-2 text-sm font-medium text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 bg-upwork-50 dark:bg-upwork-900/20 rounded-lg transition-colors"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy
+                </button>
               </div>
               <textarea
                 value={generatedData.cover_letter}

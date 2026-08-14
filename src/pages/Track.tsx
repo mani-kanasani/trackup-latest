@@ -327,11 +327,20 @@ export const Track: React.FC = () => {
             <div className="p-8 space-y-8">
               {/* Cover Letter */}
               <div>
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-8 h-8 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-upwork-600 dark:text-upwork-400" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
+                      <FileText className="w-4 h-4 text-upwork-600 dark:text-upwork-400" />
+                    </div>
+                    <h4 className="font-bold text-lg text-gray-900 dark:text-white">Cover Letter</h4>
                   </div>
-                  <h4 className="font-bold text-lg text-gray-900 dark:text-white">Cover Letter</h4>
+                  <button
+                    onClick={() => copyToClipboard(selectedMaterial.cover_letter)}
+                    className="flex items-center px-3 py-2 text-sm font-medium text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 bg-upwork-50 dark:bg-upwork-900/20 rounded-lg transition-colors"
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy
+                  </button>
                 </div>
                 <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-xl max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600">
                   <p className="text-base text-gray-900 dark:text-white whitespace-pre-wrap leading-relaxed">
@@ -407,11 +416,20 @@ export const Track: React.FC = () => {
                   under a heading reads as a generation that failed. */}
               {selectedMaterial.mermaid_code?.trim() && (
                 <div>
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-8 h-8 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
-                      <BarChart3 className="w-4 h-4 text-upwork-600 dark:text-upwork-400" />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
+                        <BarChart3 className="w-4 h-4 text-upwork-600 dark:text-upwork-400" />
+                      </div>
+                      <h4 className="font-bold text-lg text-gray-900 dark:text-white">Workflow diagram source</h4>
                     </div>
-                    <h4 className="font-bold text-lg text-gray-900 dark:text-white">Workflow diagram source</h4>
+                    <button
+                      onClick={() => copyToClipboard(selectedMaterial.mermaid_code)}
+                      className="flex items-center px-3 py-2 text-sm font-medium text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 bg-upwork-50 dark:bg-upwork-900/20 rounded-lg transition-colors"
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy
+                    </button>
                   </div>
                   <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-xl max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600">
                     <pre className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap font-mono leading-relaxed">
