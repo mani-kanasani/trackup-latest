@@ -1,0 +1,109 @@
+// The single seam between the app and the method engine.
+//
+// Callers ask for a channel and get back the system prompt to send and the pack
+// to validate the response against. Everything the doctrine needs — the user's
+// background, the right proof for this specific reader, their own prompt edits —
+// is gathered here so no page has to remember the composition order.
+
+import { getPack } from './packs';
+import { composeSystemPrompt } from './compose';
+import { validateOutput, type GeneratedOutput } from './validate';
+import type { ChannelId, MethodPack, ValidationResult } from './types';
+import { loadUserContext, contextToPrompt } from '../userContext';
+import { loadPrompts } from '../prompts';
+import { selectBest, rankCases } from '../proof/select';
+import { renderProof } from '../proof/render';
+import type { Audience, CaseStudy, ScoredCase, Target } from '../proof/types';
+
+/** Maps a channel to the user's editable prompt slot. */
+const PROMPT_SLOT: Record<ChannelId, 'proposal' | 'outreach'> = {
+  upwork: 'proposal',
+  linkedin: 'outreach',
+  coldEmail: 'outreach',
+};
+
+/**
+ * Every channel Ember generates for writes to one person already in the
+ * conversation, so client names are permitted. Public-facing surfaces (posts,
+ * lead magnets) would pass 'public' and get the anonymised form.
+ */
+const CHANNEL_AUDIENCE: Record<ChannelId, Audience> = {
+  upwork: 'direct',
+  linkedin: 'direct',
+  coldEmail: 'direct',
+};
+
+export interface BuildOptions {
+  /** The user's vault. Omitted means fall back to the free-text wins field. */
+  cases?: CaseStudy[];
+  /** What we know about the reader, used to match a case study to their world. */
+  target?: Target;
+  /** Override the channel's default audience. */
+  audience?: Audience;
+  /** Force a specific case study, e.g. because the user overrode the pick. */
+  forceCaseId?: string;
+}
+
+export interface ChannelPrompt {
+  pack: MethodPack;
+  systemPrompt: string;
+  /** True when the user has supplied nothing about themselves. */
+  contextEmpty: boolean;
+  /** True when no proof is available, which several laws depend on. */
+  proofEmpty: boolean;
+  /** The case study chosen, so the UI can show and explain the pick. */
+  chosen: ScoredCase | null;
+  /** Runners-up, so the user can swap without leaving the page. */
+  alternatives: ScoredCase[];
+}
+
+export const buildChannelPrompt = (
+  channel: ChannelId,
+  options: BuildOptions = {},
+): ChannelPrompt => {
+  const pack = getPack(channel);
+  const ctx = loadUserContext();
+  const audience = options.audience ?? CHANNEL_AUDIENCE[channel];
+  const target = options.target ?? {};
+
+  let chosen: ScoredCase | null = null;
+  let alternatives: ScoredCase[] = [];
+  let proof = '';
+
+  const vault = options.cases ?? [];
+  if (vault.length) {
+    const ranked = rankCases(vault, target);
+    chosen = options.forceCaseId
+      ? ranked.find((r) => r.caseStudy.id === options.forceCaseId) ?? null
+      : selectBest(vault, target, audience);
+    alternatives = ranked.filter((r) => r.caseStudy.id !== chosen?.caseStudy.id).slice(0, 4);
+    if (chosen) proof = renderProof([chosen.caseStudy], audience);
+  }
+
+  // Fall back to the legacy free-text fields when the vault is empty, so an
+  // existing user who has not migrated their wins still gets grounded output.
+  if (!proof) {
+    const legacy = [ctx.wins?.trim(), ctx.testimonials?.trim()].filter(Boolean).join('\n\n');
+    if (legacy) {
+      proof = `${legacy}\n\nUse at most one of these per message. Never state a number that does not appear above.`;
+    }
+  }
+
+  const about = ctx.about?.trim() ? `About the sender:\n${ctx.about.trim()}` : '';
+  const userPrompt = loadPrompts()[PROMPT_SLOT[channel]].trim();
+
+  return {
+    pack,
+    systemPrompt: composeSystemPrompt({ pack, context: about, proof, userPrompt }),
+    contextEmpty: !contextToPrompt(ctx).trim(),
+    proofEmpty: !proof,
+    chosen,
+    alternatives,
+  };
+};
+
+/** Check a generator's response against the same doctrine that produced it. */
+export const checkAgainstMethod = (channel: ChannelId, output: GeneratedOutput): ValidationResult =>
+  validateOutput(getPack(channel), output);
+
+export type { ValidationResult };

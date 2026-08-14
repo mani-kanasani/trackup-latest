@@ -36,6 +36,11 @@ I built exactly that for a recruiting firm last year. It cut their list review f
 
 I have attached a two minute walkthrough of how I would approach yours. If the direction is wrong, tell me and I will redo it.`,
   `Understood, and thanks for saying so rather than leaving it. If the timing changes after busy season, I am here. Either way, good luck with the year.`,
+  `This is my first project on this platform, so instead of a client list here is the thing itself: I mapped your intake flow and built the routing step. Two minutes, no commitment.
+
+Your brief says leads sit unanswered overnight. The routing rule below fires the moment a form lands, so the 11pm ones get an answer before you open your laptop.
+
+Tell me where the logic is wrong and I will redo it.`,
 ];
 
 let compiled = 0;
@@ -70,10 +75,35 @@ for (const pack of packs) {
 }
 
 console.log(`compiled ${compiled} patterns, ${failures} compile failures`);
-console.log(`false positives on good copy: ${falsePositives.length}`);
-for (const f of falsePositives) {
-  console.log(`  [${f.level}] ${f.pack}/${f.id} matched ${JSON.stringify(f.matched)} — ${f.label}`);
+const hardFP = falsePositives.filter((f) => f.level === 'hard');
+const softFP = falsePositives.filter((f) => f.level === 'soft');
+console.log(`HARD false positives on good copy: ${hardFP.length}  (must be 0)`);
+for (const f of hardFP) {
+  console.log(`  BLOCKS GOOD COPY  ${f.pack}/${f.id} matched ${JSON.stringify(f.matched)} — ${f.label}`);
 }
+console.log(`soft nudges on good copy: ${softFP.length}  (expected; these ask a human to check something a regex cannot)`);
+for (const f of softFP) {
+  console.log(`  nudge  ${f.pack}/${f.id} matched ${JSON.stringify(f.matched)}`);
+}
+
+
+// A pattern containing a raw control character compiles happily and then never
+// matches anything. That is worse than a broken pattern, because every check
+// passes. `` written into a JSON string becomes a real backspace (0x08), so
+// this is an easy mistake to make and an invisible one to live with.
+let controlChars = 0;
+for (const pack of packs) {
+  for (const b of pack.banned) {
+    const bad = [...b.patternSource].filter((c) => c.charCodeAt(0) < 32);
+    if (bad.length) {
+      controlChars++;
+      console.log(
+        `CONTROL CHAR  ${pack.id}/${b.id}  contains ${bad.map((c) => '0x' + c.charCodeAt(0).toString(16)).join(', ')} — did you mean \b?`,
+      );
+    }
+  }
+}
+console.log(`patterns containing raw control characters: ${controlChars}`);
 
 // Sanity check the other direction: patterns must actually catch bad copy.
 const BAD = `Hi there — I hope this email finds you well. Just checking in! I'm not pitching, but our company provides innovative solutions that leverage synergies. Book a demo here: https://example.com 🚀`;
@@ -89,4 +119,4 @@ for (const pack of packs) {
 }
 console.log(`patterns firing on a deliberately bad sample: ${caught}`);
 
-process.exit(failures > 0 || falsePositives.some((f) => f.level === 'hard') ? 1 : 0);
+process.exit(failures > 0 || controlChars > 0 || falsePositives.some((f) => f.level === 'hard') ? 1 : 0);

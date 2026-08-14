@@ -11,7 +11,7 @@ import { UNIVERSAL_BANNED } from '../validate';
 
 export const upworkPack: MethodPack = {
   id: "upwork",
-  version: "1.1.0",
+  version: "1.2.0",
   label: "an Upwork / freelance-marketplace proposal — cover letter plus its supporting assets",
 
   thesis: "A marketplace proposal is a comparison document, not a pitch. The buyer has already decided the work is worth doing and has already decided a contractor is the answer — they posted the job and are now reading a stack of applications to settle one question: who do I pick? That single fact deletes most of what outreach copy normally does. There is no problem to establish, no category to explain, no permission to earn, no interruption to apologise for. What remains is differentiation under a truncated preview, against applicants who all claim the same competence, for a reader who is shortlisting rather than deliberating. This is also not a cold channel: asking for a call here is correct, where in cold email the same ask would be premature. And it is not free — every application costs connects and a hard fifteen-minute ceiling, so which jobs you decline is as much a part of the method as what you write. It also does not end when you press send: the buyer who replies is the most valuable reader you will get in this channel, and the method has to keep working after they do. What this channel is not: a place to introduce yourself, to educate the buyer about why the category matters, to advertise your tools, or to compete on price.",
@@ -199,6 +199,16 @@ export const upworkPack: MethodPack = {
       "selfReported": false
     },
   },
+  {
+    id: "no-track-record-ladder",
+    rule: "With no client results at all, name the gap plainly once and then spend the space demonstrating instead: solve or build a visible piece of their actual problem inside the proposal. Never claim a result you do not have, and never disqualify yourself.",
+    because: "On a marketplace the buyer is already choosing between applicants who can all assert experience, so a specific demonstration of their problem outperforms an unverifiable track record. The source names zero reviews directly and reframes the absence as honesty, and its application video spends a full beat solving part of the client's flow live.",
+    source: {
+      "label": "30-day playbook, marketplace track, cold start",
+      "claim": "Zero reviews are named directly and reframed as honesty. The application video's third beat is to solve or build part of their flow live, hyper-specifically, for a minute or two. The zero-reviews paragraph exists solely to solve a cold-start problem and is deleted once reviews exist. Self-disqualifying lines are explicitly listed under Do not.",
+      "selfReported": false
+    },
+  },
   ],
 
   banned: [
@@ -206,8 +216,8 @@ export const upworkPack: MethodPack = {
   {
     id: "selfDisqualification",
     label: "Self-disqualifying admission",
-    pattern: new RegExp("\\bI(?:['’]m|\\s+am)\\s+(?:new\\s+to|just\\s+starting|a\\s+beginner|still\\s+learning)\\b|\\bI(?:['’]m|\\s+am)\\s+relatively\\s+new\\b|\\bI\\s+just\\s+started\\s+(?:out\\b|freelancing\\b|on\\s+(?:Upwork|this\\s+platform)\\b|my\\s+(?:business|agency|career)\\b)|\\bI\\s+have\\s+(?:no|very\\s+little|not\\s+much)\\s+experience\\b|\\bI\\s+(?:don['’]t|do\\s+not)\\s+have\\s+(?:much|any)\\s+experience\\b|\\bthis\\s+is\\s+my\\s+first\\s+(?:project|job|gig|client)\\b", "i"),
-    because: "Volunteering inexperience hands a shortlisting reader a reason to move on; the source names it directly on the do-not list. The bare phrase 'I just started' is bound to an object so a recency claim about the work — 'I just started a near-identical build last week' — is not caught by a rule aimed at 'I just started out'.",
+    pattern: new RegExp("\\bI(?:['’]m|\\s+am)\\s+(?:new\\s+to|just\\s+starting|a\\s+beginner|still\\s+learning)\\b|\\bI(?:['’]m|\\s+am)\\s+relatively\\s+new\\b|\\bI\\s+just\\s+started\\s+(?:out\\b|freelancing\\b|on\\s+(?:Upwork|this\\s+platform)\\b|my\\s+(?:business|agency|career)\\b)|\\bI\\s+have\\s+(?:no|very\\s+little|not\\s+much)\\s+experience\\b|\\bI\\s+(?:don['’]t|do\\s+not)\\s+have\\s+(?:much|any)\\s+experience\\b", "i"),
+    because: "Volunteering inexperience hands a shortlisting reader a reason to move on; the source names it directly on the do-not list. Naming a cold start factually is permitted and is handled separately as a soft check, because the source's own instruction is to name zero reviews directly and reframe the absence as honesty.",
     level: "hard",
   },
   {
@@ -271,6 +281,13 @@ export const upworkPack: MethodPack = {
     label: "Generic salutation in the visible preview",
     pattern: new RegExp("^\\s*(?:Dear\\s+(?:Sir|Madam|Sirs?|Sir\\s+or\\s+Madam|Hiring\\s+(?:Manager|Team)|Client|Team|Employer)|Respected\\s+(?:Sir|Madam)|To\\s+whom\\s+it\\s+may\\s+concern|Greetings\\s+of\\s+the\\s+day)", "im"),
     because: "It spends part of the short visible preview proving only that you do not know who they are. A salutation is a style choice rather than a defect, so this warns; the coverage is what matters, since the mass-application variants are the recognisable ones.",
+    level: "soft",
+  },
+  {
+    id: "coldStartWithoutSubstitute",
+    label: "Cold start named without a substitute",
+    pattern: new RegExp("\\bthis\\s+is\\s+my\\s+first\\s+(?:project|job|gig|client)\\b", "i"),
+    because: "Naming a cold start is allowed and can read as honesty, but only when the next move substitutes for the missing track record. Check that a concrete demonstration of their problem follows immediately; if it does not, cut the admission.",
     level: "soft",
   },
   ],
