@@ -4,7 +4,7 @@ import {
   ThumbsUp, ThumbsDown, Lightbulb,
 } from 'lucide-react';
 import { useLeads, type MutationResult } from './useLeads';
-import { Lead, LeadStatus, OutreachFlow, migrateFlow } from './types';
+import { Lead, LeadStatus, OutreachFlow, migrateFlow, readSentSteps } from './types';
 import { getPack } from '../../lib/method/packs';
 import { supabase } from '../../lib/supabase';
 import { loadAIConfig } from '../../lib/aiConfig';
@@ -156,7 +156,9 @@ const LeadDetail: React.FC<{
   const [proofUsed, setProofUsed] = useState<string | null>(null);
   const [noProof, setNoProof] = useState(false);
   const flow = useMemo(() => migrateFlow(lead.outreach ?? localFlow), [lead.outreach, localFlow]);
-  const sentSteps = lead.sent_steps ?? [];
+  // Read through the tolerant reader: rows written before steps carried times
+  // hold a bare array, and their tick marks must not vanish.
+  const sentSteps = useMemo(() => readSentSteps(lead.sent_steps), [lead.sent_steps]);
 
   // --- the screen, which runs before anything is written ---------------------
   //
@@ -196,7 +198,11 @@ const LeadDetail: React.FC<{
   };
 
   const toggleSent = async (key: string) => {
-    const next = sentSteps.includes(key) ? sentSteps.filter((k) => k !== key) : [...sentSteps, key];
+    const next = { ...sentSteps };
+    // Stamped at the moment the user ticks it. This is the only record of WHEN
+    // anything went out, and the whole cadence is derived from it.
+    if (key in next) delete next[key];
+    else next[key] = new Date().toISOString();
     const res = await onUpdate(lead.id, { sent_steps: next });
     if (res.error) setError(`Could not save that change: ${res.error}`);
   };
@@ -303,7 +309,7 @@ const LeadDetail: React.FC<{
         <div className="flex items-center gap-3">
           {track && (
             <label className="flex items-center text-xs text-gray-500 cursor-pointer select-none">
-              <input type="checkbox" className="mr-1.5 accent-linkedin-600" checked={sentSteps.includes(id)} onChange={() => toggleSent(id)} />
+              <input type="checkbox" className="mr-1.5 accent-linkedin-600" checked={id in sentSteps} onChange={() => toggleSent(id)} />
               Sent
             </label>
           )}

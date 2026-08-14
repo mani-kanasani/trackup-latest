@@ -12,6 +12,7 @@ import { renderQualification, summarise } from '../src/lib/qualify/render';
 import { PILLARS, PILLAR_THRESHOLD, RUNGS, TIERS } from '../src/lib/qualify/doctrine';
 import { UNIVERSAL_BANNED } from '../src/lib/method/validate';
 import type { QualificationInput } from '../src/lib/qualify/types';
+import { readSentSteps, firstSentAt } from '../src/apps/linkedin/types';
 
 let failures = 0;
 const check = (name: string, cond: boolean, detail = '') => {
@@ -199,6 +200,24 @@ for (const b of UNIVERSAL_BANNED.filter((p) => p.level === 'hard')) {
     offender ? `"${offender.match(b.pattern)?.[0]}" in "${offender.slice(0, 60)}…"` : '',
   );
 }
+
+// --- lead storage shapes ----------------------------------------------------
+//
+// A legacy `sent_steps` array must keep rendering as ticked. Losing those marks
+// would silently tell an operator they had not sent messages they had sent.
+
+const legacyArray = readSentSteps(['connectionNote', 'openerDm']);
+check('a legacy array reads as sent', 'connectionNote' in legacyArray && 'openerDm' in legacyArray);
+check('legacy entries admit the time is unknown', legacyArray.connectionNote === '');
+check('a legacy array has no first-sent time', firstSentAt(legacyArray) === null);
+
+const stamped = readSentSteps({ connectionNote: '2026-08-14T09:00:00.000Z', openerDm: '2026-08-15T09:00:00.000Z' });
+check('timestamps survive the read', stamped.openerDm === '2026-08-15T09:00:00.000Z');
+check('first sent is the earliest', firstSentAt(stamped) === '2026-08-14T09:00:00.000Z');
+
+const mixed = readSentSteps({ a: '', b: '2026-08-14T09:00:00.000Z' });
+check('a mixed row ignores the unknown time', firstSentAt(mixed) === '2026-08-14T09:00:00.000Z');
+check('null and junk read as nothing sent', Object.keys(readSentSteps(null)).length === 0 && Object.keys(readSentSteps(42)).length === 0);
 
 console.log(failures ? `\n${failures} FAILURES` : '\nall checks passed');
 process.exit(failures ? 1 : 0);
