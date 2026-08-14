@@ -79,6 +79,27 @@ const CONTRACT = 2;
 
 type Provider = 'gemini' | 'openai' | 'anthropic';
 
+/**
+ * The sentence out of a provider error, rather than the whole JSON body.
+ *
+ * Providers bury the useful line at different depths, and dumping the raw body
+ * at the user means they read
+ *   {"type":"error","error":{"type":"invalid_request_error","message":"..."}}
+ * when the only part that matters is the message.
+ */
+async function readProviderError(res: Response): Promise<string> {
+  const raw = await res.text();
+  try {
+    const body = JSON.parse(raw);
+    const msg = body?.error?.message ?? body?.message ?? body?.error;
+    if (typeof msg === 'string' && msg) return `${res.status}: ${msg}`;
+  } catch {
+    // Not JSON. The raw body still beats the status alone.
+  }
+  return `${res.status}: ${raw.slice(0, 200) || 'no detail returned'}`;
+}
+
+
 interface LeadInput {
   name?: string;
   job_title?: string;
@@ -168,15 +189,18 @@ async function callOpenAICompatible(
   prompt: string,
   useJsonMode: boolean,
 ): Promise<string> {
-  const send = (jsonMode: boolean) => {
+  // Two things a newer model can reject: response_format, and temperature at
+  // all. Both are dropped on retry rather than assumed unsupported, so an older
+  // model keeps the settings and a newer one still works.
+  const send = (jsonMode: boolean, withTemperature: boolean) => {
     const body: Record<string, unknown> = {
       model,
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: prompt },
       ],
-      temperature: 0.8,
     };
+    if (withTemperature) body.temperature = 0.8;
     if (jsonMode) body.response_format = { type: 'json_object' };
     return fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
@@ -185,10 +209,11 @@ async function callOpenAICompatible(
     });
   };
 
-  // Ask for strict JSON; if the model rejects response_format, retry without it.
-  let res = await send(useJsonMode);
-  if (!res.ok && useJsonMode) res = await send(false);
-  if (!res.ok) throw new Error(`Provider request failed (${res.status}): ${await res.text()}`);
+  // Ask for strict JSON, then peel off the optional parameters one at a time.
+  let res = await send(useJsonMode, true);
+  if (!res.ok && useJsonMode) res = await send(false, true);
+  if (!res.ok) res = await send(false, false);
+  if (!res.ok) throw new Error(`Provider request failed. ${await readProviderError(res)}`);
   const data = await res.json();
   return data?.choices?.[0]?.message?.content ?? '';
 }
@@ -207,7 +232,11 @@ async function callAnthropic(apiKey: string, model: string, system: string, prom
       // structure. At 2000 the response was truncated mid-object and every step
       // came back empty, which the app then reported as twelve things to fix.
       max_tokens: 8000,
-      temperature: 0.8,
+      // No temperature. The Claude 5 models reject it outright:
+      //   400 invalid_request_error: `temperature` is deprecated for this model.
+      // Sending it is a hard failure on current models and buys almost nothing on
+      // older ones, since the prefill and the pack constrain the output far more
+      // than a sampling parameter does.
       system: system,
       // Prefilling the assistant turn with an opening brace is Anthropic's
       // equivalent of OpenAI's json_object mode: the reply continues from "{",
@@ -220,7 +249,7 @@ async function callAnthropic(apiKey: string, model: string, system: string, prom
       ],
     }),
   });
-  if (!res.ok) throw new Error(`Anthropic request failed (${res.status}): ${await res.text()}`);
+  if (!res.ok) throw new Error(`Anthropic request failed. ${await readProviderError(res)}`);
   const data = await res.json();
   // Put back the brace the prefill consumed.
   return `{${data?.content?.[0]?.text ?? ''}`;
