@@ -27,6 +27,7 @@ import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
 import { AppBar } from '../../components/Layout/AppBar';
 import { qualify, isBlocked } from '../../lib/qualify/score';
+import { isStaleDeployment, stripContract, outOfDateMessage } from '../../lib/deployment';
 import type { QualificationInput } from '../../lib/qualify/types';
 import type { ValidationResult } from '../../lib/method/types';
 
@@ -231,10 +232,12 @@ const ProspectDetail: React.FC<{
         throw new Error(message);
       }
       if (!data) throw new Error('No response from the generator.');
+      if (isStaleDeployment(data)) throw new Error(outOfDateMessage(data));
+      const seqData = stripContract(data as unknown as Record<string, string>) as unknown as EmailSequence;
 
-      const partial = (data as Record<string, string>).__partial;
+      const partial = (seqData as Record<string, string>).__partial;
       if (partial) {
-        delete (data as Record<string, string>).__partial;
+        delete (seqData as Record<string, string>).__partial;
         setError(`${partial} You can regenerate, or write the missing ones yourself.`);
       }
 
@@ -248,18 +251,18 @@ const ProspectDetail: React.FC<{
         tier: verdict.tier,
         rung: verdict.rung,
         verdict: verdict.verdict,
-        violation_ids: checkAgainstMethod('coldEmail', data as Record<string, string>)
+        violation_ids: checkAgainstMethod('coldEmail', seqData as Record<string, string>)
           .violations.map((v) => v.patternId ?? v.lawId ?? 'empty-step'),
       };
 
       const saved = await onUpdate(prospect.id, {
-        sequence: data,
+        sequence: seqData,
         generation_meta: [...(prospect.generation_meta ?? []), meta],
         // Recorded at generation, so a reply rate can be split by it later.
         variant: prospect.variant ?? `${method.pack.version}`,
       });
       if (saved.error) {
-        setLocalSeq(data);
+        setLocalSeq(seqData);
         throw new Error(`Generated, but saving failed: ${saved.error}. The sequence is below, copy anything you need.`);
       }
     } catch (err) {

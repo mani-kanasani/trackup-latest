@@ -9,7 +9,7 @@ import { buildChannelPrompt, checkAgainstMethod } from '../lib/method/forChannel
 import { useCaseStudies } from '../lib/proof';
 import { QualifyPanel } from '../components/Qualify/QualifyPanel';
 import { qualify, isBlocked } from '../lib/qualify/score';
-import { isStaleDeployment, OUT_OF_DATE } from '../lib/deployment';
+import { isStaleDeployment, outOfDateMessage } from '../lib/deployment';
 import type { QualificationInput } from '../lib/qualify/types';
 
 /**
@@ -128,7 +128,7 @@ export const Apply: React.FC = () => {
       // that were never returned, which renders as an empty textarea and looks
       // like the app simply did nothing.
       if (isStaleDeployment(data)) {
-        throw new Error(OUT_OF_DATE);
+        throw new Error(outOfDateMessage(data));
       }
       if (!data.cover_letter?.trim()) {
         throw new Error(

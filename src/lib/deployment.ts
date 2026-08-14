@@ -10,9 +10,36 @@
 
 export const EXPECTED_CONTRACT = 2;
 
+/** What version a response claims to be, or null when it carries no marker. */
+export const contractOf = (payload: unknown): number | null => {
+  if (!payload || typeof payload !== 'object') return null;
+  const raw = (payload as Record<string, unknown>).__contract;
+  const version = typeof raw === 'string' ? Number(raw) : typeof raw === 'number' ? raw : NaN;
+  return Number.isFinite(version) ? version : null;
+};
+
+/**
+ * Names the version it actually got.
+ *
+ * "Your functions are out of date" with no number is only marginally better
+ * than a blank result: it cannot distinguish a redeploy that silently did not
+ * take from one that landed on a different project, and the user has no way to
+ * tell which without asking.
+ */
+export const outOfDateMessage = (payload: unknown): string => {
+  const got = contractOf(payload);
+  const seen = got === null
+    ? 'The function that answered carries no version at all, so it is running code from before this check existed.'
+    : `The function that answered reports version ${got}; this app needs ${EXPECTED_CONTRACT}.`;
+  return (
+    `${seen} Redeploy generate-outreach and generate-proposal from THIS build. ` +
+    'Settings shows the exact source to paste, and Test this key will tell you which version is live once you have. ' +
+    'If you copied the source from a deployed site, make sure that site has rebuilt from the latest commit first.'
+  );
+};
+
 export const OUT_OF_DATE =
-  'Your Supabase edge functions are an older version than this app expects, which is why the result came ' +
-  'back empty. Redeploy all three functions (Settings has the source, or run `npm run setup`), then try again.';
+  'Your Supabase edge functions are an older version than this app expects. Redeploy all three, then try again.';
 
 /** True when the response came from a deployment older than this build. */
 export const isStaleDeployment = (payload: unknown): boolean => {

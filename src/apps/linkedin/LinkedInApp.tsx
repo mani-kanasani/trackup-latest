@@ -17,7 +17,7 @@ import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
 import { AppBar } from '../../components/Layout/AppBar';
 import { ImportLeadsModal } from './ImportLeadsModal';
 import { qualify, isBlocked } from '../../lib/qualify/score';
-import { isStaleDeployment, stripContract, OUT_OF_DATE } from '../../lib/deployment';
+import { isStaleDeployment, stripContract, outOfDateMessage } from '../../lib/deployment';
 import type { QualificationInput } from '../../lib/qualify/types';
 import type { ValidationResult } from '../../lib/method/types';
 
@@ -392,7 +392,7 @@ const LeadDetail: React.FC<{
       if (!data) throw new Error('No response from the generator.');
       // An old deployment answers with content this build cannot use. Say that,
       // rather than letting it land as an empty flow the user has to interpret.
-      if (isStaleDeployment(data)) throw new Error(OUT_OF_DATE);
+      if (isStaleDeployment(data)) throw new Error(outOfDateMessage(data));
       const flowData = stripContract(data as unknown as Record<string, string>) as unknown as OutreachFlow;
 
       // The function marks a partial response rather than letting the missing

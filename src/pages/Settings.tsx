@@ -7,6 +7,7 @@ import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
 import { loadUserContext, saveUserContext, UserContext } from '../lib/userContext';
 import { CustomPrompts, DEFAULT_PROMPTS, PROMPT_META, PromptKey, loadPrompts, savePrompts } from '../lib/prompts';
 import { supabase } from '../lib/supabase';
+import { contractOf, EXPECTED_CONTRACT } from '../lib/deployment';
 import { ModelSelect } from '../components/UI/ModelSelect';
 import { CaseStudyVault } from '../components/Settings/CaseStudyVault';
 
@@ -105,7 +106,7 @@ export const Settings: React.FC = () => {
     setTesting(true);
     setTestResult(null);
     try {
-      const { data, error } = await supabase.functions.invoke<{ ok: boolean; model: string; reply: string }>(
+      const { data, error } = await supabase.functions.invoke<{ ok: boolean; model: string; reply: string; __contract?: number }>(
         'list-models',
         { body: { action: 'test', provider, apiKey: apiKey.trim(), model: (model || meta.defaultModel).trim() } },
       );
@@ -115,9 +116,20 @@ export const Settings: React.FC = () => {
         if (ctx?.json) { const b = await ctx.json().catch(() => null); if (b?.error) message = b.error; }
         throw new Error(message);
       }
+      // The same call reports which revision of the backend answered. That is
+      // the fastest way to tell a redeploy that landed from one that silently
+      // did not, and it costs nothing extra because the round trip already
+      // happened.
+      const live = contractOf(data);
+      const backend =
+        live === null
+          ? ' Your edge functions are running code older than this app expects, so generation will fail until you redeploy all three from this build.'
+          : live < EXPECTED_CONTRACT
+            ? ` Your edge functions report version ${live}; this app needs ${EXPECTED_CONTRACT}. Redeploy all three.`
+            : ` Backend version ${live}, up to date.`;
       setTestResult({
-        ok: true,
-        message: `${data?.model} answered "${data?.reply || 'ok'}". Your key works and this model can generate.`,
+        ok: live !== null && live >= EXPECTED_CONTRACT,
+        message: `${data?.model} answered "${data?.reply || 'ok'}". Your key works and this model can generate.${backend}`,
       });
     } catch (e) {
       setTestResult({ ok: false, message: e instanceof Error ? e.message : 'The test failed.' });
