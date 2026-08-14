@@ -68,6 +68,14 @@ export interface FunctionVersion {
   name: string;
   version: number | null;
   reachable: boolean;
+  /**
+   * The platform rejected the call before the function ran.
+   *
+   * Distinguishable because our own 401 carries a version stamp and the
+   * gateway's does not. That difference is the only way to tell "Verify JWT is
+   * still on" from "this function is old", and they need opposite fixes.
+   */
+  gatewayRejected: boolean;
 }
 
 export const probeFunctionVersions = async (
@@ -81,13 +89,25 @@ export const probeFunctionVersions = async (
       // A rejected call still answers the question, as long as the body came
       // back. supabase-js puts a non-2xx body behind error.context.
       let payload: unknown = data;
+      let status = 200;
       if (!payload && error && typeof error === 'object' && 'context' in error) {
         const ctx = (error as { context?: Response }).context;
-        if (ctx?.json) payload = await ctx.json().catch(() => null);
+        if (ctx) {
+          status = ctx.status ?? 0;
+          if (ctx.json) payload = await ctx.json().catch(() => null);
+        }
       }
-      out.push({ name, version: contractOf(payload), reachable: payload !== null && payload !== undefined });
+      const version = contractOf(payload);
+      out.push({
+        name,
+        version,
+        reachable: payload !== null && payload !== undefined,
+        // Our own 401 is stamped. An unstamped one came from the platform,
+        // which means the request never reached the function at all.
+        gatewayRejected: status === 401 && version === null,
+      });
     } catch {
-      out.push({ name, version: null, reachable: false });
+      out.push({ name, version: null, reachable: false, gatewayRejected: false });
     }
   }
   return out;

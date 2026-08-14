@@ -253,10 +253,18 @@ export const SupabaseSetup: React.FC = () => {
                   <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">swift-handler</code>, change it),
                   paste the code, and click <span className="font-semibold">Deploy</span>.
                 </p>
-                <div className="text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 rounded-xl p-3">
-                  <span className="font-semibold">Recommended:</span> after deploying each function, open its settings and
-                  turn <span className="font-semibold">OFF “Verify JWT”</span>. These functions use your own AI key (safe to
-                  expose), and on newer Supabase projects this avoids the JWT gateway rejecting the request.
+                {/* This was worded as "Recommended", which was wrong. With it on,
+                    Supabase rejects the call before the function runs, so the
+                    failure looks like a broken function rather than a setting. */}
+                <div className="text-sm bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-xl p-3">
+                  <span className="font-semibold">Required, on all three:</span> after deploying each function, open its
+                  settings and turn <span className="font-semibold">OFF “Verify JWT”</span>. Leave it on and Supabase
+                  rejects the request before your function ever runs, so generation fails with an error that looks like
+                  the function is broken. Nothing is left unprotected: each function checks the signed-in user itself.
+                  <span className="block mt-1">
+                    Settings has a <span className="font-semibold">Check backend</span> button that tells you if this is
+                    still on.
+                  </span>
                 </div>
                 <p className="text-sm font-mono text-gray-700 dark:text-gray-300 pt-1">generate-proposal</p>
                 <CopyBlock id="fn" text={functionSource} label="Copy generate-proposal" />

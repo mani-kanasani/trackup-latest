@@ -275,13 +275,15 @@ export const Settings: React.FC = () => {
                   }
                 >
                   <span className="font-mono">{v.name}</span>{' '}
-                  {!v.reachable
-                    ? 'did not respond. It may not be deployed.'
-                    : v.version === null
-                      ? 'is running code older than this check. Redeploy it.'
-                      : v.version >= EXPECTED_CONTRACT
-                        ? `is version ${v.version}, up to date.`
-                        : `is version ${v.version}. Redeploy it.`}
+                  {v.gatewayRejected
+                    ? 'was blocked before it ran. Turn OFF "Verify JWT" in that function’s settings.'
+                    : !v.reachable
+                      ? 'did not respond. It may not be deployed.'
+                      : v.version === null
+                        ? 'is running code older than this check. Redeploy it.'
+                        : v.version >= EXPECTED_CONTRACT
+                          ? `is version ${v.version}, up to date.`
+                          : `is version ${v.version}. Redeploy it.`}
                 </p>
               ))}
             </div>

@@ -219,7 +219,7 @@ const checkFunctions = async (config: SupabaseConfig): Promise<Check> => {
       label: 'Edge functions',
       status: 'fail',
       detail: `${missing.length} of ${REQUIRED_FUNCTIONS.length} not deployed: ${missing.join(', ')}.`,
-      fix: 'Deploy them with `npm run setup`, or paste each source below into a new function in the dashboard. Every one must have Verify JWT turned OFF, the app calls them with the publishable key and they check the signed-in user themselves.',
+      fix: 'Deploy them with `npm run setup`, which handles this for you, or paste each source below into a new function in the dashboard. If you paste them by hand you MUST then turn OFF "Verify JWT" in every function, or Supabase rejects each call before the function runs.',
     };
   }
   return {
