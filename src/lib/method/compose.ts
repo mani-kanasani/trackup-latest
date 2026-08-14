@@ -92,11 +92,17 @@ export const composeSystemPrompt = ({
     );
   }
 
+  // The last instruction the model reads, and it used to invite a written
+  // revision pass: "re-read your output, fix it, then reply". Against seventeen
+  // thousand characters of prose doctrine, one downstream sentence asking for
+  // JSON does not win, and a preamble breaks the parse. The self-check is worth
+  // keeping, so it stays and is made silent.
   sections.push(
-    `## Before you answer\nRe-read your output once against the laws and the banned list. Fix anything that violates them, then reply.` +
+    `## Before you answer\nRe-read your output once against the laws and the banned list and fix anything that violates them.` +
       (qualification?.trim()
-        ? ' Then check every specific claim about the reader against the ceiling above, and delete any that exceeds it.'
-        : ''),
+        ? ' Check every specific claim about the reader against the ceiling above, and delete any that exceeds it.'
+        : '') +
+      ` Do all of that silently. Your reply must contain the finished artifact and nothing else: no preamble, no commentary, no explanation, no apology.`,
   );
 
   return sections.join('\n\n');

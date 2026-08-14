@@ -209,12 +209,21 @@ async function callAnthropic(apiKey: string, model: string, system: string, prom
       max_tokens: 8000,
       temperature: 0.8,
       system: system,
-      messages: [{ role: 'user', content: `${prompt}\n\nRespond with ONLY the raw JSON object.` }],
+      // Prefilling the assistant turn with an opening brace is Anthropic's
+      // equivalent of OpenAI's json_object mode: the reply continues from "{",
+      // so there is no position in which a preamble can be written. Without it,
+      // a 17,000-character system prompt of prose doctrine reliably produces a
+      // sentence or two before the JSON, and the parse fails.
+      messages: [
+        { role: 'user', content: `${prompt}\n\nRespond with ONLY the raw JSON object.` },
+        { role: 'assistant', content: '{' },
+      ],
     }),
   });
   if (!res.ok) throw new Error(`Anthropic request failed (${res.status}): ${await res.text()}`);
   const data = await res.json();
-  return data?.content?.[0]?.text ?? '';
+  // Put back the brace the prefill consumed.
+  return `{${data?.content?.[0]?.text ?? ''}`;
 }
 
 function parseFlow(raw: string, steps: OutputStep[]): Record<string, string> {
@@ -228,7 +237,11 @@ function parseFlow(raw: string, steps: OutputStep[]): Record<string, string> {
   try {
     parsed = JSON.parse(text);
   } catch {
-    throw new Error('The AI returned a response that was not valid JSON. Try again.');
+    throw new Error(
+      // The raw reply, trimmed. Without it "not valid JSON" is unactionable:
+      // a refusal, a preamble and a truncation all look identical from outside.
+      `The model did not return usable JSON. It replied with: ${text.slice(0, 300)}${text.length > 300 ? '…' : ''}`,
+    );
   }
   const out: Record<string, string> = {};
   let filled = 0;

@@ -200,11 +200,15 @@ async function callAnthropic(
       max_tokens: 8000,
       temperature: 0.7,
       system: system,
+      // See the note in generate-outreach: prefilling the assistant turn with an
+      // opening brace is Anthropic's json_object mode, and without it a long
+      // prose system prompt reliably produces a preamble that breaks the parse.
       messages: [
         {
           role: 'user',
-          content: `${userPrompt}\n\nRespond with ONLY the raw JSON object — no markdown fences.`,
+          content: `${userPrompt}\n\nRespond with ONLY the raw JSON object, no markdown fences.`,
         },
+        { role: 'assistant', content: '{' },
       ],
     }),
   });
@@ -214,7 +218,8 @@ async function callAnthropic(
   }
 
   const data = await res.json();
-  return data?.content?.[0]?.text ?? '';
+  // Put back the brace the prefill consumed.
+  return `{${data?.content?.[0]?.text ?? ''}`;
 }
 
 async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 'apiKey'>> & {
@@ -272,7 +277,11 @@ function parseProposal(raw: string, steps: OutputStep[], letterKeys: string[]): 
   try {
     parsed = JSON.parse(text);
   } catch {
-    throw new Error('The AI returned a response that was not valid JSON. Try again.');
+    throw new Error(
+      // The raw reply, trimmed. Without it "not valid JSON" is unactionable:
+      // a refusal, a preamble and a truncation all look identical from outside.
+      `The model did not return usable JSON. It replied with: ${text.slice(0, 300)}${text.length > 300 ? '…' : ''}`,
+    );
   }
 
   const sections = Array.isArray(parsed.proposal_sections)
