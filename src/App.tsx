@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon } from 'lucide-react';
+
+import { EmberMark } from './components/UI/EmberMark';
 import { AppBar } from './components/Layout/AppBar';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -18,7 +19,7 @@ import { AppId } from './apps/registry';
 // Shared platform settings (AI provider, database connection, theme).
 const PlatformSettings: React.FC<{ onExit: () => void }> = ({ onExit }) => (
   <div className="min-h-screen app-canvas accent-ember">
-    <AppBar title="Settings" icon={SettingsIcon} gradient="from-ember-400 to-ember-600" onExit={onExit} />
+    <AppBar title="Settings" mark={<EmberMark size="sm" className="!w-8 !h-8" />} onExit={onExit} />
     <Settings />
   </div>
 );

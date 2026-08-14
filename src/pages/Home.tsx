@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Flame, ArrowRight, LogOut, Settings as SettingsIcon, Moon, Sun, BarChart3 } from 'lucide-react';
+import { ArrowRight, LogOut, Settings as SettingsIcon, Moon, Sun, BarChart3 } from 'lucide-react';
+import { EmberMark } from '../components/UI/EmberMark';
 import { APPS, AppId } from '../apps/registry';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -44,9 +45,7 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
       <header className="sticky top-0 z-30 border-b border-black/5 dark:border-white/10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="glow-accent w-9 h-9 rounded-xl bg-gradient-to-br from-ember-400 to-ember-600 flex items-center justify-center shadow-lg shadow-ember-500/30">
-              <Flame className="w-5 h-5 text-white" />
-            </div>
+            <EmberMark size="sm" glow className="!w-9 !h-9 drop-shadow-md" />
             <span className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">Ember</span>
           </div>
           <div className="flex items-center space-x-2">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Moon, Sun, Sparkles, Key, ExternalLink, Check, Database, RefreshCw, Loader2, UserRound, Wand2, Zap, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { AnimatedLogo } from '../components/UI/AnimatedLogo';
+import { EmberMark } from '../components/UI/EmberMark';
 import { AIProvider, PROVIDER_META, loadAIConfig, saveAIConfig } from '../lib/aiConfig';
 import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
 import { loadUserContext, saveUserContext, UserContext } from '../lib/userContext';
@@ -445,7 +445,7 @@ export const Settings: React.FC = () => {
       <div className="card-modern p-8 animate-rise">
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-8 h-8 bg-upwork-500/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
-            <AnimatedLogo size="sm" />
+            <EmberMark size="sm" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
             How It Works

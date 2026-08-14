@@ -299,6 +299,18 @@
   .animate-rise { animation: rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 }
 
+/* The core breathes, so the mark feels lit rather than printed. Opacity and
+   transform only, so it never touches layout. */
+.ember-core {
+  transform-origin: 32px 42px;
+  animation: emberBreathe 2.8s ease-in-out infinite;
+}
+
+@keyframes emberBreathe {
+  0%, 100% { opacity: 0.92; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.07); }
+}
+
 @keyframes rise {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }

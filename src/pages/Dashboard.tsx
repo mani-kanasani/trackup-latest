@@ -6,7 +6,7 @@ import { DateFilter } from '../components/UI/DateFilter';
 import { StatusBadge } from '../components/UI/StatusBadge';
 import { useData } from '../contexts/DataContext';
 import { DateFilter as DateFilterType, DateRange } from '../types';
-import { AnimatedLogo } from '../components/UI/AnimatedLogo';
+import { EmberMark } from '../components/UI/EmberMark';
 
 export const Dashboard: React.FC = () => {
   const { materials, getKPIData, getDateRange } = useData();
@@ -102,7 +102,7 @@ export const Dashboard: React.FC = () => {
         <div className="card-modern p-8 animate-rise">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
             <div className="w-8 h-8 bg-upwork-500/10 rounded-lg flex items-center justify-center mr-3 backdrop-blur-sm">
-              <AnimatedLogo size="sm" />
+              <EmberMark size="sm" />
             </div>
             Pipeline Overview
           </h2>

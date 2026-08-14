@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Flame } from 'lucide-react';
+import { EmberMark } from '../UI/EmberMark';
 
 export const AuthForm: React.FC = () => {
   const { login, signup } = useAuth();
@@ -45,12 +45,10 @@ export const AuthForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ember-50 via-orange-50 to-ember-100 dark:from-gray-900 dark:to-gray-950 flex items-center justify-center px-4">
+    <div className="min-h-screen app-canvas accent-ember flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8 animate-fade-in">
         <div className="text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-ember-400 to-ember-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-ember-500/30">
-            <Flame className="w-10 h-10 text-white" />
-          </div>
+          <EmberMark size="xl" glow animate className="mx-auto mb-6 drop-shadow-xl" />
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
             {mode === 'login' ? 'Sign in to Ember' : 'Create your account'}
           </h2>

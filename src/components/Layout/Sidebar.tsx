@@ -1,6 +1,6 @@
 import React from 'react';
 import { BarChart3, FileText, CheckSquare, Settings, Menu, X } from 'lucide-react';
-import { AnimatedLogo } from '../UI/AnimatedLogo';
+import { EmberMark } from '../UI/EmberMark';
 
 interface SidebarProps {
   currentPage: string;
@@ -44,7 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange, isO
           <div className="p-6 border-b border-gray-700">
             <div className="flex items-center space-x-3">
               <div className="bg-upwork-500/10 rounded-xl p-2 backdrop-blur-sm">
-                <AnimatedLogo size="md" />
+                <EmberMark size="md" />
               </div>
               <h1 className="text-2xl font-bold text-white">TrackUp</h1>
             </div>

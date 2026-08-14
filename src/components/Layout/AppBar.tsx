@@ -15,13 +15,22 @@ import { ArrowLeft, type LucideIcon } from 'lucide-react';
 
 export const AppBar: React.FC<{
   title: string;
-  icon: LucideIcon;
-  /** Tailwind gradient classes for the mark, e.g. `from-upwork-400 to-upwork-600`. */
-  gradient: string;
+  /** The app's own icon. Ignored when `mark` is supplied. */
+  icon?: LucideIcon;
+  /** Tailwind gradient classes for the chip, e.g. `from-upwork-400 to-upwork-600`. */
+  gradient?: string;
+  /**
+   * An explicit mark, for platform screens.
+   *
+   * Settings and the dashboard belong to Ember rather than to a channel, so they
+   * carry the Ember flame. An app carries its own icon, which is what tells you
+   * at a glance which of the three you are inside.
+   */
+  mark?: React.ReactNode;
   onExit: () => void;
   /** Buttons for the right-hand side. */
   children?: React.ReactNode;
-}> = ({ title, icon: Icon, gradient, onExit, children }) => (
+}> = ({ title, icon: Icon, gradient, mark, onExit, children }) => (
   <header className="sticky top-0 z-30 flex-shrink-0 border-b border-black/5 dark:border-white/10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl">
     <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4 min-w-0">
@@ -33,9 +42,11 @@ export const AppBar: React.FC<{
         </button>
         <div className="flex items-center gap-2.5 min-w-0">
           {/* The mark carries the colour, so the bar itself does not have to. */}
-          <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
-            <Icon className="w-4 h-4 text-white" />
-          </div>
+          {mark ?? (
+            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
+              {Icon && <Icon className="w-4 h-4 text-white" />}
+            </div>
+          )}
           <span className="font-bold text-gray-900 dark:text-white truncate">{title}</span>
         </div>
       </div>
