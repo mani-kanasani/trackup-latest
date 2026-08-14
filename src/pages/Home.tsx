@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Flame, ArrowRight, LogOut, Settings as SettingsIcon, Moon, Sun } from 'lucide-react';
+import { Flame, ArrowRight, LogOut, Settings as SettingsIcon, Moon, Sun, BarChart3 } from 'lucide-react';
 import { APPS, AppId } from '../apps/registry';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -9,9 +9,10 @@ import { supabase } from '../lib/supabase';
 interface HomeProps {
   onOpenApp: (id: AppId) => void;
   onOpenSettings: () => void;
+  onOpenAnalytics: () => void;
 }
 
-export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings }) => {
+export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAnalytics }) => {
   const { user, logout } = useAuth();
   const { materials } = useData();
   const { theme, toggleTheme } = useTheme();
@@ -51,6 +52,9 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings }) => {
           <div className="flex items-center space-x-2">
             <button onClick={toggleTheme} className="p-2 rounded-lg text-gray-500 hover:text-ember-600 hover:bg-ember-50 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle theme">
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </button>
+            <button onClick={onOpenAnalytics} className="p-2 rounded-lg text-gray-500 hover:text-ember-600 hover:bg-ember-50 dark:hover:bg-gray-800 transition-colors" aria-label="Your numbers" title="Your numbers">
+              <BarChart3 className="w-5 h-5" />
             </button>
             <button onClick={onOpenSettings} className="p-2 rounded-lg text-gray-500 hover:text-ember-600 hover:bg-ember-50 dark:hover:bg-gray-800 transition-colors" aria-label="Settings">
               <SettingsIcon className="w-5 h-5" />

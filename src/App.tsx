@@ -8,6 +8,7 @@ import { SupabaseSetup } from './components/Setup/SupabaseSetup';
 import { isSupabaseConfigured } from './lib/supabaseConfig';
 import { Home } from './pages/Home';
 import { Settings } from './pages/Settings';
+import { Analytics } from './pages/Analytics';
 import { TrackUpApp } from './apps/trackup/TrackUpApp';
 import { LinkedInApp } from './apps/linkedin/LinkedInApp';
 import { ColdEmailApp } from './apps/coldemail/ColdEmailApp';
@@ -29,6 +30,7 @@ const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
   const [activeApp, setActiveApp] = useState<AppId | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   if (loading) {
     return (
@@ -45,6 +47,9 @@ const AppContent: React.FC = () => {
   if (showSettings) {
     return <PlatformSettings onExit={() => setShowSettings(false)} />;
   }
+  if (showAnalytics) {
+    return <Analytics onExit={() => setShowAnalytics(false)} />;
+  }
   if (activeApp === 'trackup') {
     return <TrackUpApp onExit={() => setActiveApp(null)} />;
   }
@@ -55,7 +60,13 @@ const AppContent: React.FC = () => {
   if (activeApp === 'coldemail') {
     return <ColdEmailApp onExit={() => setActiveApp(null)} />;
   }
-  return <Home onOpenApp={setActiveApp} onOpenSettings={() => setShowSettings(true)} />;
+  return (
+    <Home
+      onOpenApp={setActiveApp}
+      onOpenSettings={() => setShowSettings(true)}
+      onOpenAnalytics={() => setShowAnalytics(true)}
+    />
+  );
 };
 
 function App() {
