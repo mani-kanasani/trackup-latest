@@ -93,12 +93,23 @@ const SECTIONS_SCHEMA = {
  * tool_use blocks appearing later.
  */
 const textFrom = (data: { content?: { type: string; text?: string }[]; stop_reason?: string }): string => {
+  // Truncation first, and before checking for text at all.
+  //
+  // Thinking tokens count toward max_tokens on Claude 5, and this app sends a
+  // 19,000-character doctrine prompt, so the model can spend the entire budget
+  // reasoning and emit no text whatsoever. When it does emit some, the JSON is
+  // cut mid-object and the parser reports "not usable JSON", which points the
+  // user at the model when the real cause is a cap set too low.
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error(
+      'The model ran out of output budget before finishing. This is a cap, not a bad response: ' +
+        'the request asks for a lot and thinking tokens count toward the same budget. Try again, ' +
+        'or pick a faster model in Settings.',
+    );
+  }
   const block = (data.content ?? []).find((b) => b.type === 'text');
   if (!block?.text) {
-    throw new Error(
-      `The model returned no text. stop_reason: ${data.stop_reason ?? 'unknown'}.` +
-        (data.stop_reason === 'max_tokens' ? ' Raise max_tokens.' : ''),
-    );
+    throw new Error(`The model returned no text. stop_reason: ${data.stop_reason ?? 'unknown'}.`);
   }
   return block.text;
 };
@@ -287,7 +298,7 @@ async function callAnthropic(
       model,
       // Twelve pack steps plus sections, a diagram and a script. See the note
       // in generate-outreach: too low here truncates the object silently.
-      max_tokens: 8000,
+      max_tokens: 64000,
       // No temperature. The Claude 5 models reject it outright:
       //   400 invalid_request_error: `temperature` is deprecated for this model.
       // Sending it is a hard failure on current models and buys almost nothing on

@@ -110,12 +110,23 @@ const jsonSchemaFor = (keys: string[]) => ({
  * tool_use blocks appearing later.
  */
 const textFrom = (data: { content?: { type: string; text?: string }[]; stop_reason?: string }): string => {
+  // Truncation first, and before checking for text at all.
+  //
+  // Thinking tokens count toward max_tokens on Claude 5, and this app sends a
+  // 19,000-character doctrine prompt, so the model can spend the entire budget
+  // reasoning and emit no text whatsoever. When it does emit some, the JSON is
+  // cut mid-object and the parser reports "not usable JSON", which points the
+  // user at the model when the real cause is a cap set too low.
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error(
+      'The model ran out of output budget before finishing. This is a cap, not a bad response: ' +
+        'the request asks for a lot and thinking tokens count toward the same budget. Try again, ' +
+        'or pick a faster model in Settings.',
+    );
+  }
   const block = (data.content ?? []).find((b) => b.type === 'text');
   if (!block?.text) {
-    throw new Error(
-      `The model returned no text. stop_reason: ${data.stop_reason ?? 'unknown'}.` +
-        (data.stop_reason === 'max_tokens' ? ' Raise max_tokens.' : ''),
-    );
+    throw new Error(`The model returned no text. stop_reason: ${data.stop_reason ?? 'unknown'}.`);
   }
   return block.text;
 };
@@ -276,10 +287,10 @@ async function callAnthropic(apiKey: string, model: string, system: string, prom
     },
     body: JSON.stringify({
       model,
-      // Twelve steps, several with a 400-700 character ceiling, plus JSON
-      // structure. At 2000 the response was truncated mid-object and every step
-      // came back empty, which the app then reported as twelve things to fix.
-      max_tokens: 8000,
+      // Generous on purpose. max_tokens is a CEILING, not a spend, so headroom is
+      // free. Thinking tokens count toward it on Claude 5 and the doctrine prompt is
+      // 19,000 characters, so at 8000 the model spent the entire budget reasoning.
+      max_tokens: 64000,
       // No temperature. The Claude 5 models reject it outright:
       //   400 invalid_request_error: `temperature` is deprecated for this model.
       // Sending it is a hard failure on current models and buys almost nothing on
