@@ -10,9 +10,30 @@
   Every item cites file:line. Verify before building — the audit was thorough,
   not infallible, and two of its claims were already wrong on inspection.
 
-  Items already done since the audit ran:
-    1.1  the wins blob overriding curated proof            -> commit 319a52a
-    S5.2 the tier telling the model how many touches        -> commit 319a52a
+  PHASE 1 IS COMPLETE. Every item below in section 1, plus two of the three
+  one-liners in section 5, shipped on 14 August:
+
+    1.1  wins blob overriding curated proof          319a52a
+    1.2  failed vault read rendered as empty vault   27fd2c2
+    1.3  the fake Mermaid preview                    27fd2c2
+    1.4  setup proving the backend is installed      b3849fd, e571892
+    1.5  unauthenticated edge functions              27fd2c2
+    1.6  proposal storage path                       0da831d
+    1.7  sent_steps carrying timestamps              ddea1d4
+    1.8  the authorship cluster                      2f91406
+    S5.1 'lost' counted as a response                2f91406
+    S5.2 tier telling the model how many touches     319a52a
+    S5.3 "worth automating" wording                  2f91406
+
+  Not done from section 1: orphaned-object cleanup (deleteJob, and removing the
+  prior file in CaseStudyVault.save) — the path is stored now, so this is
+  unblocked but unbuilt. Not done from section 5: the Home readiness checklist.
+
+  NEXT UP is section 2, in its stated order, starting with 2.1 the proof
+  self-interview.
+
+  Every item cites file:line. Verify before building — the audit was thorough,
+  not infallible, and two of its claims were wrong on inspection.
 -->
 
 # Ember build plan
