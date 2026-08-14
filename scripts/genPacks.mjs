@@ -44,7 +44,7 @@ const renderBanned = (b) => `  {
 
 const renderStep = (s) => `  {
     key: ${q(s.key)},
-    label: ${q(s.label)},
+    label: ${q(s.label)},${s.group === undefined ? '' : `\n    group: ${q(s.group)},`}
     purpose: ${q(s.purpose)},${s.day === undefined ? '' : `\n    day: ${s.day},`}${
   s.maxChars === undefined ? '' : `\n    maxChars: ${s.maxChars},`
 }

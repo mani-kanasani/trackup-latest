@@ -4,7 +4,8 @@ import {
   ThumbsUp, ThumbsDown, Lightbulb,
 } from 'lucide-react';
 import { useLeads, type MutationResult } from './useLeads';
-import { Lead, LeadStatus, OutreachFlow } from './types';
+import { Lead, LeadStatus, OutreachFlow, migrateFlow } from './types';
+import { getPack } from '../../lib/method/packs';
 import { supabase } from '../../lib/supabase';
 import { loadAIConfig } from '../../lib/aiConfig';
 import { loadUserContext, contextToPrompt } from '../../lib/userContext';
@@ -20,13 +21,28 @@ const STATUS_LABELS: Record<LeadStatus, string> = {
 };
 const STATUS_ORDER: LeadStatus[] = ['new', 'requested', 'connected', 'replied', 'meeting'];
 
-const SEQUENCE: { key: keyof OutreachFlow; title: string }[] = [
-  { key: 'connection_note', title: '1 · Connection request' },
-  { key: 'opener', title: '2 · Opener (after they accept)' },
-  { key: 'value', title: '3 · Value' },
-  { key: 'cta', title: '4 · Call to action' },
-  { key: 'bump', title: '5 · Bump (no reply)' },
-];
+/**
+ * What gets rendered comes from the pack, grouped by its own `group` field.
+ *
+ * The previous hardcoded five-step list is what let the app and the doctrine
+ * drift apart: the pack described twelve steps and the UI showed five, so seven
+ * of them had nowhere to appear even once generated.
+ */
+const LINKEDIN_PACK = getPack('linkedin');
+
+const GROUPED_STEPS = LINKEDIN_PACK.structure.reduce<{ group: string; steps: typeof LINKEDIN_PACK.structure }[]>(
+  (acc, step) => {
+    const group = step.group ?? 'The sequence';
+    const bucket = acc.find((g) => g.group === group);
+    if (bucket) bucket.steps.push(step);
+    else acc.push({ group, steps: [step] });
+    return acc;
+  },
+  [],
+);
+
+/** Only the outbound steps are things you send on a schedule and tick off. */
+const TRACKED_GROUPS = new Set(['The sequence']);
 
 export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const { leads, loading, addLead, updateLead, deleteLead } = useLeads();
@@ -136,9 +152,10 @@ const LeadDetail: React.FC<{
   // Holds a generation that could not be persisted, so it survives on screen.
   const [localFlow, setLocalFlow] = useState<OutreachFlow | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [softNotes, setSoftNotes] = useState<string[]>([]);
   const [proofUsed, setProofUsed] = useState<string | null>(null);
   const [noProof, setNoProof] = useState(false);
-  const flow = lead.outreach ?? localFlow;
+  const flow = useMemo(() => migrateFlow(lead.outreach ?? localFlow), [lead.outreach, localFlow]);
   const sentSteps = lead.sent_steps ?? [];
 
   // --- the screen, which runs before anything is written ---------------------
@@ -168,10 +185,10 @@ const LeadDetail: React.FC<{
     return () => clearTimeout(timer);
   }, [qual, lead.id]);
 
-  const changeQual = (next: QualificationInput) => {
+  const changeQual = (update: (prev: QualificationInput) => QualificationInput) => {
     dirty.current = true;
     setOverride(false);
-    setQual(next);
+    setQual((prev) => update(prev ?? {}));
   };
 
   const copy = async (text: string, id: string) => {
@@ -192,6 +209,7 @@ const LeadDetail: React.FC<{
     }
     setError('');
     setWarnings([]);
+    setSoftNotes([]);
     setProofUsed(null);
     setNoProof(false);
     setGenerating(true);
@@ -220,6 +238,10 @@ const LeadDetail: React.FC<{
           },
           context: contextToPrompt(loadUserContext()),
           systemPrompt: method.systemPrompt,
+          // The output contract, straight from the pack. Without this the
+          // generator invents its own shape and the validator grades keys
+          // nobody asked for.
+          steps: method.steps,
           provider: cfg.provider, model: cfg.model, apiKey: cfg.apiKey,
         },
       });
@@ -233,12 +255,14 @@ const LeadDetail: React.FC<{
 
       // Grade the output against the same doctrine that wrote it. Generation is
       // probabilistic; the laws are not.
-      const check: ValidationResult = checkAgainstMethod('linkedin', data as unknown as Record<string, string>);
-      setWarnings(
-        check.violations
-          .filter((v) => v.patternId || v.level === 'hard')
-          .map((v) => `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`),
-      );
+      const check: ValidationResult = checkAgainstMethod('linkedin', data as Record<string, string>);
+      const describe = (v: ValidationResult['violations'][number]) =>
+        `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`;
+      // Hard violations block a send. Soft ones are judgement calls the doctrine
+      // flags but will not decide for you, so they are shown apart rather than
+      // padding out the list of things that must be fixed.
+      setWarnings(check.violations.filter((v) => v.level === 'hard').map(describe));
+      setSoftNotes(check.violations.filter((v) => v.level === 'soft').map(describe));
       // The generation is already paid for. If the save fails, say so and keep
       // the flow on screen so it can be copied out rather than regenerated.
       const saved = await onUpdate(lead.id, { outreach: data });
@@ -366,6 +390,19 @@ const LeadDetail: React.FC<{
             </ul>
           </div>
         )}
+
+        {softNotes.length > 0 && (
+          <div className="mt-3 text-sm bg-gray-50 dark:bg-gray-800/60 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+            <p className="font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              {softNotes.length} thing{softNotes.length === 1 ? '' : 's'} worth a look, your call
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text-gray-600 dark:text-gray-400">
+              {softNotes.map((w, i) => (
+                <li key={i}>{w}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       <QualifyPanel value={qual} onChange={changeQual} error={qualError} />
@@ -378,11 +415,28 @@ const LeadDetail: React.FC<{
               <span><span className="font-semibold">Strategy:</span> {flow.blank_strategy}</span>
             </div>
           )}
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide pt-1">Sequence</h3>
-          {SEQUENCE.map((s) => <Step key={s.key} id={s.key} title={s.title} text={flow[s.key]} />)}
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide pt-1">If they reply</h3>
-          <Step id="reply_positive" title="Positive / interested" text={flow.reply_positive} tone="positive" track={false} />
-          <Step id="reply_objection" title="Objection / not now" text={flow.reply_objection} tone="objection" track={false} />
+          {GROUPED_STEPS.map(({ group, steps }) => {
+            // A group with nothing in it is hidden rather than shown empty: an
+            // older saved flow legitimately has no chase branch, and a column of
+            // blank cards reads as a broken generation.
+            const present = steps.filter((s) => flow[s.key]?.trim());
+            if (!present.length) return null;
+            return (
+              <React.Fragment key={group}>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide pt-1">{group}</h3>
+                {present.map((s, i) => (
+                  <Step
+                    key={s.key}
+                    id={s.key}
+                    title={TRACKED_GROUPS.has(group) ? `${i + 1} · ${s.label}` : s.label}
+                    text={flow[s.key]}
+                    track={TRACKED_GROUPS.has(group)}
+                    tone={group === 'If they are interested' ? 'positive' : group === 'Other replies' ? 'objection' : undefined}
+                  />
+                ))}
+              </React.Fragment>
+            );
+          })}
         </>
       ) : (
         <div className="card-modern p-8 text-center text-gray-400">

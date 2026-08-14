@@ -1,14 +1,28 @@
-import React, { useState } from 'react';
-import { Send, ExternalLink, Copy, FileText, Video, BarChart3, Eye, EyeOff, DollarSign, Briefcase } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Send, ExternalLink, Copy, FileText, Video, BarChart3, Eye, EyeOff, DollarSign, Briefcase, AlertTriangle } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { GenerateResponse, JobLevel, CompensationType } from '../types';
 import { supabase } from '../lib/supabase';
 import { loadAIConfig } from '../lib/aiConfig';
 import { loadUserContext, contextToPrompt } from '../lib/userContext';
-import { effectivePrompt } from '../lib/prompts';
+import { buildChannelPrompt, checkAgainstMethod } from '../lib/method/forChannel';
+import { useCaseStudies } from '../lib/proof';
+import { QualifyPanel } from '../components/Qualify/QualifyPanel';
+import { qualify, isBlocked } from '../lib/qualify/score';
+import type { QualificationInput } from '../lib/qualify/types';
+
+/**
+ * The pack steps that compose the message actually pasted into the marketplace.
+ *
+ * The rest of the pack — the supporting assets and the reply branches — are
+ * still generated and still graded, they just are not part of the letter. The
+ * function assembles the letter from these, in this order.
+ */
+const LETTER_KEYS = ['hook', 'diagnosis', 'demonstration', 'proof', 'roiFrame', 'scopeAndPrice', 'close'];
 
 export const Apply: React.FC = () => {
   const { addMaterial } = useData();
+  const { cases } = useCaseStudies();
   const [jobTitle, setJobTitle] = useState('');
   const [jobSummary, setJobSummary] = useState('');
   const [jobLevel, setJobLevel] = useState<JobLevel>('intermediate');
@@ -19,6 +33,16 @@ export const Apply: React.FC = () => {
   const [generatedData, setGeneratedData] = useState<GenerateResponse | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [error, setError] = useState('');
+
+  // --- the method engine and the screen --------------------------------------
+  const [qual, setQual] = useState<QualificationInput | null>(null);
+  const [override, setOverride] = useState(false);
+  const verdict = useMemo(() => qualify(qual ?? {}), [qual]);
+  const declined = isBlocked(verdict);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [softNotes, setSoftNotes] = useState<string[]>([]);
+  const [proofUsed, setProofUsed] = useState<string | null>(null);
+  const [noProof, setNoProof] = useState(false);
 
   const handleGenerate = async () => {
     if (!jobTitle.trim() || !jobSummary.trim()) {
@@ -34,6 +58,21 @@ export const Apply: React.FC = () => {
 
     setLoading(true);
     setError('');
+    setWarnings([]);
+    setSoftNotes([]);
+    setProofUsed(null);
+    setNoProof(false);
+
+    // Match one case study to THIS job rather than sending the whole vault, and
+    // carry the screen's verdict so the copy knows what job it has to do and
+    // what it is allowed to claim about them.
+    const method = buildChannelPrompt('upwork', {
+      cases,
+      target: { notes: `${jobTitle}\n\n${jobSummary}` },
+      qualification: verdict,
+    });
+    setProofUsed(method.chosen ? method.chosen.caseStudy.title : null);
+    setNoProof(method.proofEmpty);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke<GenerateResponse>(
@@ -43,7 +82,10 @@ export const Apply: React.FC = () => {
             job_title: jobTitle,
             job_summary: jobSummary,
             context: contextToPrompt(loadUserContext()),
-            systemPrompt: effectivePrompt('proposal'),
+            systemPrompt: method.systemPrompt,
+            // The output contract, straight from the pack.
+            steps: method.steps,
+            letterKeys: LETTER_KEYS,
             provider: aiConfig.provider,
             model: aiConfig.model,
             apiKey: aiConfig.apiKey,
@@ -64,6 +106,16 @@ export const Apply: React.FC = () => {
 
       if (!data) {
         throw new Error('No response from the proposal generator.');
+      }
+
+      // Grade the response against the same pack that wrote it. Hard violations
+      // are things to fix before sending; soft ones are judgement calls.
+      if (data.steps) {
+        const check = checkAgainstMethod('upwork', data.steps);
+        const describe = (v: (typeof check.violations)[number]) =>
+          `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`;
+        setWarnings(check.violations.filter((v) => v.level === 'hard').map(describe));
+        setSoftNotes(check.violations.filter((v) => v.level === 'soft').map(describe));
       }
 
       setGeneratedData(data);
@@ -112,6 +164,14 @@ export const Apply: React.FC = () => {
     setActualAmount('');
     setGeneratedData(null);
     setShowPreview(false);
+    // The screen was answered about the job just saved. Carrying those answers
+    // onto the next one would silently qualify a job nobody looked at.
+    setQual(null);
+    setOverride(false);
+    setWarnings([]);
+    setSoftNotes([]);
+    setProofUsed(null);
+    setNoProof(false);
 
     // Show success message
     const toast = document.createElement('div');
@@ -257,14 +317,83 @@ export const Apply: React.FC = () => {
 
           <button
             onClick={handleGenerate}
-            disabled={loading || !jobTitle.trim() || !jobSummary.trim()}
+            disabled={loading || !jobTitle.trim() || !jobSummary.trim() || (declined && !override)}
+            title={declined && !override ? 'The qualification screen declined this job.' : undefined}
             className="btn-primary flex items-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100"
           >
             <Send className="w-4 h-4 mr-2" />
             {loading ? 'Generating...' : 'Generate Proposal'}
           </button>
+
+          {/* A declined job is blocked rather than warned about. Applying costs
+              connects and an hour; declining is the cheapest instrument here. */}
+          {declined && (
+            <div className="text-sm bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-200 dark:border-red-800">
+              <p className="font-semibold text-red-800 dark:text-red-300 mb-1 flex items-center">
+                <AlertTriangle className="w-4 h-4 mr-2" />
+                The screen says not to apply for this one
+              </p>
+              {verdict.blockers.map((b, i) => (
+                <p key={i} className="text-red-700 dark:text-red-300 text-xs">{b}</p>
+              ))}
+              {override ? (
+                <p className="text-xs text-red-700 dark:text-red-300 mt-2 font-medium">
+                  Overridden. The generator has been told the screen failed, so it will not imply a fit.
+                </p>
+              ) : (
+                <button
+                  onClick={() => setOverride(true)}
+                  className="mt-2 text-xs font-semibold text-red-700 dark:text-red-300 underline underline-offset-2"
+                >
+                  I disagree — write it anyway
+                </button>
+              )}
+            </div>
+          )}
+
+          {noProof && !proofUsed && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              No case studies yet, so this will be written from your background alone and will claim no
+              results. Add one in Settings and Ember will cite a matched, real outcome.
+            </p>
+          )}
+
+          {proofUsed && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Proof used: <span className="font-medium text-gray-700 dark:text-gray-300">{proofUsed}</span>
+            </p>
+          )}
+
+          {warnings.length > 0 && (
+            <div className="text-sm bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-800">
+              <p className="font-semibold text-amber-800 dark:text-amber-300 mb-1">
+                {warnings.length} thing{warnings.length === 1 ? '' : 's'} to fix before you send
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-amber-700 dark:text-amber-300">
+                {warnings.map((w, i) => <li key={i}>{w}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {softNotes.length > 0 && (
+            <div className="text-sm bg-gray-50 dark:bg-gray-800/60 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+              <p className="font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                {softNotes.length} thing{softNotes.length === 1 ? '' : 's'} worth a look, your call
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-gray-600 dark:text-gray-400">
+                {softNotes.map((w, i) => <li key={i}>{w}</li>)}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* The screen sits between the job and the generation, which is where the
+          decision actually is: whether this job is worth an application at all. */}
+      <QualifyPanel
+        value={qual}
+        onChange={(update) => { setOverride(false); setQual((prev) => update(prev ?? {})); }}
+      />
 
       {/* Outputs Card */}
       {generatedData && (

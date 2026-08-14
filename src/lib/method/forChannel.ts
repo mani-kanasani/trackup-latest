@@ -52,9 +52,37 @@ export interface BuildOptions {
   qualification?: QualificationResult;
 }
 
+/**
+ * One key the model must return, derived from the pack.
+ *
+ * This exists because the output contract has to come from the doctrine rather
+ * than be restated next to it. When a generator hardcodes its own JSON shape,
+ * the shape and the pack drift, and the validator then grades output against
+ * keys that were never requested — reporting every step as empty while the copy
+ * itself is fine. Deriving the contract makes that class of bug impossible.
+ */
+export interface OutputStep {
+  key: string;
+  label: string;
+  purpose: string;
+  maxChars?: number;
+  constraints: string[];
+}
+
+export const outputSteps = (pack: MethodPack): OutputStep[] =>
+  pack.structure.map(({ key, label, purpose, maxChars, constraints }) => ({
+    key,
+    label,
+    purpose,
+    maxChars,
+    constraints,
+  }));
+
 export interface ChannelPrompt {
   pack: MethodPack;
   systemPrompt: string;
+  /** The exact keys the model must return. Send these to the generator. */
+  steps: OutputStep[];
   /** True when the user has supplied nothing about themselves. */
   contextEmpty: boolean;
   /** True when no proof is available, which several laws depend on. */
@@ -106,6 +134,7 @@ export const buildChannelPrompt = (
   return {
     pack,
     systemPrompt: composeSystemPrompt({ pack, qualification, context: about, proof, userPrompt }),
+    steps: outputSteps(pack),
     contextEmpty: !contextToPrompt(ctx).trim(),
     proofEmpty: !proof,
     chosen,

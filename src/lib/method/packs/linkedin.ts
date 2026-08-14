@@ -286,6 +286,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "connectionNote",
     label: "Connection request note",
+    group: "The sequence",
     purpose: "Get the request accepted by someone who can see at a glance that it is not a broadcast.",
     day: 0,
     maxChars: 200,
@@ -301,6 +302,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "openerDm",
     label: "First DM, sent after the request is accepted",
+    group: "The sequence",
     purpose: "Earn a reply and nothing else.",
     day: 1,
     maxChars: 600,
@@ -315,6 +317,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "proofDm",
     label: "Second DM",
+    group: "The sequence",
     purpose: "Give the reader one reason to believe you specifically, matched to their situation.",
     day: 4,
     maxChars: 700,
@@ -331,6 +334,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "closeFileDm",
     label: "Third DM, closing the file",
+    group: "The sequence",
     purpose: "Convert silence into a dated answer or a redirect.",
     day: 9,
     maxChars: 500,
@@ -345,6 +349,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "answerTheQuestion",
     label: "Reply branch, interested: answer what they asked",
+    group: "If they are interested",
     purpose: "Answer the question they actually asked, before anything else.",
     maxChars: 400,
     constraints: [
@@ -357,6 +362,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "positionTheCall",
     label: "Reply branch, interested: position the next conversation",
+    group: "If they are interested",
     purpose: "Make the next conversation sound useful to them rather than like a sales meeting.",
     maxChars: 250,
     constraints: [
@@ -368,6 +374,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "offerTimes",
     label: "Reply branch, interested: propose the times",
+    group: "If they are interested",
     purpose: "Make it possible to book without a second exchange.",
     maxChars: 300,
     constraints: [
@@ -381,6 +388,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "replyNotNow",
     label: "Reply branch: not now",
+    group: "Other replies",
     purpose: "Convert a deferral into a dated return.",
     constraints: [
       "Accept the deferral in one sentence, without argument.",
@@ -392,6 +400,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "replyWrongPerson",
     label: "Reply branch: wrong person",
+    group: "Other replies",
     purpose: "Take the referral and exit clean.",
     maxChars: 300,
     constraints: [
@@ -404,6 +413,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "replyHostile",
     label: "Reply branch: hostile",
+    group: "Other replies",
     purpose: "Remove them and stop.",
     maxChars: 160,
     constraints: [
@@ -415,6 +425,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "chaseStatusCheck",
     label: "Chase after interest that went quiet: status check",
+    group: "If interest goes quiet",
     purpose: "Ask a stalled but genuinely interested person where things stand, in a way that is answerable.",
     maxChars: 300,
     constraints: [
@@ -428,6 +439,7 @@ export const linkedinPack: MethodPack = {
   {
     key: "chaseBookingNudge",
     label: "Chase after interest that went quiet: booking nudge",
+    group: "If interest goes quiet",
     purpose: "Give a still-warm lead the single easiest way to book.",
     maxChars: 160,
     constraints: [

@@ -50,7 +50,14 @@ export interface GenerateRequest {
 }
 
 export interface GenerateResponse {
+  /** The marketplace message, assembled from the pack steps that compose it. */
   cover_letter: string;
+  /**
+   * Every step the pack asked for, keyed by step key, so the response can be
+   * graded against the same doctrine that produced it. Optional because a
+   * response generated before the pack became the contract will not carry it.
+   */
+  steps?: Record<string, string>;
   proposal_url: string;
   mermaid_code: string;
   video_script: string;

@@ -286,6 +286,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "preflight",
     label: "Preflight — does this channel fit this offer",
+    group: "Before you send",
     purpose: "Decide whether cold email is the right channel for this offer at all, before any of it is written.",
     constraints: [
       "Score four factors that trade off rather than gate: an expensive offer or high lifetime value, a large addressable market, B2B, and low competition in the target market",
@@ -300,6 +301,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "openingEmail",
     label: "Email 1 — the pitch",
+    group: "The sequence",
     purpose: "Earn a one-word reply from a stranger by proving the email was written for them and asking for something that costs them nothing.",
     day: 0,
     maxChars: 450,
@@ -319,6 +321,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "angleShift",
     label: "Email 2 — the same offer, a second angle",
+    group: "The sequence",
     purpose: "Restate the same offer from a different angle so it reads as new information rather than a repeat of email one.",
     day: 4,
     maxChars: 350,
@@ -334,6 +337,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "patternInterrupt",
     label: "Email 3 — the redirect",
+    group: "The sequence",
     purpose: "Close the loop in the fewest possible words by asking who else should be handling this, rather than asking again for their attention.",
     day: 9,
     maxChars: 320,
@@ -348,6 +352,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "answerTheQuestion",
     label: "Reply, part 1 — answer what they asked",
+    group: "If they are interested",
     purpose: "Answer the exact question the prospect asked, before anything else happens in the message.",
     maxChars: 320,
     constraints: [
@@ -362,6 +367,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "positionTheCall",
     label: "Reply, part 2 — why a call helps them",
+    group: "If they are interested",
     purpose: "Give one reason a conversation is useful to the prospect in their own situation, framed as their benefit rather than as a sales meeting.",
     maxChars: 200,
     constraints: [
@@ -374,6 +380,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "offerTimes",
     label: "Reply, part 3 — three specific slots",
+    group: "If they are interested",
     purpose: "Make booking cost the prospect one word by naming concrete times in their time zone.",
     maxChars: 400,
     constraints: [
@@ -387,6 +394,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "deferralReply",
     label: "Reply to a 'not now'",
+    group: "Other replies",
     purpose: "Convert an open-ended deferral into a dated single return.",
     maxChars: 400,
     constraints: [
@@ -400,6 +408,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "redirectReply",
     label: "Reply to a wrong-person response",
+    group: "Other replies",
     purpose: "Turn a wrong-person reply into a named referral you can open with.",
     maxChars: 260,
     constraints: [
@@ -412,6 +421,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "optOutReply",
     label: "Reply to a hostile response",
+    group: "Other replies",
     purpose: "Remove a hostile responder in one line, without defending anything.",
     maxChars: 120,
     constraints: [
@@ -424,6 +434,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "chaseStatusCheck",
     label: "Chase 1 — the permission-to-decline check",
+    group: "If interest goes quiet",
     purpose: "Re-open an interested lead who never booked, by making a decline as easy to send as a yes.",
     maxChars: 280,
     constraints: [
@@ -436,6 +447,7 @@ export const coldEmailPack: MethodPack = {
   {
     key: "chaseBookingNudge",
     label: "Chase 2 — the booking nudge",
+    group: "If interest goes quiet",
     purpose: "Give an interested lead one frictionless way to book, and then stop chasing by email.",
     maxChars: 200,
     constraints: [

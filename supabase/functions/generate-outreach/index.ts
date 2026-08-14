@@ -1,9 +1,17 @@
 // Supabase Edge Function: generate-outreach
 //
-// Generates a complete LinkedIn outreach FLOW for a lead — connection note + a
-// blank-request strategy, an opener/value/CTA DM sequence, a bump, and two
-// conditional reply branches (positive vs objection) — grounded in the user's
+// Generates a complete LinkedIn outreach FLOW for a lead, grounded in the user's
 // own context. BYOK (Gemini / OpenAI / Anthropic). Deploy with verify_jwt OFF.
+//
+// The SHAPE of that flow is not decided here. The caller sends `steps`, derived
+// from the method pack, and this function asks the model for exactly those keys.
+//
+// That indirection is the fix for a real defect: this function used to hardcode
+// its own eight-key JSON shape while the pack described twelve differently-named
+// steps. The model was told two different structures, and the validator then
+// graded the response against keys nobody had asked for — reporting every step
+// as "came back empty. Regenerate." on top of perfectly good copy. One contract,
+// derived from the doctrine, is the only way that stays fixed.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,10 +31,21 @@ interface LeadInput {
   potential_services?: string;
 }
 
+/** One key the model must return, sent by the caller from the method pack. */
+interface OutputStep {
+  key: string;
+  label: string;
+  purpose: string;
+  maxChars?: number;
+  constraints?: string[];
+}
+
 interface RequestInput {
   lead?: LeadInput;
   context?: string;
   systemPrompt?: string;
+  /** The output contract, derived from the pack. */
+  steps?: OutputStep[];
   provider?: Provider;
   model?: string;
   apiKey?: string;
@@ -43,7 +62,30 @@ const SYSTEM_PROMPT =
   'specific, non-salesy messages that get replies, and you design smart multi-step flows with ' +
   'branches for how prospects respond. You always reply with a single valid JSON object and nothing else.';
 
-const buildPrompt = (lead: LeadInput, context: string): string =>
+/** Kept alongside the pack's steps: tactical advice, not a message to send. */
+const STRATEGY_KEY = 'blank_strategy';
+const STRATEGY_SPEC =
+  'One sentence of advice. Blank connection requests, with no note, often accept at a higher rate. ' +
+  'Say whether to send blank for this specific person, and how to open if so.';
+
+/**
+ * Turns the pack's steps into the JSON contract.
+ *
+ * Each key carries its own purpose, character ceiling and constraints, so the
+ * model is told what every field is FOR rather than being handed one blob and
+ * a word count.
+ */
+const shapeFromSteps = (steps: OutputStep[]): string => {
+  const lines = steps.map((s) => {
+    const cap = s.maxChars ? ` MAX ${s.maxChars} characters.` : '';
+    const cons = s.constraints?.length ? ` ${s.constraints.join(' ')}` : '';
+    return `  ${JSON.stringify(s.key)}: ${JSON.stringify(`${s.label}. ${s.purpose}${cap}${cons}`)}`;
+  });
+  lines.push(`  ${JSON.stringify(STRATEGY_KEY)}: ${JSON.stringify(STRATEGY_SPEC)}`);
+  return `{\n${lines.join(',\n')}\n}`;
+};
+
+const buildPrompt = (lead: LeadInput, context: string, steps: OutputStep[]): string =>
   `Design a complete LinkedIn outreach FLOW for this lead.
 ${context ? `\nBackground about me / my agency (use for credibility, proof and specifics):\n${context}\n` : ''}
 Lead details:
@@ -54,19 +96,11 @@ Lead details:
 - Company website: ${lead.company_website ?? ''}
 - Services I could offer them: ${lead.potential_services ?? ''}
 
-Return ONLY a JSON object with exactly these keys:
-{
-  "connection_note": "Connection-request note, MAX 280 chars. Personal, specific to them, NO pitch.",
-  "blank_strategy": "One sentence of advice: blank (no-note) requests often accept higher — say whether to send blank for this person and how to open if so.",
-  "opener": "First DM once they accept. Warm, references them, no pitch. 2-3 sentences.",
-  "value": "Follow-up DM with a concrete, relevant proof point or result (use my wins/testimonials if provided). 2-4 sentences.",
-  "cta": "Follow-up DM proposing a specific next step (a quick call). 1-3 sentences.",
-  "bump": "A light, friendly nudge to send if they haven't replied. 1-2 sentences.",
-  "reply_positive": "What to send if they reply POSITIVELY / show interest — move toward booking a call. 2-3 sentences.",
-  "reply_objection": "What to send if they push back, hesitate, or say no — reframe gracefully, zero pressure, keep the door open. 2-3 sentences."
-}
+Return ONLY a JSON object with exactly these keys, and every one of them:
+${shapeFromSteps(steps)}
 
-Be specific to THIS lead and sound human. Avoid generic openers like "I came across your profile".`;
+Every key must be present and non-empty. Be specific to THIS lead and sound human.
+Avoid generic openers like "I came across your profile".`;
 
 async function callOpenAICompatible(
   baseUrl: string,
@@ -122,7 +156,7 @@ async function callAnthropic(apiKey: string, model: string, system: string, prom
   return data?.content?.[0]?.text ?? '';
 }
 
-function parseFlow(raw: string): Record<string, string> {
+function parseFlow(raw: string, steps: OutputStep[]): Record<string, string> {
   let text = (raw ?? '').trim();
   if (text.startsWith('```')) text = text.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
   const first = text.indexOf('{');
@@ -135,17 +169,12 @@ function parseFlow(raw: string): Record<string, string> {
   } catch {
     throw new Error('The AI returned a response that was not valid JSON. Try again.');
   }
-  const s = (k: string) => String(parsed[k] ?? '');
-  return {
-    connection_note: s('connection_note'),
-    blank_strategy: s('blank_strategy'),
-    opener: s('opener'),
-    value: s('value'),
-    cta: s('cta'),
-    bump: s('bump'),
-    reply_positive: s('reply_positive'),
-    reply_objection: s('reply_objection'),
-  };
+  // Return exactly the requested keys, so a missing one surfaces as an empty
+  // string the validator can flag rather than as a key that silently is not there.
+  const out: Record<string, string> = {};
+  for (const step of steps) out[step.key] = String(parsed[step.key] ?? '');
+  out[STRATEGY_KEY] = String(parsed[STRATEGY_KEY] ?? '');
+  return out;
 }
 
 const json = (body: unknown, status = 200) =>
@@ -172,11 +201,22 @@ Deno.serve(async (req: Request) => {
     }
     if (!apiKey) return json({ error: 'An API key is required. Add one in Settings.' }, 400);
 
+    // The contract comes from the caller's method pack. Without it there is no
+    // honest shape to ask for, and guessing one is what produced the drift this
+    // parameter exists to end.
+    const steps = (input.steps ?? []).filter((s) => s && typeof s.key === 'string' && s.key);
+    if (!steps.length) {
+      return json(
+        { error: 'No output steps were supplied. Update the app so it sends the method pack structure.' },
+        400,
+      );
+    }
+
     const model = (input.model ?? '').trim() || DEFAULT_MODEL[provider];
     const system =
       ((input.systemPrompt ?? '').trim() || SYSTEM_PROMPT) +
       ' Always reply with a single valid JSON object and nothing else.';
-    const prompt = buildPrompt(lead, (input.context ?? '').trim());
+    const prompt = buildPrompt(lead, (input.context ?? '').trim(), steps);
 
     let raw: string;
     if (provider === 'anthropic') {
@@ -194,7 +234,7 @@ Deno.serve(async (req: Request) => {
       raw = await callOpenAICompatible('https://api.openai.com/v1', apiKey, model, system, prompt, true);
     }
 
-    return json(parseFlow(raw));
+    return json(parseFlow(raw, steps));
   } catch (err) {
     console.error('generate-outreach failed:', err);
     const message = err instanceof Error ? err.message : 'Unexpected error generating outreach.';

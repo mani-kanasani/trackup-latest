@@ -53,6 +53,13 @@ export interface BannedPattern {
 export interface StructureStep {
   key: string;
   label: string;
+  /**
+   * Which phase of the conversation this step belongs to: the outbound sequence,
+   * the interested branch, the chases. Part of the artifact's shape rather than
+   * decoration, and it means the UI groups steps from the doctrine instead of
+   * from a hardcoded list that drifts every time a step is added.
+   */
+  group?: string;
   /** What this step is FOR. One job per step. */
   purpose: string;
   /** Timing, where the channel has a cadence. */

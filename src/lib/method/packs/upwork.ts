@@ -296,6 +296,7 @@ export const upworkPack: MethodPack = {
   {
     key: "hook",
     label: "Opening line",
+    group: "The proposal",
     purpose: "Survive the truncated preview and prove in one sentence that the post was actually read.",
     maxChars: 150,
     constraints: [
@@ -309,6 +310,7 @@ export const upworkPack: MethodPack = {
   {
     key: "diagnosis",
     label: "Their problem, played back",
+    group: "The proposal",
     purpose: "Restate the problem in their own language and add the one thing the post did not say.",
     maxChars: 500,
     constraints: [
@@ -321,6 +323,7 @@ export const upworkPack: MethodPack = {
   {
     key: "demonstration",
     label: "The part you already did",
+    group: "The proposal",
     purpose: "Convert a claim of capability into an artifact the buyer can look at.",
     maxChars: 700,
     constraints: [
@@ -333,6 +336,7 @@ export const upworkPack: MethodPack = {
   {
     key: "proof",
     label: "Proof line",
+    group: "The proposal",
     purpose: "Establish that you have done this before, without turning the letter into a résumé.",
     maxChars: 300,
     constraints: [
@@ -346,6 +350,7 @@ export const upworkPack: MethodPack = {
   {
     key: "roiFrame",
     label: "The value case — arithmetic where the post supplies numbers",
+    group: "The proposal",
     purpose: "Make the price a consequence of the buyer's own situation rather than of your effort.",
     maxChars: 500,
     constraints: [
@@ -358,6 +363,7 @@ export const upworkPack: MethodPack = {
   {
     key: "scopeAndPrice",
     label: "Scope, non-scope, price",
+    group: "The proposal",
     purpose: "Define done, define not-done, and place the number after both.",
     maxChars: 900,
     constraints: [
@@ -372,6 +378,7 @@ export const upworkPack: MethodPack = {
   {
     key: "close",
     label: "Close",
+    group: "The proposal",
     purpose: "End on a booked next step, assumed rather than requested.",
     maxChars: 250,
     constraints: [
@@ -383,6 +390,7 @@ export const upworkPack: MethodPack = {
   {
     key: "giveawayAsset",
     label: "The giveaway (supporting asset)",
+    group: "Supporting assets",
     purpose: "Specify the thing they keep whether or not they hire you.",
     constraints: [
       "It must be usable without you present.",
@@ -394,6 +402,7 @@ export const upworkPack: MethodPack = {
   {
     key: "videoWalkthrough",
     label: "Recorded walkthrough (supporting asset)",
+    group: "Supporting assets",
     purpose: "Give the buyer four minutes of you, in the order that survives a shortlist.",
     constraints: [
       "Four beats in order: name their project over a screen share; proof in one sentence; do or build part of the work they described on screen; assume the win and name times.",
@@ -405,6 +414,7 @@ export const upworkPack: MethodPack = {
   {
     key: "replyInterested",
     label: "Reply — interested, or asking price",
+    group: "Replies",
     purpose: "Answer what they actually asked, then put specific times on the table.",
     maxChars: 600,
     constraints: [
@@ -418,6 +428,7 @@ export const upworkPack: MethodPack = {
   {
     key: "replyNotNow",
     label: "Reply — not now",
+    group: "Replies",
     purpose: "Convert a vague deferral into a dated one.",
     maxChars: 400,
     constraints: [
@@ -430,6 +441,7 @@ export const upworkPack: MethodPack = {
   {
     key: "replyWrongFit",
     label: "Reply — wrong fit, wrong person, or lost",
+    group: "Replies",
     purpose: "Exit clean and take the one thing the exchange can still produce.",
     maxChars: 350,
     constraints: [

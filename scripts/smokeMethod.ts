@@ -5,6 +5,7 @@
 
 import { getPack, ALL_PACKS } from '../src/lib/method/packs/index';
 import { composeSystemPrompt, describePack } from '../src/lib/method/compose';
+import { outputSteps } from '../src/lib/method/forChannel';
 import { validateOutput } from '../src/lib/method/validate';
 import { qualify } from '../src/lib/qualify/score';
 import { renderQualification } from '../src/lib/qualify/render';
@@ -22,6 +23,26 @@ for (const p of ALL_PACKS) {
   check(`${p.id}: step keys unique`, new Set(keys).size === keys.length);
   check(`${p.id}: every law cites a source`, p.laws.every((l) => !!l.source?.label));
   check(`${p.id}: banned ids unique`, new Set(p.banned.map((b) => b.id)).size === p.banned.length);
+  check(`${p.id}: every step is grouped`, p.structure.every((s) => !!s.group));
+
+  // The contract the generator is asked for must be the contract the validator
+  // grades. When these drifted, every step came back "empty. Regenerate." on top
+  // of copy that was fine, and the warning list was pure noise.
+  const requested = outputSteps(p).map((s) => s.key);
+  check(
+    `${p.id}: requested keys === validated keys`,
+    requested.length === keys.length && requested.every((k) => keys.includes(k)),
+    `${requested.length} requested, ${keys.length} in pack`,
+  );
+
+  // A response carrying every requested key must pass. If it cannot, the app
+  // shows violations no user can ever clear.
+  const filled: Record<string, string> = {};
+  for (const k of requested) {
+    filled[k] = 'Your team page lists four estimators and nobody on business development. When a particular kind of client comes in, does one arrive through the network, or do you go find them?';
+  }
+  const graded = validateOutput(p, filled);
+  check(`${p.id}: a complete response passes`, graded.ok, `${graded.hardCount} hard`);
 }
 
 // ---- the prompt actually carries the doctrine

@@ -20,11 +20,24 @@ const corsHeaders = {
 
 type Provider = 'gemini' | 'openai' | 'anthropic';
 
+/** One key the model must return, sent by the caller from the method pack. */
+interface OutputStep {
+  key: string;
+  label: string;
+  purpose: string;
+  maxChars?: number;
+  constraints?: string[];
+}
+
 interface GenerateInput {
   job_title?: string;
   job_summary?: string;
   context?: string;
   systemPrompt?: string;
+  /** The output contract, derived from the pack. */
+  steps?: OutputStep[];
+  /** Which of those steps compose the marketplace message, in order. */
+  letterKeys?: string[];
   provider?: Provider;
   model?: string;
   apiKey?: string;
@@ -33,6 +46,8 @@ interface GenerateInput {
 interface ProposalContent {
   title: string;
   cover_letter: string;
+  /** Every step the pack asked for, keyed by step key. Graded by the validator. */
+  steps: Record<string, string>;
   proposal_sections: { heading: string; body: string }[];
   mermaid_code: string;
   video_script: string;
@@ -52,8 +67,32 @@ const SYSTEM_PROMPT =
   'Write in their voice, grounded only in the background they supply. Never invent a credential, a client, a metric or an asset. ' +
   'You always reply with a single valid JSON object and nothing else (no markdown, no code fences).';
 
-const buildUserPrompt = (jobTitle: string, jobSummary: string, context: string): string =>
-  `Write proposal materials for this Upwork job.
+/**
+ * Turns the pack's steps into the JSON contract.
+ *
+ * The marketplace message used to be requested as one 150-250 word blob, which
+ * meant the doctrine's per-part rules — the ceiling on the hook, the demand that
+ * proof be matched, the ban on claiming an asset that does not exist — had
+ * nothing to attach to and the validator had nothing to grade. Asking for each
+ * step separately gives every part its own job, ceiling and constraints, and the
+ * letter is assembled from them afterwards.
+ */
+const shapeFromSteps = (steps: OutputStep[]): string =>
+  steps
+    .map((s) => {
+      const cap = s.maxChars ? ` MAX ${s.maxChars} characters.` : '';
+      const cons = s.constraints?.length ? ` ${s.constraints.join(' ')}` : '';
+      return `  ${JSON.stringify(s.key)}: ${JSON.stringify(`${s.label}. ${s.purpose}${cap}${cons}`)}`;
+    })
+    .join(',\n');
+
+const buildUserPrompt = (
+  jobTitle: string,
+  jobSummary: string,
+  context: string,
+  steps: OutputStep[],
+): string =>
+  `Write proposal materials for this marketplace job.
 ${context ? `\nBackground about me / my agency (weave in for credibility, proof and specifics):\n${context}\n` : ''}
 Job title:
 ${jobTitle}
@@ -61,11 +100,11 @@ ${jobTitle}
 Job description:
 ${jobSummary}
 
-Return ONLY a JSON object with exactly these keys:
+Return ONLY a JSON object with exactly these keys, and every one of them:
 
 {
-  "title": "Short, specific name for the system/solution you'd build (e.g. 'Automated Lead-Routing System'). Max 8 words.",
-  "cover_letter": "The marketplace message, 150-250 words. Open on THEIR problem restated in their own words, not on a greeting about yourself. Show relevant capability using only the background supplied. Paraphrase the core need, outline the approach in 1-2 sentences, and end with one clear next step. Do NOT claim any asset the sender has not actually produced: no video, no recording, no attachment unless the background says one exists.",
+  "title": "Short, specific name for the system you would build, for example 'Automated Lead-Routing System'. Max 8 words.",
+${shapeFromSteps(steps)},
   "proposal_sections": [
     { "heading": "Section title", "body": "2-5 sentences." }
   ],
@@ -73,7 +112,7 @@ Return ONLY a JSON object with exactly these keys:
   "video_script": "A 45-90 second screen-recording script in the sender's own voice, walking the client through the approach. Optional for them to record; write it so it stands alone if they do."
 }
 
-For proposal_sections, produce 4-7 sections such as: Overview, Understanding Your Needs, Proposed Approach, How It Works, Relevant Experience, and Next Steps. Be specific to THIS job — reference concrete details from the description.`;
+For proposal_sections, produce 4-7 sections such as: Overview, Understanding Your Needs, Proposed Approach, How It Works, Relevant Experience, and Next Steps. Be specific to THIS job, referencing concrete details from the description.`;
 
 // --- Provider adapters -------------------------------------------------------
 
@@ -153,8 +192,10 @@ async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 
   jobSummary: string;
   context: string;
   system: string;
+  steps: OutputStep[];
+  letterKeys: string[];
 }): Promise<ProposalContent> {
-  const userPrompt = buildUserPrompt(input.jobTitle, input.jobSummary, input.context);
+  const userPrompt = buildUserPrompt(input.jobTitle, input.jobSummary, input.context, input.steps);
 
   let raw: string;
   if (input.provider === 'anthropic') {
@@ -179,10 +220,10 @@ async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 
     );
   }
 
-  return parseProposal(raw);
+  return parseProposal(raw, input.steps, input.letterKeys);
 }
 
-function parseProposal(raw: string): ProposalContent {
+function parseProposal(raw: string, steps: OutputStep[], letterKeys: string[]): ProposalContent {
   let text = (raw ?? '').trim();
 
   // Strip ```json ... ``` fences if the model added them.
@@ -210,9 +251,23 @@ function parseProposal(raw: string): ProposalContent {
       }))
     : [];
 
+  // Every step the pack asked for, so the client can grade the response against
+  // the same doctrine that produced it.
+  const stepValues: Record<string, string> = {};
+  for (const step of steps) stepValues[step.key] = String(parsed[step.key] ?? '').trim();
+
+  // The message the user actually sends, assembled from the steps that make it
+  // up. Falls back to a model-supplied cover_letter only if the caller named no
+  // letter steps, which keeps an older client working.
+  const assembled = letterKeys
+    .map((k) => stepValues[k])
+    .filter((v) => v)
+    .join('\n\n');
+
   return {
     title: String(parsed.title ?? 'Proposal'),
-    cover_letter: String(parsed.cover_letter ?? ''),
+    cover_letter: assembled || String(parsed.cover_letter ?? ''),
+    steps: stepValues,
     proposal_sections: sections,
     mermaid_code: String(parsed.mermaid_code ?? ''),
     video_script: String(parsed.video_script ?? ''),
@@ -364,6 +419,18 @@ Deno.serve(async (req: Request) => {
       return json({ error: 'Sign in before generating a proposal.' }, 401);
     }
 
+    // The contract comes from the caller's method pack. Guessing a shape here is
+    // what let the generator and the validator drift apart.
+    const steps = (input.steps ?? []).filter((s) => s && typeof s.key === 'string' && s.key);
+    if (!steps.length) {
+      return json(
+        { error: 'No output steps were supplied. Update the app so it sends the method pack structure.' },
+        400,
+      );
+    }
+    const stepKeys = new Set(steps.map((s) => s.key));
+    const letterKeys = (input.letterKeys ?? []).filter((k) => stepKeys.has(k));
+
     const system =
       ((input.systemPrompt ?? '').trim() || SYSTEM_PROMPT) +
       ' Always reply with a single valid JSON object and nothing else (no markdown, no code fences).';
@@ -375,6 +442,8 @@ Deno.serve(async (req: Request) => {
       jobSummary,
       context: (input.context ?? '').trim(),
       system,
+      steps,
+      letterKeys,
     });
 
     const pdfBytes = await buildProposalPDF(content);
@@ -406,6 +475,9 @@ Deno.serve(async (req: Request) => {
 
     return json({
       cover_letter: content.cover_letter,
+      // Returned alongside the assembled letter so the client can grade each
+      // part against the pack instead of grading one blob against nothing.
+      steps: content.steps,
       proposal_url: signed.signedUrl,
       mermaid_code: content.mermaid_code,
       video_script: content.video_script,

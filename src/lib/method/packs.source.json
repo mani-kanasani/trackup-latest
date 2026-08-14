@@ -290,7 +290,8 @@
           "Confirm one true, specific reason for reaching out exists for every name on the list; a demographic slice you have nothing to say about is not a segment",
           "Spend effort on the list and the offer before the copy: infrastructure is first and copy is last in every version of the priority order the source gives",
           "Write the stopping rule down before launch: a stated send volume that produces nothing, at acceptable bounce and warm-up scores, means changing the market rather than the copy"
-        ]
+        ],
+        "group": "Before you send"
       },
       {
         "key": "openingEmail",
@@ -309,7 +310,8 @@
           "Produce at least two versions of this email to run against each other, identical in observation line and differing only in the value proposition, the credibility line or the ask",
           "More instances of 'you' than of 'I'",
           "Plain English a fifteen-year-old could follow"
-        ]
+        ],
+        "group": "The sequence"
       },
       {
         "key": "angleShift",
@@ -324,7 +326,8 @@
           "Shorter than email 1",
           "Send as a genuine reply in the same thread",
           "Zero links, zero images, zero attachments"
-        ]
+        ],
+        "group": "The sequence"
       },
       {
         "key": "patternInterrupt",
@@ -338,7 +341,8 @@
           "Grant explicit permission to decline",
           "No new argument, no new proof, no offer, no link",
           "This is the last automated send to this address"
-        ]
+        ],
+        "group": "The sequence"
       },
       {
         "key": "answerTheQuestion",
@@ -352,7 +356,8 @@
           "Never defer the answer to a call",
           "No pitching, no new claims",
           "Sent by hand, within the hour if you can sustain it"
-        ]
+        ],
+        "group": "If they are interested"
       },
       {
         "key": "positionTheCall",
@@ -364,7 +369,8 @@
           "One sentence",
           "Frame it as walking them through how this would work for them specifically",
           "Never the words 'sales call', 'demo' or 'discovery call'"
-        ]
+        ],
+        "group": "If they are interested"
       },
       {
         "key": "offerTimes",
@@ -377,7 +383,8 @@
           "Calendar link only after the slots, as an 'if easier' fallback; this is a reply inside a live conversation, so the pre-reply link ban does not apply here",
           "Close by asking them to confirm one",
           "Never a bare availability question"
-        ]
+        ],
+        "group": "If they are interested"
       },
       {
         "key": "deferralReply",
@@ -390,7 +397,8 @@
           "Never argue against the deferral",
           "Calendar the return and honor the 'once'; coming back twice makes the promise worthless",
           "Where timing was the whole obstacle, plan the return as a fresh short campaign rather than an extension of this thread"
-        ]
+        ],
+        "group": "Other replies"
       },
       {
         "key": "redirectReply",
@@ -402,7 +410,8 @@
           "Ask who to speak to, and whether you may mention they pointed you there",
           "Never forward the original thread",
           "Start the named person at email 1 with a fresh observation of their own"
-        ]
+        ],
+        "group": "Other replies"
       },
       {
         "key": "optOutReply",
@@ -414,7 +423,8 @@
           "Never defend, never explain, never counter-offer",
           "Suppress the address across every mailbox and domain",
           "Suppress the rest of that organization too; one annoyed reply becomes a whole company's blacklist"
-        ]
+        ],
+        "group": "Other replies"
       },
       {
         "key": "chaseStatusCheck",
@@ -426,7 +436,8 @@
           "Explicitly grant permission to decline; that is what makes it answerable",
           "Send roughly two days after the conversation went quiet",
           "Only ever sent to someone who already replied, never to a cold address"
-        ]
+        ],
+        "group": "If interest goes quiet"
       },
       {
         "key": "chaseBookingNudge",
@@ -438,7 +449,8 @@
           "Roughly two days after the status check",
           "This ends the automated chase; further follow-up moves to phone or a connection request with a one-line note referencing the email",
           "Never drop a positive reply after a single unanswered attempt"
-        ]
+        ],
+        "group": "If interest goes quiet"
       }
     ],
     "evidence": [
@@ -865,7 +877,8 @@
           "200 characters is the free-account allowance; Premium accounts get 300. Write to 200 unless you have confirmed the higher cap on this account, and re-check the cap before relying on it.",
           "If the observation cannot survive the character limit, send the invite with no note rather than truncating it into a generic line.",
           "Withdraw invitations still pending after three weeks. A large pending pile plus a low acceptance rate is what puts an account under restriction."
-        ]
+        ],
+        "group": "The sequence"
       },
       {
         "key": "openerDm",
@@ -879,7 +892,8 @@
           "No offer, no mechanism, no pricing, no proof point, no link, no call ask.",
           "Close on one intent-sorting question answerable in a word or a sentence.",
           "Under 100 words."
-        ]
+        ],
+        "group": "The sequence"
       },
       {
         "key": "proofDm",
@@ -895,7 +909,8 @@
           "Close with an offer to send something concrete and free, phrased so that \"yes\" is the whole reply.",
           "Different ask from the first message, so it reads as new information rather than a repeat.",
           "No link. No call ask."
-        ]
+        ],
+        "group": "The sequence"
       },
       {
         "key": "closeFileDm",
@@ -909,7 +924,8 @@
           "Offer two or three face-saving exits, each answerable in one word. Pack doctrine, carried over from the practitioner sequence's final touch.",
           "Promise one return at a named time, and keep it to once.",
           "No new pitch, no link, no guilt."
-        ]
+        ],
+        "group": "The sequence"
       },
       {
         "key": "answerTheQuestion",
@@ -921,7 +937,8 @@
           "If they asked price, give a range and say what moves it. Never defer price to a call.",
           "Skip only if there was no question.",
           "Written and sent by a human."
-        ]
+        ],
+        "group": "If they are interested"
       },
       {
         "key": "positionTheCall",
@@ -932,7 +949,8 @@
           "One line on what they walk away with.",
           "Name the meeting after that take-away, never after its format.",
           "Do not restate the offer or re-argue the value."
-        ]
+        ],
+        "group": "If they are interested"
       },
       {
         "key": "offerTimes",
@@ -945,7 +963,8 @@
           "Put the booking link last, as the fallback rather than the ask.",
           "Never ask when they are free.",
           "This is a reply-branch step, so the link belongs here; a pre-reply link warning fired on this step is noise."
-        ]
+        ],
+        "group": "If they are interested"
       },
       {
         "key": "replyNotNow",
@@ -956,7 +975,8 @@
           "Get a month or a date and confirm you will come back then, once.",
           "Leave something behind that costs them nothing to accept.",
           "No second ask in this message."
-        ]
+        ],
+        "group": "Other replies"
       },
       {
         "key": "replyWrongPerson",
@@ -968,7 +988,8 @@
           "Ask whether you may say they pointed you there.",
           "Never forward or quote the original thread to the new person.",
           "Start the referred person at the connection note with a fresh observation of their own."
-        ]
+        ],
+        "group": "Other replies"
       },
       {
         "key": "replyHostile",
@@ -979,7 +1000,8 @@
           "One line confirming removal.",
           "No defence, no explanation, no counter-offer.",
           "Suppress the person permanently, and everyone else at that company."
-        ]
+        ],
+        "group": "Other replies"
       },
       {
         "key": "chaseStatusCheck",
@@ -992,7 +1014,8 @@
           "A human sends this one.",
           "Re-enter at the stage the person previously reached; never drag them back to the start of the sequence.",
           "Everything stops the moment they answer."
-        ]
+        ],
+        "group": "If interest goes quiet"
       },
       {
         "key": "chaseBookingNudge",
@@ -1005,7 +1028,8 @@
           "Stop here. Never chase past this message, and never drop a positive reply after a single unanswered attempt.",
           "If both go unanswered, file the person for a dated reactivation sweep rather than restarting the cold sequence — reviving someone who already engaged costs nothing to attempt.",
           "This is a reply-branch step, so the link belongs here; a pre-reply link warning fired on this step is noise."
-        ]
+        ],
+        "group": "If interest goes quiet"
       }
     ],
     "evidence": [
@@ -1401,7 +1425,8 @@
           "No compliment about their business, website or branding.",
           "One sentence.",
           "150 characters is the Upwork default for the visible preview; check what the marketplace you are on actually truncates at and write to that number instead."
-        ]
+        ],
+        "group": "The proposal"
       },
       {
         "key": "diagnosis",
@@ -1413,7 +1438,8 @@
           "Add exactly one observation they did not make — a failure mode, a hidden handoff, a downstream cost.",
           "Ask at most one question, and only where the answer is needed to price the work.",
           "Describe none of your services in this section."
-        ]
+        ],
+        "group": "The proposal"
       },
       {
         "key": "demonstration",
@@ -1425,7 +1451,8 @@
           "Link to it as a streamed link, never as a downloadable file or a drive attachment.",
           "Keep any recording under five minutes.",
           "If it is a prototype or a rough, state plainly which parts are placeholder and which are real."
-        ]
+        ],
+        "group": "The proposal"
       },
       {
         "key": "proof",
@@ -1438,7 +1465,8 @@
           "Reach for a dollar figure first, a percentage second, a named association third — in that order of preference, not as a floor.",
           "If you have no revenue figures at all, work down the fallback: in-domain with revenue, out-of-domain with revenue, an impressive association without revenue, or a template you implemented in your own business with the measured delta.",
           "One heavyweight social-proof line in the cover letter; anything further belongs in the walkthrough."
-        ]
+        ],
+        "group": "The proposal"
       },
       {
         "key": "roiFrame",
@@ -1450,7 +1478,8 @@
           "If it does not, skip the arithmetic entirely and frame value as the outcome set against what their current alternative costs them — the agency quote, the in-house hire, the hours the owner is spending now.",
           "Where the work recurs and the figures are missing, ask for frequency, time per run and people involved rather than asserting a saving.",
           "Promise no multiple, no percentage return and no guarantee of a rate."
-        ]
+        ],
+        "group": "The proposal"
       },
       {
         "key": "scopeAndPrice",
@@ -1464,7 +1493,8 @@
           "State the price once, after the inventory, as a non-round figure — never $50, $100 or $2,000.",
           "Offer a phased or reduced-scope version instead of a lower price.",
           "No payment link, invoice, or off-platform contract."
-        ]
+        ],
+        "group": "The proposal"
       },
       {
         "key": "close",
@@ -1475,7 +1505,8 @@
           "Propose two or three specific times in their timezone.",
           "Phrase it as the work proceeding; do not ask whether they are interested.",
           "No second ask of any kind."
-        ]
+        ],
+        "group": "The proposal"
       },
       {
         "key": "giveawayAsset",
@@ -1486,7 +1517,8 @@
           "It must be reusable across applications, or producible inside the fifteen-minute ceiling.",
           "It must not contain the paid scope — it is a sample of judgement, not a free build of the deliverable.",
           "Name it in one line inside the cover letter, saying what it contains."
-        ]
+        ],
+        "group": "Supporting assets"
       },
       {
         "key": "videoWalkthrough",
@@ -1497,7 +1529,8 @@
           "Under five minutes.",
           "Share as a streamed link on a recording platform; never a downloadable file or a drive link.",
           "Do not re-record for small mistakes."
-        ]
+        ],
+        "group": "Supporting assets"
       },
       {
         "key": "replyInterested",
@@ -1510,7 +1543,8 @@
           "Offer two or three specific slots in their timezone, with a booking link only as an 'if easier' fallback — never a bare link and never 'when are you free?'.",
           "Write and send this one by hand; automation starts only after it.",
           "If it goes quiet, chase twice inside the platform: at two days a short status check that explicitly grants permission to decline, at four days a single message whose entire content is the booking link."
-        ]
+        ],
+        "group": "Replies"
       },
       {
         "key": "replyNotNow",
@@ -1522,7 +1556,8 @@
           "Calendar it and come back exactly once — returning twice makes the promise worthless.",
           "Leave the giveaway with them regardless of the date.",
           "No pitch, no counter-offer, no second ask."
-        ]
+        ],
+        "group": "Replies"
       },
       {
         "key": "replyWrongFit",
@@ -1534,7 +1569,8 @@
           "If they hired someone else, thank them in one line and ask what the winning application had.",
           "Never argue, never re-pitch, never defend the price.",
           "Start any referred person fresh with their own opening line; never forward the original thread."
-        ]
+        ],
+        "group": "Replies"
       }
     ],
     "evidence": [

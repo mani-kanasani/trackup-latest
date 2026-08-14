@@ -93,7 +93,15 @@ const Choice = <T extends string>({
 
 export const QualifyPanel: React.FC<{
   value: QualificationInput | null | undefined;
-  onChange: (next: QualificationInput) => void;
+  /**
+   * Takes an updater rather than a finished object.
+   *
+   * Two answers changed inside one React batch both read the same rendered
+   * `value`, so the second overwrites the first and one of the clicks silently
+   * does nothing. Threading the previous state through means every answer is
+   * applied to whatever is actually current.
+   */
+  onChange: (update: (prev: QualificationInput) => QualificationInput) => void;
   /** Surfaced by the caller when a save failed, so answers are never silently lost. */
   error?: string;
 }> = ({ value, onChange, error }) => {
@@ -101,7 +109,8 @@ export const QualifyPanel: React.FC<{
   const result = useMemo(() => qualify(input), [input]);
   const [open, setOpen] = useState(result.verdict === 'notYet' && !value);
 
-  const patch = (next: Partial<QualificationInput>) => onChange({ ...input, ...next });
+  const patch = (next: (prev: QualificationInput) => Partial<QualificationInput>) =>
+    onChange((prev) => ({ ...prev, ...next(prev) }));
   const tone = TONE[result.verdict];
 
   return (
@@ -150,7 +159,7 @@ export const QualifyPanel: React.FC<{
                   </div>
                   <Tri
                     value={input.pillars?.[p.id] ?? 'unknown'}
-                    onChange={(a) => patch({ pillars: { ...input.pillars, [p.id]: a } })}
+                    onChange={(a) => patch((prev) => ({ pillars: { ...prev.pillars, [p.id]: a } }))}
                   />
                 </div>
               ))}
@@ -173,7 +182,7 @@ export const QualifyPanel: React.FC<{
                   </div>
                   <Tri
                     value={input.bonus?.[b.id] ?? 'unknown'}
-                    onChange={(a) => patch({ bonus: { ...input.bonus, [b.id]: a } })}
+                    onChange={(a) => patch((prev) => ({ bonus: { ...prev.bonus, [b.id]: a } }))}
                   />
                 </div>
               ))}
@@ -186,14 +195,14 @@ export const QualifyPanel: React.FC<{
               value={input.impact}
               placeholder="Not judged"
               options={[{ value: 'high', label: 'High' }, { value: 'low', label: 'Low' }]}
-              onChange={(v) => patch({ impact: v })}
+              onChange={(v) => patch(() => ({ impact: v }))}
             />
             <Choice<Complexity>
               label="Complexity to build"
               value={input.complexity}
               placeholder="Not judged"
               options={[{ value: 'low', label: 'Low' }, { value: 'high', label: 'High' }]}
-              onChange={(v) => patch({ complexity: v })}
+              onChange={(v) => patch(() => ({ complexity: v }))}
             />
           </section>
 
@@ -205,7 +214,7 @@ export const QualifyPanel: React.FC<{
               options={(Object.keys(RUNGS) as LadderRung[]).map((r) => ({
                 value: r, label: RUNGS[r].label,
               }))}
-              onChange={(v) => patch({ rung: v })}
+              onChange={(v) => patch(() => ({ rung: v }))}
             />
             {input.rung && (
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">{RUNGS[input.rung].state}</p>
@@ -226,7 +235,7 @@ export const QualifyPanel: React.FC<{
                   { value: 'generic', label: 'Generic positioning' },
                   { value: 'unclear', label: 'Cannot tell' },
                 ]}
-                onChange={(v) => patch({ nicheClarity: v })}
+                onChange={(v) => patch(() => ({ nicheClarity: v }))}
               />
               <Choice<Reachability>
                 label="Can you reach the buyer"
@@ -237,7 +246,7 @@ export const QualifyPanel: React.FC<{
                   { value: 'likely', label: 'Probably' },
                   { value: 'uncertain', label: 'Uncertain' },
                 ]}
-                onChange={(v) => patch({ reachable: v })}
+                onChange={(v) => patch(() => ({ reachable: v }))}
               />
             </div>
             <div>
@@ -246,7 +255,7 @@ export const QualifyPanel: React.FC<{
               </label>
               <input
                 value={input.growthSignal ?? ''}
-                onChange={(e) => patch({ growthSignal: e.target.value })}
+                onChange={(e) => patch(() => ({ growthSignal: e.target.value }))}
                 placeholder="A hire, a new office, an added service line, a new partner"
                 className="input-modern !py-2 text-sm"
               />
@@ -257,7 +266,7 @@ export const QualifyPanel: React.FC<{
               </label>
               <textarea
                 value={input.observation ?? ''}
-                onChange={(e) => patch({ observation: e.target.value })}
+                onChange={(e) => patch(() => ({ observation: e.target.value }))}
                 rows={2}
                 placeholder="Something only real research produces, verifiable in ninety seconds, and about them."
                 className="input-modern !py-2 text-sm resize-none"
