@@ -17,17 +17,31 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
   const { user, logout } = useAuth();
   const { materials } = useData();
   const { theme, toggleTheme } = useTheme();
-  const [leadCount, setLeadCount] = useState<number | null>(null);
+  /**
+   * One count per app, keyed by app id.
+   *
+   * This used to be a single `leadCount` that both LinkedIn and cold email fell
+   * through to, so the cold email card displayed the LinkedIn lead count: adding
+   * a lead made it read 1, and opening it showed nothing. Keying the counts by
+   * app means a fourth channel cannot inherit the same bug by omission.
+   */
+  const [counts, setCounts] = useState<Partial<Record<AppId, number>>>({});
 
   useEffect(() => {
     let active = true;
     (async () => {
       if (!user) return;
-      const { count, error } = await supabase
-        .from('leads')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-      if (active) setLeadCount(error ? 0 : count ?? 0);
+      const countOf = async (table: string) => {
+        const { count, error } = await supabase
+          .from(table)
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+        // A failed read stays undefined rather than becoming 0: a shimmer is
+        // honest about not knowing, a zero is a claim that they have nothing.
+        return error ? undefined : count ?? 0;
+      };
+      const [leads, prospects] = await Promise.all([countOf('leads'), countOf('prospects')]);
+      if (active) setCounts({ linkedin: leads, coldemail: prospects });
     })();
     return () => {
       active = false;
@@ -36,7 +50,7 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
 
   const statValue = (id: AppId): number | null => {
     if (id === 'trackup') return materials.length;
-    return leadCount;
+    return counts[id] ?? null;
   };
 
   return (
