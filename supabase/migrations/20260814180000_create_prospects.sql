@@ -14,7 +14,7 @@
   ## Variant, from the start
 
   `variant` is here on day one rather than retrofitted. Cold email is the one
-  channel whose copy is split-testable end to end — the pack says so — and
+  channel whose copy is split-testable end to end, the pack says so, and
   adding a variant column to a table already full of rows means every historical
   row is variant-null and the first comparison is against nothing.
 

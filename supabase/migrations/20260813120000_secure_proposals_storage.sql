@@ -7,13 +7,13 @@
   could enumerate every path under `proposals/` and download every user's PDF.
   Generated proposals carry client names, scope and pricing.
 
-  The bucket was public for a real reason — the returned link has to be
+  The bucket was public for a real reason, the returned link has to be
   shareable with a client who has no account. Signed URLs keep that property
   without exposing the rest of the bucket, so the fix is to switch the link
   type rather than remove the capability. The Edge Function now issues a
   long-lived signed URL; see `generate-proposal/index.ts`.
 
-  Idempotent — safe to run more than once.
+  Idempotent, safe to run more than once.
 */
 
 -- Private from here on. Existing objects are unaffected except that they now

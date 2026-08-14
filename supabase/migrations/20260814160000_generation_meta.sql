@@ -12,7 +12,7 @@
   `warnings`, `softNotes` and `proofUsed` are React state, wiped the moment the
   user selects another lead. And migration 20260814120000 states, correctly, that
   the qualification VERDICT is never stored and is re-derived at read time so a
-  doctrine change re-scores the list — which means a threshold change silently
+  doctrine change re-scores the list, which means a threshold change silently
   rewrites the tier every past message was written under. Right for the screen,
   wrong for the record.
 

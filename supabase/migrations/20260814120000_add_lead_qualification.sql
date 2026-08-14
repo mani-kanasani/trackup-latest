@@ -1,9 +1,9 @@
 /*
   # Lead qualification
 
-  Stores the answers to the qualification screen — the four pillars, the bonus
+  Stores the answers to the qualification screen, the four pillars, the bonus
   checks, the impact/complexity read, the buying-ladder rung, and the tier
-  signals — as JSON on the lead.
+  signals, as JSON on the lead.
 
   ## Why the answers and not the verdict
 

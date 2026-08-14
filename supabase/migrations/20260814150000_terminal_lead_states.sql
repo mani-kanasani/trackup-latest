@@ -30,8 +30,13 @@ BEGIN
   END IF;
 END $$;
 
--- ALTER TYPE ... ADD VALUE cannot run inside a transaction block in older
--- Postgres, and IF NOT EXISTS makes re-running safe.
+-- Postgres 12 lifted the restriction on ALTER TYPE ... ADD VALUE inside a
+-- transaction block, with the caveat that a new value cannot be USED until the
+-- transaction commits. Nothing here uses them, and Supabase runs 15 or later, so
+-- pasting every migration as one script in the SQL editor is safe. IF NOT EXISTS
+-- makes re-running safe on top of that.
+--
+-- I flagged this as a likely failure point earlier; it is not one.
 ALTER TYPE lead_status ADD VALUE IF NOT EXISTS 'no_reply';
 ALTER TYPE lead_status ADD VALUE IF NOT EXISTS 'disqualified';
 ALTER TYPE lead_status ADD VALUE IF NOT EXISTS 'won';

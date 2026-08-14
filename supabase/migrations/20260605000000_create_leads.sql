@@ -1,5 +1,5 @@
 /*
-  # LinkedIn DM Generator — leads
+  # LinkedIn DM Generator: leads
 
   1. New Table
     - `leads` (user-scoped, unlike the original Dream 100 `dream_leads`)
@@ -9,7 +9,7 @@
   2. Security
     - RLS: users can only read/write their own leads.
 
-  Idempotent — safe to run more than once.
+  Idempotent, safe to run more than once.
 */
 
 DO $$ BEGIN

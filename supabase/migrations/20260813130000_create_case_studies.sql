@@ -1,5 +1,5 @@
 /*
-  # Case studies — the proof vault
+  # Case studies: the proof vault
 
   1. Why this is a table and not a textarea
 
@@ -7,7 +7,7 @@
      depend on it: attach one concrete substantiating fact per claim, use at most
      ONE proof per message, match it to the reader's world, and never use a
      number that is not on record. A single free-text "wins" box cannot support
-     any of that — the model gets everything at once and picks badly, or invents.
+     any of that, the model gets everything at once and picks badly, or invents.
 
      Structured rows let the app hand the generator one matched proof, and let
      the validator check that every number in the output came from somewhere.
@@ -27,7 +27,7 @@
      these are never shared with anyone, so there is no public or signed-link
      path at all.
 
-  Idempotent — safe to run more than once.
+  Idempotent, safe to run more than once.
 */
 
 DO $$ BEGIN
