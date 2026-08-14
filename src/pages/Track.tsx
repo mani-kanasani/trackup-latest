@@ -6,7 +6,7 @@ import { JobMaterial, JobStatus } from '../types';
 import { resolveProposalUrl } from '../lib/proposalLink';
 
 export const Track: React.FC = () => {
-  const { materials, updateMaterialStatus } = useData();
+  const { materials, updateMaterialStatus, updateMaterial } = useData();
   const [openingDoc, setOpeningDoc] = useState(false);
   const [docError, setDocError] = useState('');
 
@@ -337,6 +337,45 @@ export const Track: React.FC = () => {
                   <p className="text-base text-gray-900 dark:text-white whitespace-pre-wrap leading-relaxed">
                     {selectedMaterial.cover_letter}
                   </p>
+                </div>
+              </div>
+
+              {/* What it actually closed for.
+
+                  Written once at draft time with no update path anywhere, so
+                  Cash Collected could never move after creation. A proposal is
+                  drafted before it is won, which is exactly when this number is
+                  not yet known. */}
+              <div>
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-8 h-8 bg-upwork-100 dark:bg-upwork-900/30 rounded-lg flex items-center justify-center">
+                    <Briefcase className="w-4 h-4 text-upwork-600 dark:text-upwork-400" />
+                  </div>
+                  <h4 className="font-bold text-lg text-gray-900 dark:text-white">Amounts</h4>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Proposed</label>
+                    <input
+                      type="number" min="0" step="0.01"
+                      key={`proposed:${selectedMaterial.id}`}
+                      defaultValue={selectedMaterial.proposed_amount ?? ''}
+                      onBlur={(e) => updateMaterial(selectedMaterial.id, { proposed_amount: e.target.value ? parseFloat(e.target.value) : undefined })}
+                      className="input-modern !py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                      Actual, once it closes
+                    </label>
+                    <input
+                      type="number" min="0" step="0.01"
+                      key={`actual:${selectedMaterial.id}`}
+                      defaultValue={selectedMaterial.actual_amount ?? ''}
+                      onBlur={(e) => updateMaterial(selectedMaterial.id, { actual_amount: e.target.value ? parseFloat(e.target.value) : undefined })}
+                      className="input-modern !py-2 text-sm"
+                    />
+                  </div>
                 </div>
               </div>
 

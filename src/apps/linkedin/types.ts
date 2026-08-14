@@ -1,6 +1,32 @@
 import type { QualificationInput } from '../../lib/qualify/types';
 
-export type LeadStatus = 'new' | 'requested' | 'connected' | 'replied' | 'meeting';
+/**
+ * The live stages, then the terminal ones.
+ *
+ * `no_reply` and `disqualified` are kept apart on purpose: one is the market's
+ * answer and one is yours. Collapsing them would hide the difference between
+ * outreach that is not landing and targeting that was wrong.
+ */
+export type LeadStatus =
+  | 'new'
+  | 'requested'
+  | 'connected'
+  | 'replied'
+  | 'meeting'
+  | 'won'
+  | 'lost'
+  | 'no_reply'
+  | 'disqualified';
+
+/** Nothing further is owed on these, so the cadence queue skips them. */
+export const TERMINAL_STATUSES: ReadonlySet<LeadStatus> = new Set<LeadStatus>([
+  'won',
+  'lost',
+  'no_reply',
+  'disqualified',
+]);
+
+export const isTerminal = (status: LeadStatus): boolean => TERMINAL_STATUSES.has(status);
 
 /**
  * A generated flow, keyed by method-pack step key.
@@ -90,6 +116,11 @@ export interface Lead {
    */
   qualification?: QualificationInput | null;
   status: LeadStatus;
+  /** Why it ended, in the operator's own words. */
+  close_reason?: string | null;
+  /** Set when won. The figure any funnel rate is worth anything against. */
+  deal_value?: number | null;
+  status_changed_at?: string | null;
   created_at: string;
   updated_at: string;
 }

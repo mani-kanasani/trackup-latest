@@ -7,6 +7,14 @@ interface DataContextType {
   materials: JobMaterial[];
   addMaterial: (material: Omit<JobMaterial, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<{ success: boolean; error?: string }>;
   updateMaterialStatus: (id: string, status: JobMaterial['status']) => void;
+  /**
+   * Edit a saved proposal after the fact.
+   *
+   * actual_amount was written once at DRAFT time and had no update path
+   * anywhere, so Cash Collected could never move after creation — the one KPI
+   * that is supposed to change when a deal actually closes.
+   */
+  updateMaterial: (id: string, patch: Partial<JobMaterial>) => Promise<{ success: boolean; error?: string }>;
   getKPIData: (dateRange: DateRange) => KPIData;
   getDateRange: (filter: DateFilter, customRange?: DateRange) => DateRange;
   loading: boolean;
@@ -159,6 +167,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateMaterial = async (id: string, patch: Partial<JobMaterial>) => {
+    if (!user) return { success: false, error: 'You must be signed in.' };
+
+    const previous = materials.find((m) => m.id === id);
+    setMaterials((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch, updated_at: new Date() } : m)));
+
+    const { error } = await supabase
+      .from('jobs')
+      .update({ ...patch, updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating material:', error);
+      // Roll back only the row we touched, so nothing else on screen is lost.
+      if (previous) setMaterials((prev) => prev.map((m) => (m.id === id ? previous : m)));
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  };
+
   const getDateRange = (filter: DateFilter, customRange?: DateRange): DateRange => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -222,7 +250,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <DataContext.Provider value={{ 
       materials, 
       addMaterial, 
-      updateMaterialStatus, 
+      updateMaterialStatus,
+      updateMaterial,
       getKPIData,
       getDateRange,
       loading

@@ -4,8 +4,9 @@ import {
   ThumbsUp, ThumbsDown, Lightbulb,
 } from 'lucide-react';
 import { useLeads, type MutationResult } from './useLeads';
-import { Lead, LeadStatus, OutreachFlow, migrateFlow, readSentSteps } from './types';
+import { Lead, LeadStatus, OutreachFlow, migrateFlow, readSentSteps, isTerminal } from './types';
 import { getPack } from '../../lib/method/packs';
+import { cadenceFor, dueQueue, pendingInvitationDays, STALE_INVITATION_DAYS } from '../../lib/cadence';
 import { supabase } from '../../lib/supabase';
 import { loadAIConfig } from '../../lib/aiConfig';
 import { loadUserContext, senderAbout } from '../../lib/userContext';
@@ -18,8 +19,12 @@ import type { ValidationResult } from '../../lib/method/types';
 
 const STATUS_LABELS: Record<LeadStatus, string> = {
   new: 'New', requested: 'Requested', connected: 'Connected', replied: 'Replied', meeting: 'Meeting',
+  won: 'Won', lost: 'Lost', no_reply: 'No reply', disqualified: 'Disqualified',
 };
-const STATUS_ORDER: LeadStatus[] = ['new', 'requested', 'connected', 'replied', 'meeting'];
+const STATUS_ORDER: LeadStatus[] = [
+  'new', 'requested', 'connected', 'replied', 'meeting',
+  'won', 'lost', 'no_reply', 'disqualified',
+];
 
 /**
  * What gets rendered comes from the pack, grouped by its own `group` field.
@@ -48,7 +53,18 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const { leads, loading, addLead, updateLead, deleteLead } = useLeads();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [showDue, setShowDue] = useState(true);
   const selected = leads.find((l) => l.id === selectedId) ?? null;
+
+  // "Who do I message today" is the question an operator actually has every
+  // morning, and until now the app could not answer it: the steps were ordered
+  // and never dated, so the only way to know was to remember.
+  const due = useMemo(() => {
+    const now = new Date();
+    return dueQueue(
+      leads.map((l) => cadenceFor(l, LINKEDIN_PACK, readSentSteps(l.sent_steps), now)),
+    );
+  }, [leads]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-linkedin-50/50 to-white dark:from-gray-900 dark:to-gray-950">
@@ -73,6 +89,38 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
 
       <div className="flex-1 max-w-6xl w-full mx-auto px-6 py-6 grid lg:grid-cols-[320px_1fr] gap-6 overflow-hidden">
         <div className="overflow-y-auto pr-1">
+          {due.length > 0 && showDue && (
+            <div className="mb-4 rounded-xl border border-linkedin-200 dark:border-linkedin-800 bg-linkedin-50/60 dark:bg-linkedin-900/20 p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xs font-bold uppercase tracking-wide text-linkedin-700 dark:text-linkedin-300">
+                  Due now ({due.length})
+                </h2>
+                <button onClick={() => setShowDue(false)} className="text-xs text-gray-500 hover:text-gray-700">Hide</button>
+              </div>
+              <div className="space-y-1.5">
+                {due.slice(0, 8).map((c) => (
+                  <button
+                    key={c.lead.id}
+                    onClick={() => setSelectedId(c.lead.id)}
+                    className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-white dark:hover:bg-gray-800"
+                  >
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{c.lead.name}</span>
+                    <span className="block text-[11px] text-gray-500 dark:text-gray-400">
+                      {c.next?.step.label}
+                      {c.daysOverdue > 0
+                        ? ` · ${c.daysOverdue} day${c.daysOverdue === 1 ? '' : 's'} late`
+                        : c.next?.dueAt
+                          ? ' · due today'
+                          : ' · not started'}
+                    </span>
+                  </button>
+                ))}
+                {due.length > 8 && (
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 px-2">and {due.length - 8} more</p>
+                )}
+              </div>
+            </div>
+          )}
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Leads ({leads.length})</h2>
           {loading ? (
             <div className="text-sm text-gray-400 p-4">Loading…</div>
@@ -172,6 +220,18 @@ const LeadDetail: React.FC<{
   // Read through the tolerant reader: rows written before steps carried times
   // hold a bare array, and their tick marks must not vanish.
   const sentSteps = useMemo(() => readSentSteps(lead.sent_steps), [lead.sent_steps]);
+  const cadence = useMemo(
+    () => cadenceFor(lead, LINKEDIN_PACK, sentSteps, new Date()),
+    [lead, sentSteps],
+  );
+  const dueByKey = useMemo(
+    () => Object.fromEntries(cadence.steps.map((d) => [d.step.key, d])),
+    [cadence],
+  );
+  const pendingDays = useMemo(
+    () => pendingInvitationDays(lead, sentSteps, new Date()),
+    [lead, sentSteps],
+  );
 
   // --- the screen, which runs before anything is written ---------------------
   //
@@ -310,13 +370,24 @@ const LeadDetail: React.FC<{
     if (res.error) setError(`That edit is on screen but did not save: ${res.error}`);
   };
 
-  const Step: React.FC<{ id: string; title: string; text: string; track?: boolean; tone?: 'positive' | 'objection' }> = ({ id, title, text, track = true, tone }) => (
+  const Step: React.FC<{ id: string; title: string; text: string; track?: boolean; timing?: string; tone?: 'positive' | 'objection' }> = ({ id, title, text, track = true, timing, tone }) => (
     <div className={`card-modern p-4 ${tone === 'positive' ? 'border-l-4 border-l-green-400' : tone === 'objection' ? 'border-l-4 border-l-amber-400' : ''}`}>
       <div className="flex items-center justify-between mb-2">
         <h4 className="font-semibold text-sm text-gray-900 dark:text-white flex items-center">
           {tone === 'positive' && <ThumbsUp className="w-4 h-4 mr-1.5 text-green-500" />}
           {tone === 'objection' && <ThumbsDown className="w-4 h-4 mr-1.5 text-amber-500" />}
           {title}
+          {timing && (
+            <span className={`ml-2 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ${
+              /overdue/.test(timing)
+                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                : /due today/.test(timing)
+                  ? 'bg-linkedin-100 text-linkedin-700 dark:bg-linkedin-900/40 dark:text-linkedin-300'
+                  : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+            }`}>
+              {timing}
+            </span>
+          )}
         </h4>
         <div className="flex items-center gap-3">
           {track && (
@@ -364,7 +435,12 @@ const LeadDetail: React.FC<{
         </div>
         <div className="flex flex-wrap items-center gap-3 mt-4">
           <select value={lead.status} onChange={(e) => onUpdate(lead.id, { status: e.target.value as LeadStatus })} className="input-modern !py-2 !w-auto text-sm">
-            {STATUS_ORDER.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+            <optgroup label="In flight">
+              {STATUS_ORDER.filter((s) => !isTerminal(s)).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+            </optgroup>
+            <optgroup label="Closed">
+              {STATUS_ORDER.filter(isTerminal).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+            </optgroup>
           </select>
           <button
             onClick={handleGenerate}
@@ -400,6 +476,42 @@ const LeadDetail: React.FC<{
               >
                 I disagree — write to them anyway
               </button>
+            )}
+          </div>
+        )}
+
+        {/* Only once it is closed. A "why did you lose this" field beside a live
+            lead is noise; beside a closed one it is the only record of what
+            happened, and the deal value is the number every rate needs. */}
+        {isTerminal(lead.status) && (
+          <div className="mt-4 grid sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                What happened
+              </label>
+              <input
+                defaultValue={lead.close_reason ?? ''}
+                key={`reason:${lead.id}:${lead.status}`}
+                onBlur={(e) => onUpdate(lead.id, { close_reason: e.target.value })}
+                placeholder="Went with someone in-house. Never opened. Budget pulled."
+                className="input-modern !py-2 text-sm"
+              />
+            </div>
+            {lead.status === 'won' && (
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                  Deal value
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue={lead.deal_value ?? ''}
+                  key={`value:${lead.id}`}
+                  onBlur={(e) => onUpdate(lead.id, { deal_value: e.target.value ? parseFloat(e.target.value) : null })}
+                  className="input-modern !py-2 text-sm"
+                />
+              </div>
             )}
           </div>
         )}
@@ -446,6 +558,25 @@ const LeadDetail: React.FC<{
         )}
       </div>
 
+      {cadence.haltedBecause && (
+        <div className="flex items-start text-sm bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 text-green-800 dark:text-green-300">
+          <ThumbsUp className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+          <span>{cadence.haltedBecause}</span>
+        </div>
+      )}
+
+      {/* The pack makes withdrawing invitations pending past three weeks a law,
+          and nothing in the app could compute that age until steps carried a time. */}
+      {pendingDays !== null && pendingDays > STALE_INVITATION_DAYS && (
+        <div className="flex items-start text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 text-amber-800 dark:text-amber-300">
+          <Lightbulb className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+          <span>
+            This invitation has been pending {pendingDays} days. Past {STALE_INVITATION_DAYS} it is worth
+            withdrawing: pending invitations count against your weekly limit and a stale one is not coming back.
+          </span>
+        </div>
+      )}
+
       <QualifyPanel value={qual} onChange={changeQual} error={qualError} />
 
       {flow ? (
@@ -470,6 +601,18 @@ const LeadDetail: React.FC<{
                     key={s.key}
                     id={s.key}
                     title={TRACKED_GROUPS.has(group) ? `${i + 1} · ${s.label}` : s.label}
+                    timing={(() => {
+                      // The pack has always carried the day. Rendering the index
+                      // and dropping it told the operator the order of four
+                      // touches and never the spacing.
+                      const d = dueByKey[s.key];
+                      if (!d) return undefined;
+                      if (d.sent) return d.sentAt ? `sent ${new Date(d.sentAt).toLocaleDateString()}` : 'sent';
+                      if (d.daysUntilDue == null) return typeof s.day === 'number' ? `day ${s.day}` : undefined;
+                      if (d.daysUntilDue < 0) return `${-d.daysUntilDue} day${d.daysUntilDue === -1 ? '' : 's'} overdue`;
+                      if (d.daysUntilDue === 0) return 'due today';
+                      return `in ${d.daysUntilDue} day${d.daysUntilDue === 1 ? '' : 's'}`;
+                    })()}
                     text={flow[s.key]}
                     track={TRACKED_GROUPS.has(group)}
                     tone={group === 'If they are interested' ? 'positive' : group === 'Other replies' ? 'objection' : undefined}
