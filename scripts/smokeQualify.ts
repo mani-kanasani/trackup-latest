@@ -121,6 +121,14 @@ check('the two rungs produce different briefs', topPrompt !== bottomPrompt);
 const tierCPrompt = renderQualification(noNiche);
 check('the Tier C ceiling reaches the prompt', tierCPrompt.includes(TIERS.C.ceiling));
 check('the Tier C ceiling forbids an invented detail', /inventing a specific detail/i.test(tierCPrompt));
+// `effort` is operator advice, not a copy constraint. In the prompt it
+// contradicted the output contract: "short sequence only" beside a request for
+// every step in the pack.
+check(
+  'the tier effort stays out of the prompt',
+  !Object.values(TIERS).some((t) => tierCPrompt.includes(t.effort)),
+);
+check('no brief tells the model how many touches to send', !/short sequence only/i.test(tierCPrompt));
 
 const unconfirmed = qualify({ pillars: { repetitive: 'yes', timeConsuming: 'yes', errorProne: 'no' } });
 const unconfirmedPrompt = renderQualification(unconfirmed);

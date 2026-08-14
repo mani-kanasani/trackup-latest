@@ -8,7 +8,7 @@ import { Lead, LeadStatus, OutreachFlow, migrateFlow } from './types';
 import { getPack } from '../../lib/method/packs';
 import { supabase } from '../../lib/supabase';
 import { loadAIConfig } from '../../lib/aiConfig';
-import { loadUserContext, contextToPrompt } from '../../lib/userContext';
+import { loadUserContext, senderAbout } from '../../lib/userContext';
 import { buildChannelPrompt, checkAgainstMethod } from '../../lib/method/forChannel';
 import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
@@ -236,7 +236,9 @@ const LeadDetail: React.FC<{
             industry: lead.industry, linkedin_url: lead.linkedin_url,
             company_website: lead.company_website, potential_services: lead.potential_services,
           },
-          context: contextToPrompt(loadUserContext()),
+          // Only who they are. Proof comes from the vault, through the system
+          // prompt, where the naming rule and the do-not-round framing apply.
+          context: senderAbout(loadUserContext()),
           systemPrompt: method.systemPrompt,
           // The output contract, straight from the pack. Without this the
           // generator invents its own shape and the validator grades keys

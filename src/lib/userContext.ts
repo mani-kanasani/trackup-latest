@@ -30,7 +30,27 @@ export const saveUserContext = (context: UserContext): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(context));
 };
 
-// Flattened string passed to the edge functions and inserted into the prompt.
+/**
+ * Who the sender is, and nothing else. This is what generators may be given.
+ *
+ * `contextToPrompt` must never reach a generator that also receives proof from
+ * the vault. It carries wins and testimonials as a free-text blob labelled "use
+ * specifics where relevant", which lands in the user prompt while the system
+ * prompt is telling the model to use exactly one matched case study and to never
+ * state a number that is not on record. The model gets both, and the blob wins
+ * because it is closer to the task — so a number nobody vetted, attributed to a
+ * client who was never cleared for naming, ends up in the copy.
+ *
+ * The vault's own empty-vault fallback in `forChannel` already handles the user
+ * who has wins and no case studies, and it applies the cap and the framing.
+ */
+export const senderAbout = (c: UserContext): string => c.about?.trim() ?? '';
+
+/**
+ * The full flattened context, including wins and testimonials.
+ *
+ * Only for callers with no proof pipeline of their own. Prefer `senderAbout`.
+ */
 export const contextToPrompt = (c: UserContext): string => {
   const parts: string[] = [];
   if (c.about?.trim()) parts.push(`About me / my agency:\n${c.about.trim()}`);

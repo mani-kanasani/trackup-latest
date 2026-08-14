@@ -39,9 +39,14 @@ export const renderQualification = (q: QualificationResult): string => {
 
   if (q.tier) {
     const tier = TIERS[q.tier];
+    // Only the ceiling goes to the model. `effort` is advice to the OPERATOR
+    // about how much of themselves to spend — how many touches to send, whether
+    // to answer replies personally — and putting it in the prompt made the
+    // request contradict itself: "short sequence only" alongside a contract
+    // demanding every step in the pack. The model produces the artifact; how
+    // much of it gets sent is the operator's call, shown in the UI.
     sections.push(
-      `## How much this lead has earned\n${tier.label}. ${tier.effort}\n\n` +
-        `The ceiling on what you may claim to know:\n${tier.ceiling}`,
+      `## What you may claim to know about this lead\n${tier.label}.\n${tier.ceiling}`,
     );
   }
 
