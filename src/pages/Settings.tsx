@@ -6,10 +6,33 @@ import { AIProvider, PROVIDER_META, loadAIConfig, saveAIConfig } from '../lib/ai
 import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
 import { loadUserContext, saveUserContext, UserContext } from '../lib/userContext';
 import { CustomPrompts, DEFAULT_PROMPTS, PROMPT_META, PromptKey, loadPrompts, savePrompts } from '../lib/prompts';
+import { getPack } from '../lib/method/packs';
+import { composeSystemPrompt } from '../lib/method/compose';
+import type { ChannelId } from '../lib/method/types';
 import { supabase } from '../lib/supabase';
 import { contractOf, EXPECTED_CONTRACT, probeFunctionVersions, type FunctionVersion } from '../lib/deployment';
 import { ModelSelect } from '../components/UI/ModelSelect';
 import { CaseStudyVault } from '../components/Settings/CaseStudyVault';
+
+/**
+ * What is actually sent, so "there is no prompt" is answerable by reading it.
+ *
+ * The method is composed from the packs at generation time and never shown, so
+ * an empty box in this section read as an empty prompt. It is not: it is an
+ * optional addition to roughly nineteen thousand characters of doctrine.
+ */
+const PROMPT_CHANNEL: Record<PromptKey, ChannelId> = { proposal: 'upwork', outreach: 'linkedin' };
+
+const methodPromptFor = (key: PromptKey): string =>
+  composeSystemPrompt({ pack: getPack(PROMPT_CHANNEL[key]) });
+
+const METHOD_SUMMARY = (() => {
+  const packs = [getPack('upwork'), getPack('linkedin'), getPack('coldEmail')];
+  const laws = packs.reduce((n, p) => n + p.laws.length, 0);
+  const banned = packs.reduce((n, p) => n + p.banned.length, 0);
+  const steps = packs.reduce((n, p) => n + p.structure.length, 0);
+  return `${laws} laws, ${banned} banned patterns and ${steps} steps across the three channels`;
+})();
 
 export const Settings: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -409,12 +432,38 @@ export const Settings: React.FC = () => {
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25">
             <Wand2 className="w-4 h-4 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">System prompts</h3>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Your additions to the method</h3>
         </div>
-        <p className="text-base text-gray-600 dark:text-gray-400 mb-6">
-          Rewrite how the AI thinks for each generator, its voice, strategy, and what to emphasize. The
-          required output format is enforced automatically, so edits can't break generation. Stored in this browser.
+        {/* This section used to be called "System prompts" and said the box
+            "controls the voice and approach". Under an empty box that reads as
+            "there is no prompt", when in fact a full method is already running
+            and invisible. Say what is actually there, and let people read it. */}
+        <p className="text-base text-gray-600 dark:text-gray-400 mb-4">
+          Every channel already writes to a complete method: {METHOD_SUMMARY}. That is built in and always
+          applied. You do not need to write anything here.
         </p>
+        <p className="text-base text-gray-600 dark:text-gray-400 mb-6">
+          These boxes are for anything you want to add <span className="font-semibold">on top of</span> it, in
+          your own words. Blank is the normal state, and the method is stronger on its own than with a vague
+          instruction placed after it. Stored in this browser.
+        </p>
+        <details className="mb-6 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <summary className="px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none hover:bg-gray-50 dark:hover:bg-gray-800/60">
+            Read the method that is already running
+          </summary>
+          <div className="border-t border-gray-200 dark:border-gray-700">
+            {(Object.keys(PROMPT_META) as PromptKey[]).map((key) => (
+              <div key={key} className="p-4 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                  {PROMPT_META[key].label}
+                </p>
+                <pre className="max-h-56 overflow-auto bg-gray-50 dark:bg-gray-900/60 rounded-lg p-3 text-[11px] leading-relaxed font-mono text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                  {methodPromptFor(key)}
+                </pre>
+              </div>
+            ))}
+          </div>
+        </details>
         <div className="space-y-6">
           {(Object.keys(PROMPT_META) as PromptKey[]).map((key) => (
             <div key={key}>
