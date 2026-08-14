@@ -27,8 +27,10 @@ export interface ProviderMeta {
 export const PROVIDER_META: Record<AIProvider, ProviderMeta> = {
   gemini: {
     label: 'Google Gemini (free tier)',
-    defaultModel: 'gemini-2.5-flash',
-    modelOptions: ['gemini-2.5-flash', 'gemini-3-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash'],
+    defaultModel: 'gemini-3.7-flash',
+    // gemini-3-flash never existed (the ID is gemini-3-flash-preview),
+    // gemini-2.0-flash shut down 1 Jun 2026, gemini-1.5-flash 29 Sep 2025.
+    modelOptions: ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'],
     keyLabel: 'Gemini API key',
     keyUrl: 'https://aistudio.google.com/app/apikey',
     free: true,
@@ -39,7 +41,9 @@ export const PROVIDER_META: Record<AIProvider, ProviderMeta> = {
   openai: {
     label: 'OpenAI',
     defaultModel: 'gpt-4o-mini',
-    modelOptions: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'o3-mini'],
+    // gpt-4.1-nano and o3-mini both shut down 23 Oct 2026, and o3-mini rejects
+    // temperature, so neither belongs in a preset list.
+    modelOptions: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-4.1-mini'],
     keyLabel: 'OpenAI API key',
     keyUrl: 'https://platform.openai.com/api-keys',
     free: false,
@@ -48,7 +52,9 @@ export const PROVIDER_META: Record<AIProvider, ProviderMeta> = {
   anthropic: {
     label: 'Anthropic Claude',
     defaultModel: 'claude-sonnet-5',
-    modelOptions: ['claude-sonnet-5', 'claude-opus-5', 'claude-haiku-4-5', 'claude-3-5-haiku-latest'],
+    // claude-3-5-haiku-latest was retired 19 Feb 2026; requests to it fail, and
+    // the alias does not resolve to anything live.
+    modelOptions: ['claude-sonnet-5', 'claude-opus-5', 'claude-haiku-4-5', 'claude-fable-5'],
     keyLabel: 'Anthropic API key',
     keyUrl: 'https://console.anthropic.com/settings/keys',
     free: false,

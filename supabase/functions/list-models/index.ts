@@ -138,11 +138,15 @@ async function probeModel(provider: Provider, apiKey: string, model: string): Pr
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-      body: JSON.stringify({ model, max_tokens: 8, messages: [{ role: 'user', content: prompt }] }),
+      // Thinking tokens count toward max_tokens on Claude 5, so a tiny cap can be
+      // consumed before any text is produced. 64 leaves room for one word.
+      body: JSON.stringify({ model, max_tokens: 64, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!res.ok) throw new Error(await readProviderError(res));
     const data = await res.json();
-    return String(data?.content?.[0]?.text ?? '').trim();
+    // By type, never by position: thinking blocks precede text on Claude 5.
+    const block = (data?.content ?? []).find((b: { type: string }) => b.type === 'text');
+    return String(block?.text ?? '').trim();
   }
 
   const baseUrl = provider === 'openai'
@@ -151,7 +155,11 @@ async function probeModel(provider: Provider, apiKey: string, model: string): Pr
   const res = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, max_completion_tokens: 8, max_tokens: 8, messages: [{ role: 'user', content: prompt }] }),
+    // Only max_completion_tokens. max_tokens is deprecated and rejected outright
+    // by o-series models, so sending both reported a perfectly good key as
+    // broken. 16 rather than 8 because on a reasoning model the cap covers
+    // reasoning tokens too, and 8 can be spent before any visible text exists.
+    body: JSON.stringify({ model, max_completion_tokens: 16, messages: [{ role: 'user', content: prompt }] }),
   });
   if (!res.ok) throw new Error(await readProviderError(res));
   const data = await res.json();

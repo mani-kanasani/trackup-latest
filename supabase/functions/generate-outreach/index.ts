@@ -80,6 +80,48 @@ const CONTRACT = 2;
 type Provider = 'gemini' | 'openai' | 'anthropic';
 
 /**
+ * Ask Anthropic for JSON without prefilling the assistant turn.
+ *
+ * The prefill trick ("{" as a trailing assistant message) returns a hard 400 on
+ * Claude 4.6-generation models and later, which includes claude-sonnet-5 and
+ * claude-opus-5. Structured outputs are the supported replacement and work on
+ * every model we offer, so there is one code path rather than a per-model
+ * branch.
+ */
+const jsonSchemaFor = (keys: string[]) => ({
+  type: 'json_schema',
+  schema: {
+    type: 'object',
+    properties: Object.fromEntries(keys.map((k) => [k, { type: 'string' }])),
+    required: keys,
+    // Required by the API on every object in the schema.
+    additionalProperties: false,
+  },
+});
+
+/**
+ * The text out of a Messages response.
+ *
+ * Never index `content` positionally. Thinking is on by default on Opus 5 and
+ * Sonnet 5, so content[0] is a thinking block and `content[0].text` is
+ * undefined. Worse, thinking is adaptive: the model skips it on simple requests,
+ * so positional access fails INTERMITTENTLY and reads as a flaky model rather
+ * than a client bug. Finding the block by type is also forward-safe against
+ * tool_use blocks appearing later.
+ */
+const textFrom = (data: { content?: { type: string; text?: string }[]; stop_reason?: string }): string => {
+  const block = (data.content ?? []).find((b) => b.type === 'text');
+  if (!block?.text) {
+    throw new Error(
+      `The model returned no text. stop_reason: ${data.stop_reason ?? 'unknown'}.` +
+        (data.stop_reason === 'max_tokens' ? ' Raise max_tokens.' : ''),
+    );
+  }
+  return block.text;
+};
+
+
+/**
  * The sentence out of a provider error, rather than the whole JSON body.
  *
  * Providers bury the useful line at different depths, and dumping the raw body
@@ -200,7 +242,9 @@ async function callOpenAICompatible(
         { role: 'user', content: prompt },
       ],
     };
-    if (withTemperature) body.temperature = 0.8;
+    // Reasoning models reject temperature outright, so it is skipped rather
+    // than sent and retried: a wasted round trip on every single call.
+    if (withTemperature && !/^(o\d|gpt-5)/.test(model)) body.temperature = 0.8;
     if (jsonMode) body.response_format = { type: 'json_object' };
     return fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
@@ -209,16 +253,20 @@ async function callOpenAICompatible(
     });
   };
 
-  // Ask for strict JSON, then peel off the optional parameters one at a time.
+  // Retry drops TEMPERATURE, never response_format.
+  //
+  // The old fallback stripped both together. Since the usual cause is a
+  // reasoning model rejecting temperature, the retry then succeeded with no JSON
+  // enforcement at all: a 200 carrying prose or fenced markdown, which parses to
+  // garbage downstream. A silent corruption is worse than the error it replaced.
   let res = await send(useJsonMode, true);
-  if (!res.ok && useJsonMode) res = await send(false, true);
-  if (!res.ok) res = await send(false, false);
+  if (!res.ok) res = await send(useJsonMode, false);
   if (!res.ok) throw new Error(`Provider request failed. ${await readProviderError(res)}`);
   const data = await res.json();
   return data?.choices?.[0]?.message?.content ?? '';
 }
 
-async function callAnthropic(apiKey: string, model: string, system: string, prompt: string): Promise<string> {
+async function callAnthropic(apiKey: string, model: string, system: string, prompt: string, jsonKeys: string[]): Promise<string> {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -238,21 +286,17 @@ async function callAnthropic(apiKey: string, model: string, system: string, prom
       // older ones, since the prefill and the pack constrain the output far more
       // than a sampling parameter does.
       system: system,
-      // Prefilling the assistant turn with an opening brace is Anthropic's
-      // equivalent of OpenAI's json_object mode: the reply continues from "{",
-      // so there is no position in which a preamble can be written. Without it,
-      // a 17,000-character system prompt of prose doctrine reliably produces a
-      // sentence or two before the JSON, and the parse fails.
-      messages: [
-        { role: 'user', content: `${prompt}\n\nRespond with ONLY the raw JSON object.` },
-        { role: 'assistant', content: '{' },
-      ],
+      // No assistant prefill. It returns a hard 400 on Claude 4.6-generation
+      // models and later, which is both Claude 5 presets including the default,
+      // so the trick that was meant to guarantee JSON would have failed every
+      // request. Structured outputs do the same job and are supported on every
+      // model we offer, so this is one path rather than a per-model branch.
+      output_config: { format: jsonSchemaFor(jsonKeys) },
+      messages: [{ role: 'user', content: prompt }],
     }),
   });
   if (!res.ok) throw new Error(`Anthropic request failed. ${await readProviderError(res)}`);
-  const data = await res.json();
-  // Put back the brace the prefill consumed.
-  return `{${data?.content?.[0]?.text ?? ''}`;
+  return textFrom(await res.json());
 }
 
 function parseFlow(raw: string, steps: OutputStep[]): Record<string, string> {
@@ -361,7 +405,7 @@ Deno.serve(async (req: Request) => {
 
     let raw: string;
     if (provider === 'anthropic') {
-      raw = await callAnthropic(apiKey, model, system, prompt);
+      raw = await callAnthropic(apiKey, model, system, prompt, [...steps.map((st) => st.key), STRATEGY_KEY]);
     } else if (provider === 'gemini') {
       raw = await callOpenAICompatible(
         'https://generativelanguage.googleapis.com/v1beta/openai',

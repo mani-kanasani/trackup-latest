@@ -47,6 +47,64 @@ const CONTRACT = 2;
 type Provider = 'gemini' | 'openai' | 'anthropic';
 
 /**
+ * Ask Anthropic for JSON without prefilling the assistant turn.
+ *
+ * The prefill trick ("{" as a trailing assistant message) returns a hard 400 on
+ * Claude 4.6-generation models and later, which includes claude-sonnet-5 and
+ * claude-opus-5. Structured outputs are the supported replacement and work on
+ * every model we offer, so there is one code path rather than a per-model
+ * branch.
+ */
+const jsonSchemaFor = (keys: string[], extras: Record<string, unknown> = {}) => ({
+  type: 'json_schema',
+  schema: {
+    type: 'object',
+    properties: {
+      ...Object.fromEntries(keys.map((k) => [k, { type: 'string' }])),
+      ...extras,
+    },
+    required: [...keys, ...Object.keys(extras)],
+    // Required by the API on every object in the schema. It also means any key
+    // the prompt asks for and the schema omits is REJECTED, which is why
+    // proposal_sections has to be declared rather than left implicit.
+    additionalProperties: false,
+  },
+});
+
+/** The one non-string field the proposal asks for. */
+const SECTIONS_SCHEMA = {
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: { heading: { type: 'string' }, body: { type: 'string' } },
+    required: ['heading', 'body'],
+    additionalProperties: false,
+  },
+};
+
+/**
+ * The text out of a Messages response.
+ *
+ * Never index `content` positionally. Thinking is on by default on Opus 5 and
+ * Sonnet 5, so content[0] is a thinking block and `content[0].text` is
+ * undefined. Worse, thinking is adaptive: the model skips it on simple requests,
+ * so positional access fails INTERMITTENTLY and reads as a flaky model rather
+ * than a client bug. Finding the block by type is also forward-safe against
+ * tool_use blocks appearing later.
+ */
+const textFrom = (data: { content?: { type: string; text?: string }[]; stop_reason?: string }): string => {
+  const block = (data.content ?? []).find((b) => b.type === 'text');
+  if (!block?.text) {
+    throw new Error(
+      `The model returned no text. stop_reason: ${data.stop_reason ?? 'unknown'}.` +
+        (data.stop_reason === 'max_tokens' ? ' Raise max_tokens.' : ''),
+    );
+  }
+  return block.text;
+};
+
+
+/**
  * The sentence out of a provider error, rather than the whole JSON body.
  *
  * Providers bury the useful line at different depths, and dumping the raw body
@@ -186,7 +244,9 @@ async function callOpenAICompatible(
         { role: 'user', content: userPrompt },
       ],
     };
-    if (withTemperature) body.temperature = 0.7;
+    // Reasoning models reject temperature outright, so it is skipped rather
+    // than sent and retried: a wasted round trip on every single call.
+    if (withTemperature && !/^(o\d|gpt-5)/.test(model)) body.temperature = 0.7;
     if (jsonMode) body.response_format = { type: 'json_object' };
     return fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
@@ -195,10 +255,14 @@ async function callOpenAICompatible(
     });
   };
 
-  // Ask for strict JSON, then peel off the optional parameters one at a time.
+  // Retry drops TEMPERATURE, never response_format.
+  //
+  // The old fallback stripped both together. Since the usual cause is a
+  // reasoning model rejecting temperature, the retry then succeeded with no JSON
+  // enforcement at all: a 200 carrying prose or fenced markdown, which parses to
+  // garbage downstream. A silent corruption is worse than the error it replaced.
   let res = await send(useJsonMode, true);
-  if (!res.ok && useJsonMode) res = await send(false, true);
-  if (!res.ok) res = await send(false, false);
+  if (!res.ok) res = await send(useJsonMode, false);
   if (!res.ok) throw new Error(`Provider request failed. ${await readProviderError(res)}`);
 
   const data = await res.json();
@@ -210,6 +274,7 @@ async function callAnthropic(
   model: string,
   system: string,
   userPrompt: string,
+  jsonKeys: string[],
 ): Promise<string> {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -229,16 +294,10 @@ async function callAnthropic(
       // older ones, since the prefill and the pack constrain the output far more
       // than a sampling parameter does.
       system: system,
-      // See the note in generate-outreach: prefilling the assistant turn with an
-      // opening brace is Anthropic's json_object mode, and without it a long
-      // prose system prompt reliably produces a preamble that breaks the parse.
-      messages: [
-        {
-          role: 'user',
-          content: `${userPrompt}\n\nRespond with ONLY the raw JSON object, no markdown fences.`,
-        },
-        { role: 'assistant', content: '{' },
-      ],
+      // See the note in generate-outreach: the prefill returns a 400 on Claude
+      // 4.6 and later, so structured outputs carry the JSON contract instead.
+      output_config: { format: jsonSchemaFor(jsonKeys, { proposal_sections: SECTIONS_SCHEMA }) },
+      messages: [{ role: 'user', content: userPrompt }],
     }),
   });
 
@@ -246,9 +305,7 @@ async function callAnthropic(
     throw new Error(`Anthropic request failed. ${await readProviderError(res)}`);
   }
 
-  const data = await res.json();
-  // Put back the brace the prefill consumed.
-  return `{${data?.content?.[0]?.text ?? ''}`;
+  return textFrom(await res.json());
 }
 
 async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 'apiKey'>> & {
@@ -264,7 +321,10 @@ async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 
 
   let raw: string;
   if (input.provider === 'anthropic') {
-    raw = await callAnthropic(input.apiKey, input.model, input.system, userPrompt);
+    raw = await callAnthropic(
+      input.apiKey, input.model, input.system, userPrompt,
+      ['title', ...input.steps.map((st) => st.key), 'mermaid_code', 'video_script'],
+    );
   } else if (input.provider === 'gemini') {
     raw = await callOpenAICompatible(
       'https://generativelanguage.googleapis.com/v1beta/openai',
