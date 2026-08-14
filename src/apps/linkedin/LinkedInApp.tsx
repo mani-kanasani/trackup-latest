@@ -4,9 +4,10 @@ import {
   ThumbsUp, ThumbsDown, Lightbulb,
 } from 'lucide-react';
 import { useLeads, type MutationResult } from './useLeads';
-import { Lead, LeadStatus, OutreachFlow, migrateFlow, readSentSteps, isTerminal } from './types';
+import { Lead, LeadStatus, OutreachFlow, GenerationMeta, migrateFlow, readSentSteps, isTerminal } from './types';
 import { getPack } from '../../lib/method/packs';
 import { cadenceFor, dueQueue, pendingInvitationDays, STALE_INVITATION_DAYS } from '../../lib/cadence';
+import { funnelFor, closedCount, revenueFrom, MIN_SAMPLE } from '../../lib/funnel';
 import { supabase } from '../../lib/supabase';
 import { loadAIConfig } from '../../lib/aiConfig';
 import { loadUserContext, senderAbout } from '../../lib/userContext';
@@ -59,6 +60,10 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   // "Who do I message today" is the question an operator actually has every
   // morning, and until now the app could not answer it: the steps were ordered
   // and never dated, so the only way to know was to remember.
+  const funnel = useMemo(() => funnelFor(leads), [leads]);
+  const closed = useMemo(() => closedCount(leads), [leads]);
+  const revenue = useMemo(() => revenueFrom(leads), [leads]);
+
   const due = useMemo(() => {
     const now = new Date();
     return dueQueue(
@@ -86,6 +91,33 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
           </button>
         </div>
       </header>
+
+      {leads.length > 0 && (
+        <div className="max-w-6xl w-full mx-auto px-6 pt-5">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            {funnel.map((st) => (
+              <div key={st.key} className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-3">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{st.label}</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{st.count}</p>
+                {/* A rate or the reason there isn't one. Never a percentage over
+                    a handful of leads: three connections and one reply is not a
+                    33% reply rate, and printing one is how somebody talks
+                    themselves into keeping a message that is not working. */}
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                  {st.rate != null
+                    ? `${Math.round(st.rate * 100)}% of previous`
+                    : st.note ?? ''}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2">
+            {closed} closed{revenue > 0 ? ` · ${revenue.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} won` : ''}
+            {closed === 0 && ' · rates only mean something once leads start closing, so mark the dead ones dead'}
+            {closed > 0 && leads.length < MIN_SAMPLE && ' · still a small sample'}
+          </p>
+        </div>
+      )}
 
       <div className="flex-1 max-w-6xl w-full mx-auto px-6 py-6 grid lg:grid-cols-[320px_1fr] gap-6 overflow-hidden">
         <div className="overflow-y-auto pr-1">
@@ -200,6 +232,7 @@ const LeadDetail: React.FC<{
   // Holds a generation that could not be persisted, so it survives on screen.
   const [localFlow, setLocalFlow] = useState<OutreachFlow | null>(null);
   const [proofUsed, setProofUsed] = useState<string | null>(null);
+  const lastGeneration = lead.generation_meta?.[lead.generation_meta.length - 1] ?? null;
   const [noProof, setNoProof] = useState(false);
   const flow = useMemo(() => migrateFlow(lead.outreach ?? localFlow), [lead.outreach, localFlow]);
   // Deliberately NOT state.
@@ -345,9 +378,31 @@ const LeadDetail: React.FC<{
 
       // Grade the output against the same doctrine that wrote it. Generation is
       // probabilistic; the laws are not.
+      // Everything worth recording is already in scope on this line, and all of
+      // it is otherwise transient: the validator's findings live in component
+      // state, and the qualification verdict is re-derived at read time.
+      const meta: GenerationMeta = {
+        at: new Date().toISOString(),
+        pack_id: method.pack.id,
+        pack_version: method.pack.version,
+        case_study_id: method.chosen?.caseStudy.id ?? null,
+        case_study_title: method.chosen?.caseStudy.title ?? null,
+        case_study_score: method.chosen?.score ?? null,
+        tier: verdict.tier,
+        rung: verdict.rung,
+        verdict: verdict.verdict,
+        // Ids only. The excerpts are the user's own copy and have no business
+        // being duplicated into a log.
+        violation_ids: checkAgainstMethod('linkedin', data as Record<string, string>)
+          .violations.map((v) => v.patternId ?? v.lawId ?? 'empty-step'),
+      };
+
       // The generation is already paid for. If the save fails, say so and keep
       // the flow on screen so it can be copied out rather than regenerated.
-      const saved = await onUpdate(lead.id, { outreach: data });
+      const saved = await onUpdate(lead.id, {
+        outreach: data,
+        generation_meta: [...(lead.generation_meta ?? []), meta],
+      });
       if (saved.error) {
         setLocalFlow(data);
         throw new Error(
@@ -528,6 +583,16 @@ const LeadDetail: React.FC<{
         {proofUsed && (
           <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
             Proof used: <span className="font-medium text-gray-700 dark:text-gray-300">{proofUsed}</span>
+          </p>
+        )}
+
+        {/* Survives a lead switch, unlike the live banners above it. */}
+        {!proofUsed && lastGeneration && (
+          <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+            Written {new Date(lastGeneration.at).toLocaleDateString()} under {lastGeneration.pack_id}{' '}
+            {lastGeneration.pack_version}
+            {lastGeneration.tier ? `, tier ${lastGeneration.tier}` : ''}
+            {lastGeneration.case_study_title ? `, citing “${lastGeneration.case_study_title}”` : ', citing no proof'}.
           </p>
         )}
 

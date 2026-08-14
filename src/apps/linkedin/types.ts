@@ -63,6 +63,22 @@ const LEGACY_KEYS: Record<string, string> = {
  */
 export type SentSteps = Record<string, string>;
 
+/** One generation, as it happened. */
+export interface GenerationMeta {
+  at: string;
+  pack_id: string;
+  pack_version: string;
+  /** Null when the vault was empty and the copy claimed no results. */
+  case_study_id: string | null;
+  case_study_title: string | null;
+  case_study_score: number | null;
+  tier: string | null;
+  rung: string | null;
+  verdict: string;
+  /** Pattern ids only. The excerpts are the user's copy and do not belong in a log. */
+  violation_ids: string[];
+}
+
 export const readSentSteps = (raw: unknown): SentSteps => {
   if (Array.isArray(raw)) {
     return Object.fromEntries(raw.filter((k): k is string => typeof k === 'string').map((k) => [k, '']));
@@ -109,6 +125,16 @@ export interface Lead {
    * always read through `readSentSteps` rather than touching this directly.
    */
   sent_steps?: SentSteps | string[] | null;
+  /**
+   * The conditions each generation was made under, newest last.
+   *
+   * Stored rather than derived, because the two things worth knowing later are
+   * both deliberately transient: the validator's findings live in component
+   * state, and the qualification verdict is re-derived at read time so a
+   * doctrine change re-scores everything. Right for the screen, wrong for a
+   * record of what a message was actually written under.
+   */
+  generation_meta?: GenerationMeta[] | null;
   /**
    * The screen's answers, not its verdict. Storing the derived tier and score
    * would leave every lead frozen against whichever doctrine was current when
