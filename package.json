@@ -1,7 +1,8 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "ember",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "AI outreach suite: method-backed proposals, LinkedIn DMs and cold email, grounded in your own case studies.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +12,8 @@
     "setup": "node scripts/setup.mjs",
     "method:gen": "node scripts/genPacks.mjs",
     "method:check": "node scripts/checkPatterns.mjs",
-    "method:test": "esbuild scripts/smokeMethod.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/smoke.mjs --log-level=error && node node_modules/.cache/smoke.mjs"
+    "method:test": "esbuild scripts/smokeMethod.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/smoke.mjs --log-level=error && node node_modules/.cache/smoke.mjs",
+    "proof:test": "esbuild scripts/smokeProof.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/proof.mjs --log-level=error && node node_modules/.cache/proof.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

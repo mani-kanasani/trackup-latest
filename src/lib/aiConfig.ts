@@ -4,6 +4,8 @@
 // is stored only in this browser's localStorage and sent to our Supabase Edge
 // Function transiently at generation time — it is never persisted on our servers.
 
+import { readMigrating } from './storage';
+
 export type AIProvider = 'gemini' | 'openai' | 'anthropic';
 
 export interface AIConfig {
@@ -54,14 +56,15 @@ export const PROVIDER_META: Record<AIProvider, ProviderMeta> = {
   },
 };
 
-const STORAGE_KEY = 'trackup.aiConfig';
+const STORAGE_KEY = 'ember.aiConfig';
+const LEGACY_STORAGE_KEY = 'trackup.aiConfig';
 
 export const isProvider = (value: unknown): value is AIProvider =>
   value === 'gemini' || value === 'openai' || value === 'anthropic';
 
 export const loadAIConfig = (): AIConfig | null => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = readMigrating(STORAGE_KEY, LEGACY_STORAGE_KEY);
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as Partial<AIConfig>;
@@ -86,4 +89,5 @@ export const saveAIConfig = (config: AIConfig): void => {
 
 export const clearAIConfig = (): void => {
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(LEGACY_STORAGE_KEY);
 };

@@ -26,3 +26,8 @@ dist-ssr
 
 # Supabase CLI
 supabase/.temp
+
+# Build/test artifacts
+*.tsbuildinfo
+node_modules/.cache
+.smoke.mjs

@@ -1,6 +1,6 @@
 # Ember
 
-An AI outreach suite — one login, multiple apps:
+An AI outreach suite — one login, multiple apps, all driven by a shared method engine:
 
 - **TrackUp** — generate & track Upwork proposals (cover letter, workflow diagram, shareable PDF, video script).
 - **LinkedIn DM Generator** — turn leads into personalized connection requests + a branching DM flow.
@@ -14,9 +14,15 @@ Bring your own AI key (Google Gemini free tier, OpenAI, or Anthropic).
 
 - **Frontend:** React + Vite + TypeScript + Tailwind
 - **Storage & auth:** Supabase (Postgres + Auth + Storage)
-- **AI generation:** a single Supabase Edge Function (`generate-proposal`) that
-  calls the user's chosen provider, renders the proposal to a PDF, and stores it
-  in the public `proposals` Storage bucket. **This replaces the old n8n webhook.**
+- **AI generation:** three Supabase Edge Functions. `generate-proposal` calls the
+  user's chosen provider, renders the proposal to a PDF and stores it in the
+  private `proposals` bucket, returning a signed link that is shareable with a
+  client who has no account. `generate-outreach` produces the LinkedIn flow.
+  `list-models` fetches the provider's live model list.
+- **Method engine:** every generator is driven by a channel *method pack*
+  (`src/lib/method/`) carrying the laws, banned patterns and structure for that
+  channel, each law citing its source. The same pack validates the model's output,
+  so doctrine is enforced rather than hoped for. See `npm run method:test`.
 
 ### Bring your own key
 
@@ -57,7 +63,7 @@ npm run setup
 ```
 
 This links your Supabase project and installs the `users`/`jobs`/`leads` tables,
-the public `proposals` Storage bucket, and the three Edge Functions. It runs the
+the private `proposals` Storage bucket, and the three Edge Functions. It runs the
 Supabase CLI via `npx` (downloaded on first use — no global install or Docker
 needed). The functions need no extra secrets: each request carries the user's own
 AI key.

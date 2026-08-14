@@ -8,12 +8,15 @@
 // The anon key is public by design (access is controlled by Row Level Security),
 // so storing it in the browser is safe.
 
+import { readMigrating } from './storage';
+
 export interface SupabaseConfig {
   url: string;
   anonKey: string;
 }
 
-const STORAGE_KEY = 'trackup.supabase';
+const STORAGE_KEY = 'ember.supabase';
+const LEGACY_STORAGE_KEY = 'trackup.supabase';
 
 const normalizeUrl = (url: string): string => url.trim().replace(/\/+$/, '');
 
@@ -29,7 +32,7 @@ export const getSupabaseConfig = (): SupabaseConfig | null => {
   const env = envConfig();
   if (env) return env;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = readMigrating(STORAGE_KEY, LEGACY_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<SupabaseConfig>;
       if (parsed.url && parsed.anonKey) {
@@ -53,6 +56,7 @@ export const saveSupabaseConfig = (config: SupabaseConfig): void => {
 
 export const clearSupabaseConfig = (): void => {
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(LEGACY_STORAGE_KEY);
 };
 
 export const looksLikeSupabaseUrl = (url: string): boolean => /^https?:\/\/.+/.test(url.trim());
