@@ -14,6 +14,8 @@ import { loadPrompts } from '../prompts';
 import { selectBest, rankCases } from '../proof/select';
 import { renderProof } from '../proof/render';
 import type { Audience, CaseStudy, ScoredCase, Target } from '../proof/types';
+import { renderQualification } from '../qualify/render';
+import type { QualificationResult } from '../qualify/types';
 
 /** Maps a channel to the user's editable prompt slot. */
 const PROMPT_SLOT: Record<ChannelId, 'proposal' | 'outreach'> = {
@@ -42,6 +44,12 @@ export interface BuildOptions {
   audience?: Audience;
   /** Force a specific case study, e.g. because the user overrode the pick. */
   forceCaseId?: string;
+  /**
+   * The screen's verdict on this reader. Omitted means no screen was run, and
+   * the prompt simply carries no brief — the same graceful-degradation the
+   * empty vault gets, because a half-adopted feature must not break the app.
+   */
+  qualification?: QualificationResult;
 }
 
 export interface ChannelPrompt {
@@ -55,6 +63,8 @@ export interface ChannelPrompt {
   chosen: ScoredCase | null;
   /** Runners-up, so the user can swap without leaving the page. */
   alternatives: ScoredCase[];
+  /** True when the screen declined this lead, so the caller can refuse to send. */
+  declined: boolean;
 }
 
 export const buildChannelPrompt = (
@@ -91,14 +101,16 @@ export const buildChannelPrompt = (
 
   const about = ctx.about?.trim() ? `About the sender:\n${ctx.about.trim()}` : '';
   const userPrompt = loadPrompts()[PROMPT_SLOT[channel]].trim();
+  const qualification = options.qualification ? renderQualification(options.qualification) : '';
 
   return {
     pack,
-    systemPrompt: composeSystemPrompt({ pack, context: about, proof, userPrompt }),
+    systemPrompt: composeSystemPrompt({ pack, qualification, context: about, proof, userPrompt }),
     contextEmpty: !contextToPrompt(ctx).trim(),
     proofEmpty: !proof,
     chosen,
     alternatives,
+    declined: options.qualification?.verdict === 'decline',
   };
 };
 

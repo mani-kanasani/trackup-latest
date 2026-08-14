@@ -1,3 +1,5 @@
+import type { QualificationInput } from '../../lib/qualify/types';
+
 export type LeadStatus = 'new' | 'requested' | 'connected' | 'replied' | 'meeting';
 
 export interface OutreachFlow {
@@ -26,6 +28,12 @@ export interface Lead {
   potential_services?: string | null;
   outreach?: OutreachFlow | null;
   sent_steps?: string[] | null;
+  /**
+   * The screen's answers, not its verdict. Storing the derived tier and score
+   * would leave every lead frozen against whichever doctrine was current when
+   * it was screened; storing the answers re-scores them on every read.
+   */
+  qualification?: QualificationInput | null;
   status: LeadStatus;
   created_at: string;
   updated_at: string;

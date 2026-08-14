@@ -9,6 +9,13 @@ import type { MethodPack } from './types';
 
 export interface ComposeInput {
   pack: MethodPack;
+  /**
+   * The screen's verdict on this specific reader, already rendered: what job the
+   * message has to do, and the ceiling on what it may claim to know about them.
+   * Sits between the doctrine and the sender's own material because it is the
+   * brief for this one message rather than a standing rule.
+   */
+  qualification?: string;
   /** Who the user is: background, positioning, offer. */
   context?: string;
   /** Selected case studies, already rendered to text. */
@@ -19,7 +26,13 @@ export interface ComposeInput {
 
 const bullet = (s: string) => `- ${s.replace(/\s+/g, ' ').trim()}`;
 
-export const composeSystemPrompt = ({ pack, context, proof, userPrompt }: ComposeInput): string => {
+export const composeSystemPrompt = ({
+  pack,
+  qualification,
+  context,
+  proof,
+  userPrompt,
+}: ComposeInput): string => {
   const sections: string[] = [];
 
   sections.push(
@@ -56,6 +69,10 @@ export const composeSystemPrompt = ({ pack, context, proof, userPrompt }: Compos
       .join('\n')}`,
   );
 
+  if (qualification?.trim()) {
+    sections.push(qualification.trim());
+  }
+
   if (context?.trim()) {
     sections.push(
       `## Who the sender is. Use these specifics. Never invent facts about them.\n${context.trim()}`,
@@ -76,7 +93,10 @@ export const composeSystemPrompt = ({ pack, context, proof, userPrompt }: Compos
   }
 
   sections.push(
-    `## Before you answer\nRe-read your output once against the laws and the banned list. Fix anything that violates them, then reply.`,
+    `## Before you answer\nRe-read your output once against the laws and the banned list. Fix anything that violates them, then reply.` +
+      (qualification?.trim()
+        ? ' Then check every specific claim about the reader against the ceiling above, and delete any that exceeds it.'
+        : ''),
   );
 
   return sections.join('\n\n');

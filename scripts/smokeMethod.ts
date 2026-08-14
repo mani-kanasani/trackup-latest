@@ -6,6 +6,9 @@
 import { getPack, ALL_PACKS } from '../src/lib/method/packs/index';
 import { composeSystemPrompt, describePack } from '../src/lib/method/compose';
 import { validateOutput } from '../src/lib/method/validate';
+import { qualify } from '../src/lib/qualify/score';
+import { renderQualification } from '../src/lib/qualify/render';
+import { RUNGS, TIERS } from '../src/lib/qualify/doctrine';
 
 let failures = 0;
 const check = (name: string, cond: boolean, detail = '') => {
@@ -37,6 +40,30 @@ check('prompt includes the proof', prompt.includes('40 minutes'));
 check('prompt includes the user override', prompt.includes('No exclamation marks'));
 check('prompt forbids inventing numbers', prompt.includes('never round one up'));
 check('prompt is substantial', prompt.length > 3000, `${prompt.length} chars`);
+
+// ---- the screen's brief reaches the prompt, in the right place
+const briefed = composeSystemPrompt({
+  pack,
+  qualification: renderQualification(
+    qualify({
+      pillars: { repetitive: 'yes', errorProne: 'yes' },
+      rung: 'bottom',
+      nicheClarity: 'unclear',
+    }),
+  ),
+  context: 'I build lead-routing systems for mid-size logistics firms.',
+  proof: 'Cut a dispatcher team from 6 hours of manual triage a day to about 40 minutes.',
+});
+check('prompt carries what the message must do', briefed.includes(RUNGS.bottom.instruction));
+check('prompt carries the tier ceiling', briefed.includes(TIERS.C.ceiling));
+check(
+  'the brief precedes the sender and their proof',
+  briefed.indexOf('What this message has to do') < briefed.indexOf('Who the sender is'),
+);
+check(
+  'the closing check is extended when a brief is present',
+  briefed.includes('delete any that exceeds it') && !prompt.includes('delete any that exceeds it'),
+);
 
 // ---- the validator catches what the doctrine forbids
 const stepKeys = pack.structure.map((s) => s.key);

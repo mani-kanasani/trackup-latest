@@ -1,8 +1,9 @@
-# Ember — session handoff, 13 August 2026
+# Ember — session handoff, 14 August 2026
 
-Branch `method-engine`, **uncommitted**. Everything below verifies green:
-`npm run method:test` · `npm run proof:test` · `npm run method:check` ·
-`./node_modules/.bin/tsc --noEmit -p tsconfig.app.json` · `npm run build`.
+Branch `method-engine`. Everything below verifies green:
+`npm run method:test` · `npm run proof:test` · `npm run qualify:test` ·
+`npm run method:check` · `./node_modules/.bin/tsc --noEmit -p tsconfig.app.json` ·
+`npm run build`.
 
 ---
 
@@ -48,29 +49,58 @@ TrackUp remains the name of the Upwork app inside the suite.
 - **Entirely optional.** Empty vault produces a full prompt with no proof section and no invented
   results.
 
+**Qualification and tiering** (`src/lib/qualify/`). The screen that runs *before* generation, and the
+thing that lets Ember decline a lead rather than dutifully writing to it.
+
+- Four pillars at a **two-of-four threshold**, the bonus screen, the impact/complexity quadrant, the
+  buying ladder, and A/B/C tiering. All in `doctrine.ts`, which is hand-authored — it is not
+  per-channel, so it does not belong in `packs.source.json` and is not generated.
+- **`no` and `not checked yet` are kept apart the whole way through.** An unresearched lead comes back
+  `notYet` with the questions to go and answer, never `decline`. A screen that punishes you for not
+  having done the work it is about to ask for is a screen people route around.
+- Three of its outputs change the copy: the **rung** sets what job the message has to do, the **tier**
+  sets a ceiling on claimed familiarity, and the **pillars** decide which angles are arguable. An
+  unconfirmed pillar is a guess about their business, so the brief withholds it.
+- **Tier A is earned by research done, not by the lead looking good.** Every Tier A signal with no
+  written observation lands in B, because the copy would otherwise have to invent the detail.
+- The **answers** are persisted, never the verdict (`20260814120000_add_lead_qualification.sql`), so
+  changing a threshold re-scores the whole list instead of leaving stale verdicts behind.
+- Wired into LinkedIn: `QualifyPanel` above generation, and a declined lead **disables** the generate
+  button behind a separate override click.
+
 ---
 
 ## Currently in flight
 
-Nothing half-written. The last change was the vault UI, and it is complete and verified.
+Nothing half-written. The last change was the qualification screen, complete and verified — logic by
+`npm run qualify:test`, rendering and interactivity checked in the browser against a temporary
+harness that has been removed.
 
 ---
 
 ## Still to do, in the agreed order
 
-1. **Qualification and tiering** — the 4 Pillars and the buying ladder as a scoring step *before*
-   generation. Cheapest high-value layer; turns a copy generator into something that says a lead is
-   not worth writing to.
-2. **Cold email app** — the pack exists, the app does not. Third entry in `src/apps/registry.tsx`.
-3. **Cadence engine** — three touches, 2–7 day spacing, any reply halts the sequence. `sent_steps`
+1. **Cold email app** — the pack exists, the app does not. Third entry in `src/apps/registry.tsx`.
+   **But see the note below: the 13 August call paused cold email and ranked Upwork first**, which
+   argues for wiring `Apply.tsx` to the engine ahead of this.
+2. **Cadence engine** — three touches, 2–7 day spacing, any reply halts the sequence. `sent_steps`
    already exists; this makes it due-dated.
-4. **Constraint diagnostic** — the Month 6 loop. *If no stage shows a backlog, the constraint is lead
+3. **Constraint diagnostic** — the Month 6 loop. *If no stage shows a backlog, the constraint is lead
    generation.* Needs real usage data to be worth anything, so it goes last.
 
 **Smaller, unblocked:**
 
-- The two new migrations have **never been applied** to a live Supabase project.
-- `src/pages/Apply.tsx` (Upwork) still does not use the method engine. Only LinkedIn does.
+- The **three** new migrations have **never been applied** to a live Supabase project: proposals
+  storage, case studies, and lead qualification. Until they are, the vault and the screen have
+  nowhere to persist. The app boots to the setup wizard, so none of this has been exercised against
+  a real database.
+- `src/pages/Apply.tsx` (Upwork) still does not use the method engine, and now also does not use the
+  screen. Only LinkedIn has either.
+- **`packs.source.json` contains 36 em dashes in authored doctrine**, and em dash is a *hard*-banned
+  pattern. The system prompt models the exact character it forbids, which is likely feeding the
+  violations the validator then catches. `qualify/doctrine.ts` was written clean and
+  `qualify:test` now fails the build if any rendered brief contains a hard-banned pattern; the packs
+  need the same treatment, by hand, since a blanket replace would mangle meaning.
 - Text extraction from uploaded case-study files is unimplemented; `extracted_text` is always null.
 - Three pre-existing lint errors in `DataContext.tsx` and `Dashboard.tsx`.
 - `REVIEW.md` lists 14 more Medium findings, none addressed.
@@ -97,6 +127,11 @@ Adversarial verification was worth more for calibration than for rejection.
 **Naming a weakness and talking yourself down are different things**, and a regex can barely tell
 them apart. "This is my first project" is doctrine-endorsed honesty; "I'm new to this" is
 disqualifying. Hence a hard ban plus a separate soft nudge.
+
+**The prompt is written in the register the output copies.** Printing the qualification brief once
+showed it was full of em dashes, which every pack hard-bans. Reading a generated artifact beats
+reasoning about it: 40 passing checks did not catch this, because nothing was checking the *prompt*
+against the rules it imposes. Something is now.
 
 ---
 

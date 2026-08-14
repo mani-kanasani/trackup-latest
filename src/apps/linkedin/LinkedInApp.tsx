@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft, Linkedin, Plus, Sparkles, Copy, Check, Trash2, Loader2, ExternalLink, X,
   ThumbsUp, ThumbsDown, Lightbulb,
@@ -10,6 +10,9 @@ import { loadAIConfig } from '../../lib/aiConfig';
 import { loadUserContext, contextToPrompt } from '../../lib/userContext';
 import { buildChannelPrompt, checkAgainstMethod } from '../../lib/method/forChannel';
 import { useCaseStudies } from '../../lib/proof';
+import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
+import { qualify, isBlocked } from '../../lib/qualify/score';
+import type { QualificationInput } from '../../lib/qualify/types';
 import type { ValidationResult } from '../../lib/method/types';
 
 const STATUS_LABELS: Record<LeadStatus, string> = {
@@ -138,6 +141,39 @@ const LeadDetail: React.FC<{
   const flow = lead.outreach ?? localFlow;
   const sentSteps = lead.sent_steps ?? [];
 
+  // --- the screen, which runs before anything is written ---------------------
+  //
+  // Answers are held locally and saved on a debounce. A failed save leaves them
+  // on screen with the error, for the same reason a failed flow save does: the
+  // user did the thinking, and losing it silently is the worst outcome.
+  const [qual, setQual] = useState<QualificationInput | null>(lead.qualification ?? null);
+  const [qualError, setQualError] = useState('');
+  const [override, setOverride] = useState(false);
+  const verdict = useMemo(() => qualify(qual ?? {}), [qual]);
+  const declined = isBlocked(verdict);
+
+  // `onUpdate` is a fresh function on every parent render, so it goes through a
+  // ref. In the dependency array it would reset the debounce timer on each
+  // render and the save would never fire.
+  const updateRef = useRef(onUpdate);
+  updateRef.current = onUpdate;
+  const dirty = useRef(false);
+
+  useEffect(() => {
+    if (!dirty.current) return;
+    const timer = setTimeout(async () => {
+      const res = await updateRef.current(lead.id, { qualification: qual });
+      setQualError(res.error ? `The screen could not be saved: ${res.error}` : '');
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [qual, lead.id]);
+
+  const changeQual = (next: QualificationInput) => {
+    dirty.current = true;
+    setOverride(false);
+    setQual(next);
+  };
+
   const copy = async (text: string, id: string) => {
     try { await navigator.clipboard.writeText(text); setCopied(id); setTimeout(() => setCopied(null), 1500); } catch { /* */ }
   };
@@ -168,6 +204,9 @@ const LeadDetail: React.FC<{
         buyer_role: lead.job_title,
         notes: [lead.company_name, lead.industry, lead.potential_services].filter(Boolean).join(' · '),
       },
+      // The screen's verdict travels into the prompt: it decides what job the
+      // message has to do, and caps what the copy may claim to know about them.
+      qualification: verdict,
     });
     setProofUsed(method.chosen ? method.chosen.caseStudy.title : null);
     setNoProof(method.proofEmpty);
@@ -262,11 +301,44 @@ const LeadDetail: React.FC<{
           <select value={lead.status} onChange={(e) => onUpdate(lead.id, { status: e.target.value as LeadStatus })} className="input-modern !py-2 !w-auto text-sm">
             {STATUS_ORDER.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
           </select>
-          <button onClick={handleGenerate} disabled={generating} className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-linkedin-500 to-linkedin-700 hover:from-linkedin-600 hover:to-linkedin-800 shadow-sm disabled:opacity-50">
+          <button
+            onClick={handleGenerate}
+            disabled={generating || (declined && !override)}
+            title={declined && !override ? 'The qualification screen declined this lead.' : undefined}
+            className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-linkedin-500 to-linkedin-700 hover:from-linkedin-600 hover:to-linkedin-800 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {generating ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1.5" />}
             {generating ? 'Generating…' : flow ? 'Regenerate flow' : 'Generate outreach flow'}
           </button>
         </div>
+
+        {/* A declined lead is blocked rather than warned about, because a warning
+            beside an enabled button is a warning nobody reads. The override is
+            deliberately a second, separate click: the screen is advice, not a
+            cage, but disagreeing with it should be a decision. */}
+        {declined && (
+          <div className="mt-3 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+            <p className="font-semibold text-red-800 dark:text-red-300 mb-1">
+              The screen says not to write to this one
+            </p>
+            {verdict.blockers.map((b, i) => (
+              <p key={i} className="text-red-700 dark:text-red-300 text-xs">{b}</p>
+            ))}
+            {override ? (
+              <p className="text-xs text-red-700 dark:text-red-300 mt-2 font-medium">
+                Overridden. The generator has been told the screen failed, so it will not imply a fit.
+              </p>
+            ) : (
+              <button
+                onClick={() => setOverride(true)}
+                className="mt-2 text-xs font-semibold text-red-700 dark:text-red-300 underline underline-offset-2"
+              >
+                I disagree — write to them anyway
+              </button>
+            )}
+          </div>
+        )}
+
         {error && <div className="mt-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">{error}</div>}
 
         {noProof && !proofUsed && (
@@ -295,6 +367,8 @@ const LeadDetail: React.FC<{
           </div>
         )}
       </div>
+
+      <QualifyPanel value={qual} onChange={changeQual} error={qualError} />
 
       {flow ? (
         <>

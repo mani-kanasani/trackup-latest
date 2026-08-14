@@ -13,7 +13,8 @@
     "method:gen": "node scripts/genPacks.mjs",
     "method:check": "node scripts/checkPatterns.mjs",
     "method:test": "esbuild scripts/smokeMethod.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/smoke.mjs --log-level=error && node node_modules/.cache/smoke.mjs",
-    "proof:test": "esbuild scripts/smokeProof.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/proof.mjs --log-level=error && node node_modules/.cache/proof.mjs"
+    "proof:test": "esbuild scripts/smokeProof.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/proof.mjs --log-level=error && node node_modules/.cache/proof.mjs",
+    "qualify:test": "esbuild scripts/smokeQualify.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/qualify.mjs --log-level=error && node node_modules/.cache/qualify.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
