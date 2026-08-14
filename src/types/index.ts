@@ -11,6 +11,8 @@ export interface JobMaterial {
   summary: string;
   cover_letter: string;
   proposal_document: string;
+  /** Object path in the private bucket. proposal_document is a cache of a signed URL for it. */
+  proposal_path?: string | null;
   mermaid_code: string;
   video_script: string;
   status: JobStatus;
@@ -59,6 +61,8 @@ export interface GenerateResponse {
    */
   steps?: Record<string, string>;
   proposal_url: string;
+  /** Object path, so an expired proposal_url can be re-signed rather than lost. */
+  proposal_path?: string | null;
   mermaid_code: string;
   video_script: string;
 }

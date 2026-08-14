@@ -3,9 +3,21 @@ import { Search, X, ExternalLink, FileText, Video, BarChart3, Copy, Briefcase } 
 import { useData } from '../contexts/DataContext';
 import { StatusBadge } from '../components/UI/StatusBadge';
 import { JobMaterial, JobStatus } from '../types';
+import { resolveProposalUrl } from '../lib/proposalLink';
 
 export const Track: React.FC = () => {
   const { materials, updateMaterialStatus } = useData();
+  const [openingDoc, setOpeningDoc] = useState(false);
+  const [docError, setDocError] = useState('');
+
+  const openProposal = async (material: JobMaterial) => {
+    setDocError('');
+    setOpeningDoc(true);
+    const { url, error } = await resolveProposalUrl(material.proposal_document, material.proposal_path);
+    setOpeningDoc(false);
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    else setDocError(error ?? 'Could not open the proposal.');
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<JobStatus | 'all'>('all');
   const [sortOrder, setSortOrder] = useState<'latest' | 'oldest'>('latest');
@@ -336,15 +348,20 @@ export const Track: React.FC = () => {
                   </div>
                   <h4 className="font-bold text-lg text-gray-900 dark:text-white">Proposal Document</h4>
                 </div>
-                <a
-                  href={selectedMaterial.proposal_document}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center w-full px-6 py-4 border-2 border-dashed border-upwork-300 dark:border-upwork-600 rounded-xl hover:border-upwork-500 dark:hover:border-upwork-400 transition-all duration-300 text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300 bg-upwork-50/50 dark:bg-upwork-900/10 hover:bg-upwork-100 dark:hover:bg-upwork-900/20 transform hover:scale-105 font-semibold"
+                {/* Not a plain href: the stored URL is a signed link that expires,
+                    so opening goes through a resolver that mints a fresh one from
+                    the object path when the cached one has lapsed. */}
+                <button
+                  onClick={() => openProposal(selectedMaterial)}
+                  disabled={openingDoc}
+                  className="flex items-center justify-center w-full px-6 py-4 border-2 border-dashed border-upwork-300 dark:border-upwork-600 rounded-xl hover:border-upwork-500 dark:hover:border-upwork-400 transition-all duration-300 text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300 bg-upwork-50/50 dark:bg-upwork-900/10 hover:bg-upwork-100 dark:hover:bg-upwork-900/20 transform hover:scale-105 font-semibold disabled:opacity-50"
                 >
                   <ExternalLink className="w-5 h-5 mr-3" />
-                  Open Document
-                </a>
+                  {openingDoc ? 'Opening…' : 'Open Document'}
+                </button>
+                {docError && (
+                  <p className="mt-2 text-sm text-amber-700 dark:text-amber-400">{docError}</p>
+                )}
               </div>
 
               {/* Workflow diagram source. Hidden when absent: an empty panel

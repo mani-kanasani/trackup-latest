@@ -504,6 +504,10 @@ Deno.serve(async (req: Request) => {
       // part against the pack instead of grading one blob against nothing.
       steps: content.steps,
       proposal_url: signed.signedUrl,
+      // The object path, so the app can mint a fresh link when this one
+      // expires. Without it a stored URL is the only handle on the file and
+      // the PDF becomes unreachable the moment it lapses.
+      proposal_path: path,
       mermaid_code: content.mermaid_code,
       video_script: content.video_script,
     }, 200, cors);

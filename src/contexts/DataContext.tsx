@@ -89,6 +89,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         summary: material.summary,
         cover_letter: material.cover_letter,
         proposal_document: material.proposal_document,
+        proposal_path: material.proposal_path,
         mermaid_code: material.mermaid_code,
         video_script: material.video_script,
         status: material.status,

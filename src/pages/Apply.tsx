@@ -149,6 +149,7 @@ export const Apply: React.FC = () => {
       summary: jobSummary,
       cover_letter: generatedData.cover_letter,
       proposal_document: generatedData.proposal_url,
+      proposal_path: generatedData.proposal_path,
       mermaid_code: generatedData.mermaid_code,
       video_script: generatedData.video_script,
       status: 'drafted',
