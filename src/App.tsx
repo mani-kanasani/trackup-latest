@@ -10,6 +10,7 @@ import { Home } from './pages/Home';
 import { Settings } from './pages/Settings';
 import { TrackUpApp } from './apps/trackup/TrackUpApp';
 import { LinkedInApp } from './apps/linkedin/LinkedInApp';
+import { ColdEmailApp } from './apps/coldemail/ColdEmailApp';
 import { AppId } from './apps/registry';
 
 // Shared platform settings (AI provider, database connection, theme).
@@ -49,6 +50,10 @@ const AppContent: React.FC = () => {
   }
   if (activeApp === 'linkedin') {
     return <LinkedInApp onExit={() => setActiveApp(null)} />;
+  }
+
+  if (activeApp === 'coldemail') {
+    return <ColdEmailApp onExit={() => setActiveApp(null)} />;
   }
   return <Home onOpenApp={setActiveApp} onOpenSettings={() => setShowSettings(true)} />;
 };

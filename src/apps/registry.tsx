@@ -1,6 +1,6 @@
-import { Send, Linkedin, type LucideIcon } from 'lucide-react';
+import { Send, Linkedin, Mail, type LucideIcon } from 'lucide-react';
 
-export type AppId = 'trackup' | 'linkedin';
+export type AppId = 'trackup' | 'linkedin' | 'coldemail';
 
 export interface AppDef {
   id: AppId;
@@ -39,6 +39,18 @@ export const APPS: AppDef[] = [
     accent: 'linkedin',
     gradient: 'from-linkedin-500 to-linkedin-700',
     statLabel: 'leads',
+    available: true,
+  },
+  {
+    id: 'coldemail',
+    name: 'Cold Email',
+    tagline: 'Multi-touch email sequences',
+    description:
+      'Write a full cold email sequence per prospect, graded against the method, with the observation line the whole campaign turns on. Tracks replies, opt-outs and what closed.',
+    icon: Mail,
+    accent: 'ember',
+    gradient: 'from-ember-500 to-ember-700',
+    statLabel: 'prospects',
     available: true,
   },
 ];
