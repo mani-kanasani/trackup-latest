@@ -38,8 +38,16 @@ export const Apply: React.FC = () => {
   const [override, setOverride] = useState(false);
   const verdict = useMemo(() => qualify(qual ?? {}), [qual]);
   const declined = isBlocked(verdict);
-  const [warnings, setWarnings] = useState<string[]>([]);
-  const [softNotes, setSoftNotes] = useState<string[]>([]);
+  // Derived, not latched. Same reason as the LinkedIn app: a check that fires
+  // once and disappears has nothing to say about the letter you actually send.
+  const check = useMemo(
+    () => (generatedData?.steps ? checkAgainstMethod('upwork', generatedData.steps) : null),
+    [generatedData],
+  );
+  const describeViolation = (v: NonNullable<typeof check>['violations'][number]) =>
+    `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`;
+  const warnings = (check?.violations ?? []).filter((v) => v.level === 'hard').map(describeViolation);
+  const softNotes = (check?.violations ?? []).filter((v) => v.level === 'soft').map(describeViolation);
   const [proofUsed, setProofUsed] = useState<string | null>(null);
   const [noProof, setNoProof] = useState(false);
 
@@ -65,8 +73,6 @@ export const Apply: React.FC = () => {
 
     setLoading(true);
     setError('');
-    setWarnings([]);
-    setSoftNotes([]);
     setProofUsed(null);
     setNoProof(false);
 
@@ -116,16 +122,6 @@ export const Apply: React.FC = () => {
 
       if (!data) {
         throw new Error('No response from the proposal generator.');
-      }
-
-      // Grade the response against the same pack that wrote it. Hard violations
-      // are things to fix before sending; soft ones are judgement calls.
-      if (data.steps) {
-        const check = checkAgainstMethod('upwork', data.steps);
-        const describe = (v: (typeof check.violations)[number]) =>
-          `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`;
-        setWarnings(check.violations.filter((v) => v.level === 'hard').map(describe));
-        setSoftNotes(check.violations.filter((v) => v.level === 'soft').map(describe));
       }
 
       setGeneratedData(data);
@@ -178,8 +174,6 @@ export const Apply: React.FC = () => {
     // onto the next one would silently qualify a job nobody looked at.
     setQual(null);
     setOverride(false);
-    setWarnings([]);
-    setSoftNotes([]);
     setProofUsed(null);
     setNoProof(false);
 
@@ -440,6 +434,15 @@ export const Apply: React.FC = () => {
                 rows={8}
                 className="input-modern text-sm resize-none"
               />
+              {/* The letter is assembled from the pack's steps, and the check
+                  grades the steps. Editing here changes what you send but not
+                  what was graded, so say so rather than letting a cleared
+                  warning look like a fixed one. */}
+              {check && warnings.length > 0 && (
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  The checks below were run on the generated text. Edits here are not re-checked.
+                </p>
+              )}
             </div>
 
             {/* Workflow diagram source.

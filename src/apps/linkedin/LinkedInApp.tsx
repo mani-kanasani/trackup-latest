@@ -151,11 +151,24 @@ const LeadDetail: React.FC<{
   const [copied, setCopied] = useState<string | null>(null);
   // Holds a generation that could not be persisted, so it survives on screen.
   const [localFlow, setLocalFlow] = useState<OutreachFlow | null>(null);
-  const [warnings, setWarnings] = useState<string[]>([]);
-  const [softNotes, setSoftNotes] = useState<string[]>([]);
   const [proofUsed, setProofUsed] = useState<string | null>(null);
   const [noProof, setNoProof] = useState(false);
   const flow = useMemo(() => migrateFlow(lead.outreach ?? localFlow), [lead.outreach, localFlow]);
+  // Deliberately NOT state.
+  //
+  // Latched at generation time, the check fired once against text the user could
+  // not edit, and vanished the moment they clicked another lead — so the copy
+  // they actually send tomorrow carries no warning at all. validateOutput is
+  // pure, so recomputing from whatever is on screen costs nothing and means
+  // fixing a violation visibly clears it.
+  const check = useMemo(
+    () => (flow ? checkAgainstMethod('linkedin', flow) : null),
+    [flow],
+  );
+  const describeViolation = (v: ValidationResult['violations'][number]) =>
+    `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`;
+  const warnings = (check?.violations ?? []).filter((v) => v.level === 'hard').map(describeViolation);
+  const softNotes = (check?.violations ?? []).filter((v) => v.level === 'soft').map(describeViolation);
   // Read through the tolerant reader: rows written before steps carried times
   // hold a bare array, and their tick marks must not vanish.
   const sentSteps = useMemo(() => readSentSteps(lead.sent_steps), [lead.sent_steps]);
@@ -224,8 +237,6 @@ const LeadDetail: React.FC<{
       return;
     }
     setError('');
-    setWarnings([]);
-    setSoftNotes([]);
     setProofUsed(null);
     setNoProof(false);
     setGenerating(true);
@@ -274,14 +285,6 @@ const LeadDetail: React.FC<{
 
       // Grade the output against the same doctrine that wrote it. Generation is
       // probabilistic; the laws are not.
-      const check: ValidationResult = checkAgainstMethod('linkedin', data as Record<string, string>);
-      const describe = (v: ValidationResult['violations'][number]) =>
-        `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`;
-      // Hard violations block a send. Soft ones are judgement calls the doctrine
-      // flags but will not decide for you, so they are shown apart rather than
-      // padding out the list of things that must be fixed.
-      setWarnings(check.violations.filter((v) => v.level === 'hard').map(describe));
-      setSoftNotes(check.violations.filter((v) => v.level === 'soft').map(describe));
       // The generation is already paid for. If the save fails, say so and keep
       // the flow on screen so it can be copied out rather than regenerated.
       const saved = await onUpdate(lead.id, { outreach: data });
@@ -296,6 +299,15 @@ const LeadDetail: React.FC<{
     } finally {
       setGenerating(false);
     }
+  };
+
+  /** Persists one edited step back onto the stored flow. */
+  const saveStep = async (key: string, value: string) => {
+    if (!flow || flow[key] === value) return;
+    const next = { ...flow, [key]: value };
+    setLocalFlow(next);
+    const res = await onUpdate(lead.id, { outreach: next });
+    if (res.error) setError(`That edit is on screen but did not save: ${res.error}`);
   };
 
   const Step: React.FC<{ id: string; title: string; text: string; track?: boolean; tone?: 'positive' | 'objection' }> = ({ id, title, text, track = true, tone }) => (
@@ -321,7 +333,17 @@ const LeadDetail: React.FC<{
           )}
         </div>
       </div>
-      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{text}</p>
+      {/* A textarea, not a paragraph. The validator points at a specific phrase;
+          without somewhere to change it the warning is an observation the user
+          can only act on by regenerating and hoping. Saved on blur so every
+          keystroke is not a write. */}
+      <textarea
+        defaultValue={text}
+        key={`${id}:${text}`}
+        onBlur={(e) => saveStep(id, e.target.value)}
+        rows={Math.min(10, Math.max(2, Math.ceil((text.length || 1) / 70)))}
+        className="w-full text-sm text-gray-700 dark:text-gray-300 leading-relaxed bg-transparent border border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-linkedin-400 rounded-lg p-2 -m-2 resize-y focus:outline-none"
+      />
     </div>
   );
 

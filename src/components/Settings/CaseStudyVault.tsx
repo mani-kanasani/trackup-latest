@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { useCaseStudies } from '../../lib/proof';
 import type { CaseStudy, CaseNaming } from '../../lib/proof/types';
+import { ProofInterview } from './ProofInterview';
 
 const EMPTY: Partial<CaseStudy> = {
   title: '',
@@ -44,6 +45,9 @@ export const CaseStudyVault: React.FC = () => {
   const [error, setError] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  // The empty state opens straight into the interview. Someone who has
+  // concluded they have no proof will not click a button that assumes they do.
+  const [interviewing, setInterviewing] = useState(true);
 
   const startNew = () => {
     setDraft(EMPTY);
@@ -142,12 +146,31 @@ export const CaseStudyVault: React.FC = () => {
       ) : (
         <>
           {cases.length === 0 && editing === null && (
-            <div className="text-center py-8 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl mb-4">
-              <p className="text-gray-600 dark:text-gray-400 mb-1">No case studies yet.</p>
-              <p className="text-sm text-gray-500 dark:text-gray-500">
-                Add one and every generator starts citing a real, matched result.
-              </p>
-            </div>
+            interviewing ? (
+              <ProofInterview
+                onFound={(seed) => {
+                  setDraft({ ...EMPTY, ...seed });
+                  setFile(null);
+                  setError('');
+                  setEditing('new');
+                  setInterviewing(false);
+                }}
+                onClose={() => setInterviewing(false)}
+              />
+            ) : (
+              <div className="text-center py-8 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl mb-4">
+                <p className="text-gray-600 dark:text-gray-400 mb-1">No case studies yet.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-500 mb-3">
+                  Ember writes from your background alone until there is one here, and claims no results.
+                </p>
+                <button
+                  onClick={() => setInterviewing(true)}
+                  className="text-sm font-semibold text-ember-600 dark:text-ember-400 underline underline-offset-2"
+                >
+                  Help me find one
+                </button>
+              </div>
+            )
           )}
 
           <div className="space-y-3 mb-4">
