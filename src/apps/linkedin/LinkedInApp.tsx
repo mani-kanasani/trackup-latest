@@ -16,6 +16,7 @@ import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
 import { ImportLeadsModal } from './ImportLeadsModal';
 import { qualify, isBlocked } from '../../lib/qualify/score';
+import { isStaleDeployment, stripContract, OUT_OF_DATE } from '../../lib/deployment';
 import type { QualificationInput } from '../../lib/qualify/types';
 import type { ValidationResult } from '../../lib/method/types';
 
@@ -256,9 +257,23 @@ const LeadDetail: React.FC<{
   // they actually send tomorrow carries no warning at all. validateOutput is
   // pure, so recomputing from whatever is on screen costs nothing and means
   // fixing a violation visibly clears it.
-  const check = useMemo(
-    () => (flow ? checkAgainstMethod('linkedin', flow) : null),
+  /**
+   * A stored flow with no content in it at all.
+   *
+   * This is a failed generation that was saved before the functions learned to
+   * refuse one. Grading it produces twelve identical "came back empty,
+   * regenerate" violations, which reads as twelve problems with the copy when
+   * it is one problem with the generation — and none of them can ever be
+   * cleared by editing. It gets its own state.
+   */
+  const flowIsEmpty = useMemo(
+    () => Boolean(flow) && LINKEDIN_PACK.structure.every((st) => !flow?.[st.key]?.trim()),
     [flow],
+  );
+
+  const check = useMemo(
+    () => (flow && !flowIsEmpty ? checkAgainstMethod('linkedin', flow) : null),
+    [flow, flowIsEmpty],
   );
   const describeViolation = (v: ValidationResult['violations'][number]) =>
     `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`;
@@ -389,13 +404,17 @@ const LeadDetail: React.FC<{
         throw new Error(message);
       }
       if (!data) throw new Error('No response from the generator.');
+      // An old deployment answers with content this build cannot use. Say that,
+      // rather than letting it land as an empty flow the user has to interpret.
+      if (isStaleDeployment(data)) throw new Error(OUT_OF_DATE);
+      const flowData = stripContract(data as unknown as Record<string, string>) as unknown as OutreachFlow;
 
       // The function marks a partial response rather than letting the missing
       // steps arrive as a silent list of blanks. Lift it out of the payload so it
       // is not stored as a phantom step, and tell the user plainly.
-      const partial = (data as Record<string, string>).__partial;
+      const partial = (flowData as Record<string, string>).__partial;
       if (partial) {
-        delete (data as Record<string, string>).__partial;
+        delete (flowData as Record<string, string>).__partial;
         setError(`${partial} You can regenerate, or write the missing ones yourself.`);
       }
 
@@ -416,18 +435,18 @@ const LeadDetail: React.FC<{
         verdict: verdict.verdict,
         // Ids only. The excerpts are the user's own copy and have no business
         // being duplicated into a log.
-        violation_ids: checkAgainstMethod('linkedin', data as Record<string, string>)
+        violation_ids: checkAgainstMethod('linkedin', flowData as Record<string, string>)
           .violations.map((v) => v.patternId ?? v.lawId ?? 'empty-step'),
       };
 
       // The generation is already paid for. If the save fails, say so and keep
       // the flow on screen so it can be copied out rather than regenerated.
       const saved = await onUpdate(lead.id, {
-        outreach: data,
+        outreach: flowData,
         generation_meta: [...(lead.generation_meta ?? []), meta],
       });
       if (saved.error) {
-        setLocalFlow(data);
+        setLocalFlow(flowData);
         throw new Error(
           `Generated, but saving failed: ${saved.error}. The flow is shown below — copy anything you need before leaving this page.`,
         );
@@ -619,6 +638,29 @@ const LeadDetail: React.FC<{
           </p>
         )}
 
+        {flowIsEmpty && (
+          <div className="mt-3 text-sm bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-800">
+            <p className="font-semibold text-amber-800 dark:text-amber-300 mb-1">
+              This generation came back empty
+            </p>
+            <p className="text-amber-700 dark:text-amber-400">
+              Nothing was written, so there is nothing here to fix. This usually means the edge
+              functions need redeploying, or the model returned an unusable response. Check
+              <span className="font-semibold"> Test this key</span> in Settings, then regenerate.
+            </p>
+            <button
+              onClick={async () => {
+                setLocalFlow(null);
+                const res = await onUpdate(lead.id, { outreach: null });
+                if (res.error) setError(`Could not clear it: ${res.error}`);
+              }}
+              className="mt-2 text-xs font-semibold text-amber-800 dark:text-amber-300 underline underline-offset-2"
+            >
+              Clear this empty flow
+            </button>
+          </div>
+        )}
+
         {warnings.length > 0 && (
           <div className="mt-3 text-sm bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-200 dark:border-amber-800">
             <p className="font-semibold text-amber-800 dark:text-amber-300 mb-1">
@@ -667,7 +709,7 @@ const LeadDetail: React.FC<{
 
       <QualifyPanel value={qual} onChange={changeQual} error={qualError} />
 
-      {flow ? (
+      {flow && !flowIsEmpty ? (
         <>
           {flow.blank_strategy && (
             <div className="flex items-start text-sm bg-linkedin-50 dark:bg-linkedin-900/20 border border-linkedin-200 dark:border-linkedin-800 rounded-xl p-4 text-linkedin-800 dark:text-linkedin-200">

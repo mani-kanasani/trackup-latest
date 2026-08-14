@@ -56,6 +56,18 @@ async function requireUser(req: Request): Promise<string | null> {
 }
 
 
+
+/**
+ * The deployed-code version.
+ *
+ * These functions are pasted into someone's own Supabase project, so the app has
+ * no way to know which revision is actually running — and "did you redeploy?"
+ * is unanswerable by looking at the screen. A response that does not carry this
+ * marker is an old deployment, and the app now says so instead of leaving the
+ * user to interpret a blank result.
+ */
+const CONTRACT = 2;
+
 type Provider = 'gemini' | 'openai' | 'anthropic';
 
 const json = (body: unknown, status = 200, cors: Record<string, string> = {}) =>
@@ -169,7 +181,7 @@ Deno.serve(async (req: Request) => {
       const target = (model ?? '').trim();
       if (!target) return json({ error: 'Choose a model to test.' }, 400, cors);
       const reply = await probeModel(provider, key, target);
-      return json({ ok: true, model: target, reply }, 200, cors);
+      return json({ ok: true, model: target, reply, __contract: CONTRACT }, 200, cors);
     }
 
     let models: string[];

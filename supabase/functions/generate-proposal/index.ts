@@ -32,6 +32,18 @@ const corsFor = (req: Request) => {
   };
 };
 
+
+/**
+ * The deployed-code version.
+ *
+ * These functions are pasted into someone's own Supabase project, so the app has
+ * no way to know which revision is actually running — and "did you redeploy?"
+ * is unanswerable by looking at the screen. A response that does not carry this
+ * marker is an old deployment, and the app now says so instead of leaving the
+ * user to interpret a blank result.
+ */
+const CONTRACT = 2;
+
 type Provider = 'gemini' | 'openai' | 'anthropic';
 
 /** A Mermaid document has to open with a diagram directive. Anything else is prose. */
@@ -517,6 +529,7 @@ Deno.serve(async (req: Request) => {
     }
 
     return json({
+      __contract: CONTRACT,
       cover_letter: content.cover_letter,
       // Returned alongside the assembled letter so the client can grade each
       // part against the pack instead of grading one blob against nothing.

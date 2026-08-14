@@ -65,6 +65,18 @@ async function requireUser(req: Request): Promise<string | null> {
 }
 
 
+
+/**
+ * The deployed-code version.
+ *
+ * These functions are pasted into someone's own Supabase project, so the app has
+ * no way to know which revision is actually running — and "did you redeploy?"
+ * is unanswerable by looking at the screen. A response that does not carry this
+ * marker is an old deployment, and the app now says so instead of leaving the
+ * user to interpret a blank result.
+ */
+const CONTRACT = 2;
+
 type Provider = 'gemini' | 'openai' | 'anthropic';
 
 interface LeadInput {
@@ -309,7 +321,7 @@ Deno.serve(async (req: Request) => {
       raw = await callOpenAICompatible('https://api.openai.com/v1', apiKey, model, system, prompt, true);
     }
 
-    return json(parseFlow(raw, steps), 200, cors);
+    return json({ ...parseFlow(raw, steps), __contract: String(CONTRACT) }, 200, cors);
   } catch (err) {
     console.error('generate-outreach failed:', err);
     const message = err instanceof Error ? err.message : 'Unexpected error generating outreach.';
