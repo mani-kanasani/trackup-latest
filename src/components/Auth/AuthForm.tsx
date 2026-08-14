@@ -12,11 +12,13 @@ export const AuthForm: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setNotice('');
 
     try {
       let result;
@@ -26,7 +28,12 @@ export const AuthForm: React.FC = () => {
         result = await signup(formData.name, formData.email, formData.password);
       }
 
-      if (!result.success && result.error) {
+      // Email confirmation is not a failure, it is the next step. Showing it in
+      // red next to a dead form is what makes people abandon here.
+      if (result.needsEmailConfirmation) {
+        setNotice(result.error ?? 'Check your email to confirm your account, then sign in.');
+        setMode('login');
+      } else if (!result.success && result.error) {
         setError(result.error);
       }
     } catch (err) {
@@ -106,6 +113,12 @@ export const AuthForm: React.FC = () => {
               />
             </div>
           </div>
+
+          {notice && (
+            <div className="text-blue-700 dark:text-blue-300 text-sm text-center bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+              {notice}
+            </div>
+          )}
 
           {error && (
             <div className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">

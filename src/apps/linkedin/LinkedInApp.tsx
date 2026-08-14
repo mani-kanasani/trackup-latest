@@ -3,12 +3,14 @@ import {
   ArrowLeft, Linkedin, Plus, Sparkles, Copy, Check, Trash2, Loader2, ExternalLink, X,
   ThumbsUp, ThumbsDown, Lightbulb,
 } from 'lucide-react';
-import { useLeads } from './useLeads';
+import { useLeads, type MutationResult } from './useLeads';
 import { Lead, LeadStatus, OutreachFlow } from './types';
 import { supabase } from '../../lib/supabase';
 import { loadAIConfig } from '../../lib/aiConfig';
 import { loadUserContext, contextToPrompt } from '../../lib/userContext';
-import { effectivePrompt } from '../../lib/prompts';
+import { buildChannelPrompt, checkAgainstMethod } from '../../lib/method/forChannel';
+import { useCaseStudies } from '../../lib/proof';
+import type { ValidationResult } from '../../lib/method/types';
 
 const STATUS_LABELS: Record<LeadStatus, string> = {
   new: 'New', requested: 'Requested', connected: 'Connected', replied: 'Replied', meeting: 'Meeting',
@@ -119,22 +121,31 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
 
 const LeadDetail: React.FC<{
   lead: Lead;
-  onUpdate: (id: string, updates: Partial<Lead>) => void;
+  // Returns the failure so the caller can surface it. A `void` signature here is
+  // what let a failed save silently eat a freshly generated flow.
+  onUpdate: (id: string, updates: Partial<Lead>) => Promise<MutationResult>;
   onDelete: (id: string) => void;
 }> = ({ lead, onUpdate, onDelete }) => {
+  const { cases } = useCaseStudies();
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
-  const flow = lead.outreach;
+  // Holds a generation that could not be persisted, so it survives on screen.
+  const [localFlow, setLocalFlow] = useState<OutreachFlow | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [proofUsed, setProofUsed] = useState<string | null>(null);
+  const [noProof, setNoProof] = useState(false);
+  const flow = lead.outreach ?? localFlow;
   const sentSteps = lead.sent_steps ?? [];
 
   const copy = async (text: string, id: string) => {
     try { await navigator.clipboard.writeText(text); setCopied(id); setTimeout(() => setCopied(null), 1500); } catch { /* */ }
   };
 
-  const toggleSent = (key: string) => {
+  const toggleSent = async (key: string) => {
     const next = sentSteps.includes(key) ? sentSteps.filter((k) => k !== key) : [...sentSteps, key];
-    onUpdate(lead.id, { sent_steps: next });
+    const res = await onUpdate(lead.id, { sent_steps: next });
+    if (res.error) setError(`Could not save that change: ${res.error}`);
   };
 
   const handleGenerate = async () => {
@@ -144,7 +155,22 @@ const LeadDetail: React.FC<{
       return;
     }
     setError('');
+    setWarnings([]);
+    setProofUsed(null);
+    setNoProof(false);
     setGenerating(true);
+    // Match a case study to THIS lead's world rather than sending the whole
+    // vault. "One proof, matched to the reader" is a law in every pack.
+    const method = buildChannelPrompt('linkedin', {
+      cases,
+      target: {
+        industry: lead.industry,
+        buyer_role: lead.job_title,
+        notes: [lead.company_name, lead.industry, lead.potential_services].filter(Boolean).join(' · '),
+      },
+    });
+    setProofUsed(method.chosen ? method.chosen.caseStudy.title : null);
+    setNoProof(method.proofEmpty);
     try {
       const { data, error: fnError } = await supabase.functions.invoke<OutreachFlow>('generate-outreach', {
         body: {
@@ -154,7 +180,7 @@ const LeadDetail: React.FC<{
             company_website: lead.company_website, potential_services: lead.potential_services,
           },
           context: contextToPrompt(loadUserContext()),
-          systemPrompt: effectivePrompt('outreach'),
+          systemPrompt: method.systemPrompt,
           provider: cfg.provider, model: cfg.model, apiKey: cfg.apiKey,
         },
       });
@@ -165,7 +191,24 @@ const LeadDetail: React.FC<{
         throw new Error(message);
       }
       if (!data) throw new Error('No response from the generator.');
-      onUpdate(lead.id, { outreach: data });
+
+      // Grade the output against the same doctrine that wrote it. Generation is
+      // probabilistic; the laws are not.
+      const check: ValidationResult = checkAgainstMethod('linkedin', data as unknown as Record<string, string>);
+      setWarnings(
+        check.violations
+          .filter((v) => v.patternId || v.level === 'hard')
+          .map((v) => `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`),
+      );
+      // The generation is already paid for. If the save fails, say so and keep
+      // the flow on screen so it can be copied out rather than regenerated.
+      const saved = await onUpdate(lead.id, { outreach: data });
+      if (saved.error) {
+        setLocalFlow(data);
+        throw new Error(
+          `Generated, but saving failed: ${saved.error}. The flow is shown below — copy anything you need before leaving this page.`,
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate outreach.');
     } finally {
@@ -225,6 +268,32 @@ const LeadDetail: React.FC<{
           </button>
         </div>
         {error && <div className="mt-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">{error}</div>}
+
+        {noProof && !proofUsed && (
+          <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+            No case studies yet, so this was written from your background alone and claims no results.
+            Add one in Settings and Ember will cite a matched, real outcome.
+          </p>
+        )}
+
+        {proofUsed && (
+          <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+            Proof used: <span className="font-medium text-gray-700 dark:text-gray-300">{proofUsed}</span>
+          </p>
+        )}
+
+        {warnings.length > 0 && (
+          <div className="mt-3 text-sm bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-200 dark:border-amber-800">
+            <p className="font-semibold text-amber-800 dark:text-amber-300 mb-1">
+              {warnings.length} thing{warnings.length === 1 ? '' : 's'} to fix before you send
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text-amber-700 dark:text-amber-300">
+              {warnings.map((w, i) => (
+                <li key={i}>{w}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {flow ? (

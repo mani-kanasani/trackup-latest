@@ -44,9 +44,12 @@ const DEFAULT_MODEL: Record<Provider, string> = {
   anthropic: 'claude-haiku-4-5',
 };
 
+// Fallback only. The client normally composes a full method-backed system prompt
+// (src/lib/method/compose.ts) and sends it as `systemPrompt`. This must never
+// name a specific person: every user of this app is a different sender.
 const SYSTEM_PROMPT =
-  'You are Mani, an expert automation & AI systems specialist writing winning proposals on Upwork. ' +
-  'Your voice is professional, confident, clear, and intelligent — never casual, generic, or filler-heavy. ' +
+  'You are writing proposal materials that the sender will submit under their own name on a freelance marketplace. ' +
+  'Write in their voice, grounded only in the background they supply. Never invent a credential, a client, a metric or an asset. ' +
   'You always reply with a single valid JSON object and nothing else (no markdown, no code fences).';
 
 const buildUserPrompt = (jobTitle: string, jobSummary: string, context: string): string =>
@@ -62,12 +65,12 @@ Return ONLY a JSON object with exactly these keys:
 
 {
   "title": "Short, specific name for the system/solution you'd build (e.g. 'Automated Lead-Routing System'). Max 8 words.",
-  "cover_letter": "The Upwork message, 150-250 words. Greet the client, show you've built something similar, mention you recorded a short Loom video and prepared a detailed proposal document, paraphrase the core need, outline your approach in 1-2 sentences, and end with a clear call to action.",
+  "cover_letter": "The marketplace message, 150-250 words. Open on THEIR problem restated in their own words, not on a greeting about yourself. Show relevant capability using only the background supplied. Paraphrase the core need, outline the approach in 1-2 sentences, and end with one clear next step. Do NOT claim any asset the sender has not actually produced: no video, no recording, no attachment unless the background says one exists.",
   "proposal_sections": [
     { "heading": "Section title", "body": "2-5 sentences." }
   ],
   "mermaid_code": "A Mermaid.js flowchart of the proposed workflow. MUST start with 'graph TD;'. Flowchart only. No backticks, no the word mermaid.",
-  "video_script": "A 45-90 second Loom video script in Mani's voice walking the client through the approach."
+  "video_script": "A 45-90 second screen-recording script in the sender's own voice, walking the client through the approach. Optional for them to record; write it so it stands alone if they do."
 }
 
 For proposal_sections, produce 4-7 sections such as: Overview, Understanding Your Needs, Proposed Approach, How It Works, Relevant Experience, and Next Steps. Be specific to THIS job — reference concrete details from the description.`;
@@ -342,14 +345,24 @@ Deno.serve(async (req: Request) => {
 
     const model = (input.model ?? '').trim() || DEFAULT_MODEL[provider];
 
-    // Identify the caller (verify_jwt is on) so we can scope the file path.
+    // Identify the caller and REQUIRE a real user.
+    //
+    // These functions deploy with verify_jwt off, which is necessary because the
+    // browser calls them with the anon key. That means the platform performs no
+    // auth at all, so this check is the only gate. Falling back to an
+    // 'anonymous' path, as this did previously, turned an unauthenticated call
+    // into a working code path that wrote unreachable files and let a
+    // session-less signup burn the user's API credits before failing to save.
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const authHeader = req.headers.get('Authorization') ?? '';
     const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: userData } = await userClient.auth.getUser();
-    const userId = userData?.user?.id ?? 'anonymous';
+    const userId = userData?.user?.id;
+    if (!userId) {
+      return json({ error: 'Sign in before generating a proposal.' }, 401);
+    }
 
     const system =
       ((input.systemPrompt ?? '').trim() || SYSTEM_PROMPT) +
@@ -366,8 +379,8 @@ Deno.serve(async (req: Request) => {
 
     const pdfBytes = await buildProposalPDF(content);
 
-    // Upload with the service role so the public bucket can be written regardless
-    // of client RLS.
+    // Upload with the service role: the bucket is private, so client RLS would
+    // otherwise block the write.
     const admin = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const path = `${userId}/${crypto.randomUUID()}.pdf`;
     const { error: uploadError } = await admin.storage
@@ -378,11 +391,22 @@ Deno.serve(async (req: Request) => {
       throw new Error(`Failed to store the proposal PDF: ${uploadError.message}`);
     }
 
-    const { data: publicUrlData } = admin.storage.from('proposals').getPublicUrl(path);
+    // A signed URL, not a public one. The link still works for a client with no
+    // account, which is why the bucket was public in the first place, but it no
+    // longer exposes every other proposal in the bucket. One year, because the
+    // link goes into an Upwork thread that can stay live for months.
+    const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
+    const { data: signed, error: signError } = await admin.storage
+      .from('proposals')
+      .createSignedUrl(path, ONE_YEAR_SECONDS);
+
+    if (signError || !signed?.signedUrl) {
+      throw new Error(`Stored the PDF but could not create a shareable link: ${signError?.message ?? 'unknown error'}`);
+    }
 
     return json({
       cover_letter: content.cover_letter,
-      proposal_url: publicUrlData.publicUrl,
+      proposal_url: signed.signedUrl,
       mermaid_code: content.mermaid_code,
       video_script: content.video_script,
     });

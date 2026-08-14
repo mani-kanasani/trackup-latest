@@ -3,10 +3,17 @@ import { supabase } from '../lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { User } from '../types';
 
+export interface AuthResult {
+  success: boolean;
+  error?: string;
+  /** Signup succeeded but the project requires email confirmation before a session exists. */
+  needsEmailConfirmation?: boolean;
+}
+
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  signup: (name: string, email: string, password: string) => Promise<AuthResult>;
   logout: () => void;
   loading: boolean;
 }
@@ -110,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   };
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -136,7 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signup = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const signup = async (name: string, email: string, password: string): Promise<AuthResult> => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -153,7 +160,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: error.message };
       }
 
-      if (data.user) {
+      // Supabase ships new projects with "Confirm email" ON. In that mode signUp
+      // returns a populated user with a NULL session — no JWT, so every insert
+      // fails RLS. Treating that as success drops the user into an app where
+      // generation burns their API credits and nothing can be saved.
+      if (data.user && !data.session) {
+        return {
+          success: false,
+          needsEmailConfirmation: true,
+          error:
+            'Check your email to confirm your account, then sign in. (Project owners can turn this off in Supabase under Authentication → Sign In / Providers → Confirm email.)',
+        };
+      }
+
+      if (data.user && data.session) {
         await ensureUserRecord(data.user);
         setUser(mapSupabaseUser(data.user));
         return { success: true };
