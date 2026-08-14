@@ -10,8 +10,8 @@
   Every item cites file:line. Verify before building — the audit was thorough,
   not infallible, and two of its claims were already wrong on inspection.
 
-  PHASE 1 IS COMPLETE. Every item below in section 1, plus two of the three
-  one-liners in section 5, shipped on 14 August:
+  BOTH PHASES ARE COMPLETE. Section 1, section 2, and two of the three
+  one-liners in section 5, shipped 14 August:
 
     1.1  wins blob overriding curated proof          319a52a
     1.2  failed vault read rendered as empty vault   27fd2c2
@@ -25,12 +25,32 @@
     S5.2 tier telling the model how many touches     319a52a
     S5.3 "worth automating" wording                  2f91406
 
-  Not done from section 1: orphaned-object cleanup (deleteJob, and removing the
-  prior file in CaseStudyVault.save) — the path is stored now, so this is
-  unblocked but unbuilt. Not done from section 5: the Home readiness checklist.
+    2.1  the proof self-interview                    476201e
+    2.2  persistent validator over editable text     476201e
+    2.3  cadence queue and due dates                 a759157
+    2.4  terminal lead states, editable amounts      a759157
+    2.5  generation provenance                       f3708c9
+    2.6  LinkedIn funnel metrics                     f3708c9
+    2.7  lead import                                 11e9d02
+    2.8  cold email app                              30cd3ec
 
-  NEXT UP is section 2, in its stated order, starting with 2.1 the proof
-  self-interview.
+  STILL NOT BUILT, and deliberately:
+
+    - Orphaned-object cleanup: deleteJob, and CaseStudyVault.save overwriting
+      file_path without removing the prior object. Unblocked since 0da831d
+      stored the path. Small, and the only genuine leftover.
+    - The Home readiness checklist from section 5.
+    - Import for cold email prospects. useProspects.importProspects exists and
+      is tested by construction, but no UI calls it — the LinkedIn importer
+      would need its email-keyed twin.
+    - Everything in section 3, which remains correctly deferred. The constraint
+      diagnostic now HAS its inputs (2.3, 2.4 and 2.5 landed), so it becomes
+      buildable once a few months of real rows exist.
+
+  NOTHING HERE HAS RUN AGAINST A LIVE SUPABASE PROJECT. Nine migrations, three
+  edge functions and three apps are verified by typecheck, build, 100+ smoke
+  checks and browser checks against stubs. The install path itself is the next
+  thing to test, by forking.
 
   Every item cites file:line. Verify before building — the audit was thorough,
   not infallible, and two of its claims were wrong on inspection.

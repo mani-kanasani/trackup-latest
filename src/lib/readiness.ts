@@ -29,7 +29,7 @@ export interface Check {
 }
 
 /** Created by the migrations, in the order a person would notice them missing. */
-const REQUIRED_TABLES = ['users', 'jobs', 'leads', 'case_studies'] as const;
+const REQUIRED_TABLES = ['users', 'jobs', 'leads', 'case_studies', 'prospects'] as const;
 
 /**
  * One column from each of the later migrations.
@@ -46,6 +46,9 @@ const REQUIRED_COLUMNS: { table: string; column: string; feature: string }[] = [
   { table: 'leads', column: 'qualification', feature: 'the qualification screen' },
   { table: 'leads', column: 'status_changed_at', feature: 'cadence timing' },
   { table: 'jobs', column: 'proposal_path', feature: 'reopening proposal PDFs after their link expires' },
+  { table: 'leads', column: 'generation_meta', feature: 'knowing which proof and tier produced a message' },
+  { table: 'leads', column: 'deal_value', feature: 'closing a lead and reporting a rate' },
+  { table: 'prospects', column: 'opted_out', feature: 'honouring cold email opt-outs' },
 ];
 
 /** Deployed by `npm run setup`, or pasted from the wizard. */
