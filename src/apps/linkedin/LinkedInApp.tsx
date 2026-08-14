@@ -74,7 +74,7 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   }, [leads]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-linkedin-50/50 to-white dark:from-gray-900 dark:to-gray-950">
+    <div className="min-h-screen flex flex-col app-canvas accent-linkedin">
       <header className="border-b border-linkedin-100 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md flex-shrink-0">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">

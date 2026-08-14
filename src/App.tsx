@@ -16,7 +16,7 @@ import { AppId } from './apps/registry';
 
 // Shared platform settings (AI provider, database connection, theme).
 const PlatformSettings: React.FC<{ onExit: () => void }> = ({ onExit }) => (
-  <div className="min-h-screen bg-gradient-to-br from-ember-50 to-orange-100 dark:from-gray-900 dark:to-gray-950">
+  <div className="min-h-screen app-canvas accent-ember">
     <div className="h-9 bg-ember-500 text-white flex items-center px-4">
       <button onClick={onExit} className="flex items-center text-sm font-semibold hover:opacity-90">
         <ArrowLeft className="w-4 h-4 mr-1.5" /> All apps

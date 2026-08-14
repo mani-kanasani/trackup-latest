@@ -99,7 +99,7 @@ export const Dashboard: React.FC = () => {
       {/* Bottom Split */}
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Left - Pipeline Overview */}
-        <div className="card-modern p-8">
+        <div className="card-modern p-8 animate-rise">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
             <div className="w-8 h-8 bg-upwork-500/10 rounded-lg flex items-center justify-center mr-3 backdrop-blur-sm">
               <AnimatedLogo size="sm" />
@@ -151,7 +151,7 @@ export const Dashboard: React.FC = () => {
         {/* Right - Outcome Percentages */}
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-            <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center mr-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25 mr-3">
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
             Outcome Metrics

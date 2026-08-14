@@ -118,9 +118,9 @@ export const CaseStudyVault: React.FC = () => {
     setDraft((d) => ({ ...d, [k]: v }));
 
   return (
-    <div className="card-modern p-8">
+    <div className="card-modern p-8 animate-rise">
       <div className="flex items-center space-x-3 mb-2">
-        <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25">
           <FolderOpen className="w-4 h-4 text-white" />
         </div>
         <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Case studies</h3>

@@ -182,12 +182,12 @@ export const SupabaseSetup: React.FC = () => {
           })}
         </div>
 
-        <div className="card-modern p-8">
+        <div className="card-modern p-8 animate-rise">
           {/* Step 1 — Create database */}
           {step === 1 && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-ember-500 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-ember-400 to-ember-600 flex items-center justify-center shadow-lg shadow-ember-500/25">
                   <Database className="w-4 h-4 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create your database</h2>
@@ -216,7 +216,7 @@ export const SupabaseSetup: React.FC = () => {
           {step === 2 && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-ember-500 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-ember-400 to-ember-600 flex items-center justify-center shadow-lg shadow-ember-500/25">
                   <Database className="w-4 h-4 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Set up the backend</h2>
@@ -293,7 +293,7 @@ export const SupabaseSetup: React.FC = () => {
           {step === 3 && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-ember-500 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-ember-400 to-ember-600 flex items-center justify-center shadow-lg shadow-ember-500/25">
                   <Database className="w-4 h-4 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Connect your project</h2>

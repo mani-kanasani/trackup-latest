@@ -27,7 +27,7 @@ export const TrackUpApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="flex flex-col h-screen app-canvas accent-upwork">
       {/* Platform bar */}
       <div className="h-9 flex-shrink-0 bg-ember-500 text-white flex items-center px-4">
         <button onClick={onExit} className="flex items-center text-sm font-semibold hover:opacity-90 transition-opacity">

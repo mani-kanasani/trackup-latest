@@ -204,9 +204,9 @@ export const Apply: React.FC = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-8 animate-fade-in">
       {/* Job Input Card */}
-      <div className="card-modern p-8">
+      <div className="card-modern p-8 animate-rise">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-          <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center mr-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25 mr-3">
             <Send className="w-4 h-4 text-white" />
           </div>
           Job Details
@@ -404,7 +404,7 @@ export const Apply: React.FC = () => {
         <div className="card-modern p-8 animate-fade-in">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-              <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center mr-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25 mr-3">
                 <FileText className="w-4 h-4 text-white" />
               </div>
               Generated Materials

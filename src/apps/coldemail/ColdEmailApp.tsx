@@ -61,7 +61,7 @@ export const ColdEmailApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const suppressed = prospects.filter((p) => p.opted_out).length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-ember-50/40 to-white dark:from-gray-900 dark:to-gray-950">
+    <div className="min-h-screen flex flex-col app-canvas accent-ember">
       <header className="border-b border-ember-100 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md flex-shrink-0">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">

@@ -1,34 +1,314 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+  The design layer.
+
+  Two rules govern everything here, and the second one is the reason the app used
+  to twitch.
+
+  1. Depth comes from layered shadow and a light source, not from borders. A
+     panel that is only a grey outline reads as a form; the same panel with a
+     soft ambient shadow, a tight contact shadow and a one-pixel highlight along
+     its top edge reads as an object.
+
+  2. A hover effect must never change an element's LAYOUT BOX. `transform` is a
+     paint-time operation and is safe by itself, but a scaled element can still
+     overflow a scroll container, which raises a scrollbar, which reflows the
+     page, which moves the element out from under the cursor, which drops the
+     hover — and it oscillates. So scaling is confined to `.card-interactive`,
+     which is only ever used inside a grid with a gutter wide enough to absorb
+     it, and every scroll container clips the horizontal axis as a backstop.
+*/
+
 @layer base {
+  :root {
+    /* One accent drives glow, focus and gradient per surface, so an app's colour
+       flows through every interaction without hardcoding it in each rule. */
+    --accent-400: 251 146 60;
+    --accent-500: 249 115 22;
+    --accent-600: 234 88 12;
+
+    --surface: 255 255 255;
+    --surface-sunken: 249 250 251;
+    --hairline: 0 0 0 / 0.06;
+
+    /* Layered rather than one blurry box: ambient for the room, contact for the
+       edge, and a highlight so the top edge catches the light. */
+    --shadow-rest:
+      0 1px 2px rgb(16 24 40 / 0.04),
+      0 4px 12px -2px rgb(16 24 40 / 0.06);
+    --shadow-lift:
+      0 2px 4px rgb(16 24 40 / 0.05),
+      0 12px 28px -6px rgb(16 24 40 / 0.12);
+  }
+
+  .dark {
+    --surface: 24 28 38;
+    --surface-sunken: 17 20 28;
+    --hairline: 255 255 255 / 0.08;
+    --shadow-rest: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px -2px rgb(0 0 0 / 0.35);
+    --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.45), 0 14px 32px -6px rgb(0 0 0 / 0.55);
+  }
+
+  html {
+    /* The backstop for rule 2. A stray transform can never raise a horizontal
+       scrollbar, so it can never start the oscillation. */
+    overflow-x: clip;
+  }
+
   body {
     font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  /* Headings tighten as they grow. Display text set at body letter-spacing is
+     the single most common thing that makes an interface look unconsidered. */
+  h1, h2, h3, h4 { letter-spacing: -0.021em; }
+  h1 { letter-spacing: -0.032em; }
+
+  ::selection {
+    background: rgb(var(--accent-500) / 0.22);
+  }
+
+  /* A scrollbar that belongs to the design rather than to the OS. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(148 163 184 / 0.35) transparent;
+  }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb {
+    background: rgb(148 163 184 / 0.3);
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover { background: rgb(148 163 184 / 0.55); background-clip: content-box; }
+
+  /* Anyone who has asked their system to stop moving things gets a still app.
+     Non-negotiable: motion sickness is not a preference to design around. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
+/* Per-app accent. Set on a wrapper and everything inside inherits the colour.
+
+   Deliberately OUTSIDE @layer: Tailwind tree-shakes layered class selectors
+   against literal class names in the source, and these are applied as
+   `accent-${app.accent}`, which it cannot see. Inside a layer, two of the three
+   were silently dropped and every surface glowed the same colour. */
+.accent-ember { --accent-400: 251 146 60; --accent-500: 249 115 22; --accent-600: 234 88 12; }
+.accent-linkedin { --accent-400: 74 147 203; --accent-500: 10 102 194; --accent-600: 9 89 171; }
+.accent-upwork { --accent-400: 74 222 128; --accent-500: 20 168 0; --accent-600: 16 138 0; }
+
 @layer components {
-  .btn-primary {
-    @apply bg-upwork-500 hover:bg-upwork-600 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-200 hover:shadow-lg relative overflow-hidden;
-  }
-  
-  .btn-primary:hover {
-    animation: glow 2s ease-in-out infinite alternate;
-  }
-  
-  .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-upwork-600 font-semibold py-3 px-6 rounded-xl border-2 border-upwork-200 hover:border-upwork-300 transition-colors duration-200;
-  }
-  
+  /* --- surfaces ----------------------------------------------------------- */
+
   .card-modern {
-    @apply bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 transition-shadow duration-200 hover:shadow-xl;
+    @apply relative rounded-2xl;
+    background: rgb(var(--surface));
+    box-shadow: var(--shadow-rest);
+    border: 1px solid rgb(var(--hairline));
+    transition: box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
-  
+  /* The highlight along the top edge. One pixel, and it is most of the
+     difference between a box and a surface. */
+  .card-modern::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    border-radius: 1rem 1rem 0 0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.7), transparent);
+    pointer-events: none;
+  }
+  .dark .card-modern::before {
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.12), transparent);
+  }
+  .card-modern:hover {
+    box-shadow: var(--shadow-lift);
+    border-color: rgb(var(--accent-500) / 0.28);
+  }
+
+  /*
+    The only thing that scales.
+
+    Safe because it is used exclusively on grid cards, where the gutter is wider
+    than the 1.5% growth, and because html/body clip the horizontal axis.
+  */
+  .card-interactive {
+    @apply card-modern cursor-pointer;
+    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  .card-interactive:hover {
+    transform: scale(1.015);
+    box-shadow: var(--shadow-lift), 0 0 0 1px rgb(var(--accent-500) / 0.2),
+                0 18px 44px -12px rgb(var(--accent-500) / 0.3);
+    border-color: rgb(var(--accent-500) / 0.4);
+  }
+  /* A press that answers the click before the network does. */
+  .card-interactive:active { transform: scale(0.995); transition-duration: 90ms; }
+
+  .surface-sunken {
+    background: rgb(var(--surface-sunken));
+    border: 1px solid rgb(var(--hairline));
+    @apply rounded-xl;
+  }
+
+  /* --- buttons ------------------------------------------------------------- */
+
+  .btn-primary {
+    @apply relative inline-flex items-center justify-center overflow-hidden rounded-xl px-6 py-3 font-semibold text-white;
+    background-image: linear-gradient(135deg, rgb(var(--accent-500)), rgb(var(--accent-600)));
+    box-shadow: 0 1px 2px rgb(16 24 40 / 0.1), 0 6px 16px -4px rgb(var(--accent-500) / 0.45);
+    transition: box-shadow 200ms ease, filter 200ms ease, transform 120ms ease;
+  }
+  /* The sheen. A highlight that crosses the button on hover, which costs one
+     pseudo-element and reads as considerably more than it is. */
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 25%, rgb(255 255 255 / 0.28) 50%, transparent 75%);
+    transform: translateX(-120%);
+    transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-primary:hover {
+    filter: brightness(1.06);
+    box-shadow: 0 2px 4px rgb(16 24 40 / 0.12), 0 12px 30px -6px rgb(var(--accent-500) / 0.6);
+  }
+  .btn-primary:hover::after { transform: translateX(120%); }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-primary:disabled { filter: grayscale(0.4) brightness(0.95); box-shadow: var(--shadow-rest); }
+  .btn-primary:disabled::after { display: none; }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold;
+    background: rgb(var(--surface));
+    color: rgb(var(--accent-600));
+    border: 1px solid rgb(var(--accent-500) / 0.3);
+    box-shadow: var(--shadow-rest);
+    transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+  .btn-secondary:hover {
+    background: rgb(var(--accent-500) / 0.06);
+    border-color: rgb(var(--accent-500) / 0.55);
+    box-shadow: var(--shadow-rest), 0 0 0 4px rgb(var(--accent-500) / 0.1);
+  }
+  .dark .btn-secondary { color: rgb(var(--accent-400)); }
+
+  /* --- inputs -------------------------------------------------------------- */
+
   .input-modern {
-    @apply w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-upwork-500 focus:border-upwork-500 transition-all duration-200;
+    @apply w-full rounded-xl px-4 py-3 text-gray-900 dark:text-white;
+    background: rgb(var(--surface));
+    border: 1px solid rgb(var(--hairline));
+    box-shadow: inset 0 1px 2px rgb(16 24 40 / 0.04);
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
   }
+  .dark .input-modern { background: rgb(var(--surface-sunken)); box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.25); }
+  .input-modern::placeholder { @apply text-gray-400 dark:text-gray-500; }
+  .input-modern:hover { border-color: rgb(var(--accent-500) / 0.3); }
+  /* A focus ring in the accent, not the browser's blue. */
+  .input-modern:focus {
+    outline: none;
+    border-color: rgb(var(--accent-500) / 0.7);
+    box-shadow: 0 0 0 4px rgb(var(--accent-500) / 0.14);
+  }
+
+  /* --- text ---------------------------------------------------------------- */
+
+  .text-gradient {
+    background-image: linear-gradient(135deg, rgb(var(--accent-500)), rgb(var(--accent-400)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* --- effects -------------------------------------------------------------- */
+
+  /* A soft coloured bloom behind an element. Sits on a pseudo-element so it
+     never participates in layout. */
+  .glow-accent { position: relative; }
+  .glow-accent::before {
+    content: '';
+    position: absolute;
+    inset: -30%;
+    border-radius: inherit;
+    background: radial-gradient(closest-side, rgb(var(--accent-500) / 0.35), transparent);
+    opacity: 0;
+    transition: opacity 300ms ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .glow-accent:hover::before { opacity: 1; }
+
+  /* The page background: two wide colour fields rather than a flat fill. */
+  .app-canvas {
+    background-color: rgb(var(--surface-sunken));
+    background-image:
+      radial-gradient(ellipse 80% 50% at 15% -10%, rgb(var(--accent-500) / 0.1), transparent),
+      radial-gradient(ellipse 60% 50% at 95% 0%, rgb(var(--accent-400) / 0.07), transparent);
+    background-attachment: fixed;
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgb(var(--surface-sunken)) 25%,
+      rgb(var(--accent-500) / 0.08) 37%,
+      rgb(var(--surface-sunken)) 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+
+  /* A status dot that breathes, for anything genuinely live. */
+  .pulse-dot { position: relative; }
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: inherit;
+    animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
+
+@layer utilities {
+  /* Entrance. Callers stagger with an inline animationDelay, because Tailwind
+     tree-shakes this layer against literal class names and a computed one would
+     be purged. */
+  .animate-rise { animation: rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+@keyframes ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
 }

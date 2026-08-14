@@ -148,9 +148,9 @@ export const Settings: React.FC = () => {
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-8 animate-fade-in">
       {/* AI Provider */}
-      <div className="card-modern p-8">
+      <div className="card-modern p-8 animate-rise">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">AI Provider</h3>
@@ -269,9 +269,9 @@ export const Settings: React.FC = () => {
       </div>
 
       {/* Your context */}
-      <div className="card-modern p-8">
+      <div className="card-modern p-8 animate-rise">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25">
             <UserRound className="w-4 h-4 text-white" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Your context</h3>
@@ -325,9 +325,9 @@ export const Settings: React.FC = () => {
       <CaseStudyVault />
 
       {/* System prompts */}
-      <div className="card-modern p-8">
+      <div className="card-modern p-8 animate-rise">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25">
             <Wand2 className="w-4 h-4 text-white" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">System prompts</h3>
@@ -373,9 +373,9 @@ export const Settings: React.FC = () => {
       </div>
 
       {/* Database Connection */}
-      <div className="card-modern p-8">
+      <div className="card-modern p-8 animate-rise">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25">
             <Database className="w-4 h-4 text-white" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Database Connection</h3>
@@ -395,11 +395,11 @@ export const Settings: React.FC = () => {
       </div>
 
       {/* Dark Mode Toggle */}
-      <div className="card-modern p-8">
+      <div className="card-modern p-8 animate-rise">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-              <div className="w-8 h-8 bg-upwork-500 rounded-lg flex items-center justify-center mr-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25 mr-3">
                 {theme === 'light' ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-white" />}
               </div>
               Dark Mode
@@ -442,7 +442,7 @@ export const Settings: React.FC = () => {
       </div>
 
       {/* How It Works */}
-      <div className="card-modern p-8">
+      <div className="card-modern p-8 animate-rise">
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-8 h-8 bg-upwork-500/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
             <AnimatedLogo size="sm" />
