@@ -8,6 +8,7 @@ import { loadUserContext, saveUserContext, UserContext } from '../lib/userContex
 import { CustomPrompts, DEFAULT_PROMPTS, PROMPT_META, PromptKey, loadPrompts, savePrompts } from '../lib/prompts';
 import { supabase } from '../lib/supabase';
 import { ModelSelect } from '../components/UI/ModelSelect';
+import { CaseStudyVault } from '../components/Settings/CaseStudyVault';
 
 export const Settings: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -234,6 +235,10 @@ export const Settings: React.FC = () => {
               className="input-modern resize-none"
               placeholder="e.g. Saved a client 20 hrs/week with a lead-routing system; shipped 30+ automations; 3x'd a team's reply rate…"
             />
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Used only when your case-study vault below is empty. Adding case studies there is better:
+              Ember can then match one proof to each prospect instead of sending all of this every time.
+            </p>
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Testimonials</label>
@@ -251,6 +256,8 @@ export const Settings: React.FC = () => {
           </button>
         </div>
       </div>
+
+      <CaseStudyVault />
 
       {/* System prompts */}
       <div className="card-modern p-8">
