@@ -244,6 +244,12 @@ const ProspectDetail: React.FC<{
       }
       if (!data) throw new Error('No response from the generator.');
 
+      const partial = (data as Record<string, string>).__partial;
+      if (partial) {
+        delete (data as Record<string, string>).__partial;
+        setError(`${partial} You can regenerate, or write the missing ones yourself.`);
+      }
+
       const meta: GenerationMeta = {
         at: new Date().toISOString(),
         pack_id: method.pack.id,

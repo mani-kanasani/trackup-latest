@@ -323,7 +323,7 @@ export const Apply: React.FC = () => {
             onClick={handleGenerate}
             disabled={loading || !jobTitle.trim() || !jobSummary.trim() || (declined && !override)}
             title={declined && !override ? 'The qualification screen declined this job.' : undefined}
-            className="btn-primary flex items-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100"
+            className="btn-primary flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4 mr-2" />
             {loading ? 'Generating...' : 'Generate Proposal'}
@@ -496,7 +496,7 @@ export const Apply: React.FC = () => {
                 href={generatedData.proposal_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-full px-6 py-8 border-2 border-dashed border-upwork-300 dark:border-upwork-600 rounded-xl hover:border-upwork-500 dark:hover:border-upwork-400 transition-all duration-300 text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300 bg-upwork-50/50 dark:bg-upwork-900/10 hover:bg-upwork-100 dark:hover:bg-upwork-900/20 transform hover:scale-105 font-medium"
+                className="flex items-center justify-center w-full px-6 py-8 border-2 border-dashed border-upwork-300 dark:border-upwork-600 rounded-xl hover:border-upwork-500 dark:hover:border-upwork-400 transition-all duration-300 text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300 bg-upwork-50/50 dark:bg-upwork-900/10 hover:bg-upwork-100 dark:hover:bg-upwork-900/20 font-medium"
               >
                 <ExternalLink className="w-6 h-6 mr-3" />
                 Open Proposal Document

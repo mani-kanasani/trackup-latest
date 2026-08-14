@@ -24,7 +24,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onClick, click
       className={`
         inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm
         ${config.color}
-        ${clickable ? 'cursor-pointer hover:opacity-80 transition-all duration-200 transform hover:scale-105' : ''}
+        ${clickable ? 'cursor-pointer hover:opacity-80 transition-all duration-200' : ''}
       `}
       onClick={onClick}
     >

@@ -97,6 +97,56 @@ async function geminiModels(apiKey: string): Promise<string[]> {
     .sort();
 }
 
+
+/**
+ * The smallest real generation the provider will accept.
+ *
+ * Listing models proves the key authenticates. It does not prove the CHOSEN
+ * model exists, that the account has credit, or that generation is enabled —
+ * and those are the failures people actually hit, discovered halfway through a
+ * proposal. So this asks for one word and caps the response at a handful of
+ * tokens: enough to be a true end-to-end test, cheap enough to run freely.
+ */
+async function probeModel(provider: Provider, apiKey: string, model: string): Promise<string> {
+  const prompt = 'Reply with exactly one word: ready';
+
+  if (provider === 'anthropic') {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      body: JSON.stringify({ model, max_tokens: 8, messages: [{ role: 'user', content: prompt }] }),
+    });
+    if (!res.ok) throw new Error(await readProviderError(res));
+    const data = await res.json();
+    return String(data?.content?.[0]?.text ?? '').trim();
+  }
+
+  const baseUrl = provider === 'openai'
+    ? 'https://api.openai.com/v1'
+    : 'https://generativelanguage.googleapis.com/v1beta/openai';
+  const res = await fetch(`${baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, max_completion_tokens: 8, max_tokens: 8, messages: [{ role: 'user', content: prompt }] }),
+  });
+  if (!res.ok) throw new Error(await readProviderError(res));
+  const data = await res.json();
+  return String(data?.choices?.[0]?.message?.content ?? '').trim();
+}
+
+/** Providers put the useful sentence in different places; dig it out. */
+async function readProviderError(res: Response): Promise<string> {
+  const raw = await res.text();
+  try {
+    const body = JSON.parse(raw);
+    const msg = body?.error?.message ?? body?.message ?? body?.error;
+    if (typeof msg === 'string' && msg) return `${res.status}: ${msg}`;
+  } catch {
+    // Not JSON. The raw body is still better than the status alone.
+  }
+  return `${res.status}: ${raw.slice(0, 200) || 'no detail returned'}`;
+}
+
 Deno.serve(async (req: Request) => {
   const cors = corsFor(req);
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -106,15 +156,26 @@ Deno.serve(async (req: Request) => {
   if (!userId) return json({ error: 'Sign in to list models.' }, 401, cors);
 
   try {
-    const { provider, apiKey } = (await req.json()) as { provider?: Provider; apiKey?: string };
+    const { provider, apiKey, action, model } = (await req.json()) as {
+      provider?: Provider; apiKey?: string; action?: 'list' | 'test'; model?: string;
+    };
     const key = (apiKey ?? '').trim();
     if (!key) return json({ error: 'An API key is required.' }, 400, cors);
+    if (provider !== 'openai' && provider !== 'anthropic' && provider !== 'gemini') {
+      return json({ error: 'A valid provider is required.' }, 400, cors);
+    }
+
+    if (action === 'test') {
+      const target = (model ?? '').trim();
+      if (!target) return json({ error: 'Choose a model to test.' }, 400, cors);
+      const reply = await probeModel(provider, key, target);
+      return json({ ok: true, model: target, reply }, 200, cors);
+    }
 
     let models: string[];
     if (provider === 'openai') models = await openaiModels(key);
     else if (provider === 'anthropic') models = await anthropicModels(key);
-    else if (provider === 'gemini') models = await geminiModels(key);
-    else return json({ error: 'A valid provider is required.' }, 400, cors);
+    else models = await geminiModels(key);
 
     return json({ models }, 200, cors);
   } catch (err) {

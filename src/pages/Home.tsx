@@ -85,7 +85,7 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
               <button
                 key={app.id}
                 onClick={() => onOpenApp(app.id)}
-                className="group text-left card-modern p-7 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                className="group text-left card-modern p-7 hover:shadow-xl transition-all duration-300"
               >
                 <div className="flex items-start justify-between">
                   <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${app.gradient} flex items-center justify-center shadow-md`}>

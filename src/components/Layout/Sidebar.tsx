@@ -63,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onPageChange, isO
                     onToggle();
                   }}
                   className={`
-                    w-full flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 group
+                    w-full flex items-center px-4 py-4 text-sm font-semibold rounded-xl transition-all duration-300 ease-in-out group
                     ${isActive 
                       ? 'bg-upwork-500 text-white shadow-lg' 
                       : 'text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-md'

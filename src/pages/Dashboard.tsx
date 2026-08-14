@@ -131,7 +131,7 @@ export const Dashboard: React.FC = () => {
             ) : (
               <div className="space-y-3">
                 {recentItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-300 transform hover:scale-[1.02]">
+                  <div key={item.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-300">
                     <div className="flex-1 min-w-0">
                       <p className="text-base font-semibold text-gray-900 dark:text-white truncate">
                         {item.title}

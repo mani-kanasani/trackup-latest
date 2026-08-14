@@ -390,6 +390,15 @@ const LeadDetail: React.FC<{
       }
       if (!data) throw new Error('No response from the generator.');
 
+      // The function marks a partial response rather than letting the missing
+      // steps arrive as a silent list of blanks. Lift it out of the payload so it
+      // is not stored as a phantom step, and tell the user plainly.
+      const partial = (data as Record<string, string>).__partial;
+      if (partial) {
+        delete (data as Record<string, string>).__partial;
+        setError(`${partial} You can regenerate, or write the missing ones yourself.`);
+      }
+
       // Grade the output against the same doctrine that wrote it. Generation is
       // probabilistic; the laws are not.
       // Everything worth recording is already in scope on this line, and all of

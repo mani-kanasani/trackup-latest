@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ currentPage }) => {
           </span>
           <button
             onClick={logout}
-            className="flex items-center px-4 py-2 text-sm font-semibold text-upwork-600 dark:text-upwork-400 hover:bg-upwork-50 dark:hover:bg-upwork-900/20 rounded-xl transition-all duration-300 transform hover:scale-105"
+            className="flex items-center px-4 py-2 text-sm font-semibold text-upwork-600 dark:text-upwork-400 hover:bg-upwork-50 dark:hover:bg-upwork-900/20 rounded-xl transition-all duration-300"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Sign out

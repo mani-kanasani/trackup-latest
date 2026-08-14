@@ -32,7 +32,7 @@ export const DateFilter: React.FC<DateFilterProps> = ({ currentFilter, onFilterC
               key={filter}
               onClick={() => onFilterChange(filter)}
               className={`
-                px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 capitalize transform hover:scale-105
+                px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 capitalize
                 ${currentFilter === filter
                   ? 'bg-upwork-500 text-white shadow-lg'
                   : 'text-gray-600 dark:text-gray-300 hover:text-upwork-600 dark:hover:text-white hover:bg-upwork-50 dark:hover:bg-gray-600'
@@ -47,7 +47,7 @@ export const DateFilter: React.FC<DateFilterProps> = ({ currentFilter, onFilterC
         <button
           onClick={() => setShowDatePicker(!showDatePicker)}
           className={`
-            p-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-sm
+            p-3 rounded-xl transition-all duration-300 shadow-sm
             ${currentFilter === 'custom'
               ? 'bg-upwork-500 text-white shadow-lg'
               : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-upwork-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600'
@@ -87,7 +87,7 @@ export const DateFilter: React.FC<DateFilterProps> = ({ currentFilter, onFilterC
               <button
                 onClick={handleCustomRangeApply}
                 disabled={!customStart || !customEnd}
-                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100"
+                className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Apply
               </button>

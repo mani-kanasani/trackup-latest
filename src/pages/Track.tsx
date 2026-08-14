@@ -94,7 +94,7 @@ export const Track: React.FC = () => {
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={`
-                  flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-sm
+                  flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 shadow-sm
                   ${statusFilter === status
                     ? 'bg-upwork-500 text-white shadow-lg'
                     : 'bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-upwork-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600'
@@ -187,7 +187,7 @@ export const Track: React.FC = () => {
                     <tr
                       key={material.id}
                       onClick={() => setSelectedMaterial(material)}
-                      className="hover:bg-upwork-50 dark:hover:bg-gray-700 cursor-pointer transition-all duration-300 transform hover:scale-[1.01]"
+                      className="hover:bg-upwork-50 dark:hover:bg-gray-700 cursor-pointer transition-all duration-300"
                     >
                       <td className="px-8 py-6">
                         <div className="text-base font-semibold text-gray-900 dark:text-white truncate max-w-xs">
@@ -273,7 +273,7 @@ export const Track: React.FC = () => {
                 </h2>
                 <button
                   onClick={() => setSelectedMaterial(null)}
-                  className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-xl transition-all duration-200 transform hover:scale-110"
+                  className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
                 >
                   <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                 </button>
@@ -393,7 +393,7 @@ export const Track: React.FC = () => {
                 <button
                   onClick={() => openProposal(selectedMaterial)}
                   disabled={openingDoc}
-                  className="flex items-center justify-center w-full px-6 py-4 border-2 border-dashed border-upwork-300 dark:border-upwork-600 rounded-xl hover:border-upwork-500 dark:hover:border-upwork-400 transition-all duration-300 text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300 bg-upwork-50/50 dark:bg-upwork-900/10 hover:bg-upwork-100 dark:hover:bg-upwork-900/20 transform hover:scale-105 font-semibold disabled:opacity-50"
+                  className="flex items-center justify-center w-full px-6 py-4 border-2 border-dashed border-upwork-300 dark:border-upwork-600 rounded-xl hover:border-upwork-500 dark:hover:border-upwork-400 transition-all duration-300 text-upwork-600 dark:text-upwork-400 hover:text-upwork-700 dark:hover:text-upwork-300 bg-upwork-50/50 dark:bg-upwork-900/10 hover:bg-upwork-100 dark:hover:bg-upwork-900/20 font-semibold disabled:opacity-50"
                 >
                   <ExternalLink className="w-5 h-5 mr-3" />
                   {openingDoc ? 'Opening…' : 'Open Document'}

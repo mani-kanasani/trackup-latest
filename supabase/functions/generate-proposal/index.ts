@@ -183,7 +183,9 @@ async function callAnthropic(
     },
     body: JSON.stringify({
       model,
-      max_tokens: 4096,
+      // Twelve pack steps plus sections, a diagram and a script. See the note
+      // in generate-outreach: too low here truncates the object silently.
+      max_tokens: 8000,
       temperature: 0.7,
       system: system,
       messages: [
@@ -271,7 +273,23 @@ function parseProposal(raw: string, steps: OutputStep[], letterKeys: string[]): 
   // Every step the pack asked for, so the client can grade the response against
   // the same doctrine that produced it.
   const stepValues: Record<string, string> = {};
-  for (const step of steps) stepValues[step.key] = String(parsed[step.key] ?? '').trim();
+  let filled = 0;
+  for (const step of steps) {
+    const v = String(parsed[step.key] ?? '').trim();
+    stepValues[step.key] = v;
+    if (v) filled++;
+  }
+
+  // See the equivalent note in generate-outreach: an all-empty result is an
+  // upstream failure and must not be handed back as a document to fix.
+  if (filled === 0 && !String(parsed.cover_letter ?? '').trim()) {
+    const got = Object.keys(parsed).slice(0, 8).join(', ') || 'nothing';
+    throw new Error(
+      `The model replied but used none of the requested fields. It returned: ${got}. ` +
+        'This usually means the response was cut short or the model ignored the format. ' +
+        'Try again, or pick a stronger model in Settings.',
+    );
+  }
 
   // The message the user actually sends, assembled from the steps that make it
   // up. Falls back to a model-supplied cover_letter only if the caller named no

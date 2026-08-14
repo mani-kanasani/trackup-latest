@@ -47,8 +47,8 @@ export const PROVIDER_META: Record<AIProvider, ProviderMeta> = {
   },
   anthropic: {
     label: 'Anthropic Claude',
-    defaultModel: 'claude-haiku-4-5',
-    modelOptions: ['claude-haiku-4-5', 'claude-sonnet-4-6', 'claude-opus-4-8', 'claude-3-5-haiku-latest'],
+    defaultModel: 'claude-sonnet-5',
+    modelOptions: ['claude-sonnet-5', 'claude-opus-5', 'claude-haiku-4-5', 'claude-3-5-haiku-latest'],
     keyLabel: 'Anthropic API key',
     keyUrl: 'https://console.anthropic.com/settings/keys',
     free: false,

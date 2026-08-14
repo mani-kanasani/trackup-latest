@@ -191,7 +191,10 @@ async function callAnthropic(apiKey: string, model: string, system: string, prom
     },
     body: JSON.stringify({
       model,
-      max_tokens: 2000,
+      // Twelve steps, several with a 400-700 character ceiling, plus JSON
+      // structure. At 2000 the response was truncated mid-object and every step
+      // came back empty, which the app then reported as twelve things to fix.
+      max_tokens: 8000,
       temperature: 0.8,
       system: system,
       messages: [{ role: 'user', content: `${prompt}\n\nRespond with ONLY the raw JSON object.` }],
@@ -215,11 +218,32 @@ function parseFlow(raw: string, steps: OutputStep[]): Record<string, string> {
   } catch {
     throw new Error('The AI returned a response that was not valid JSON. Try again.');
   }
-  // Return exactly the requested keys, so a missing one surfaces as an empty
-  // string the validator can flag rather than as a key that silently is not there.
   const out: Record<string, string> = {};
-  for (const step of steps) out[step.key] = String(parsed[step.key] ?? '');
+  let filled = 0;
+  for (const step of steps) {
+    const v = String(parsed[step.key] ?? '').trim();
+    out[step.key] = v;
+    if (v) filled++;
+  }
   out[STRATEGY_KEY] = String(parsed[STRATEGY_KEY] ?? '');
+
+  // A response that parses but carries none of the requested keys is a failure,
+  // and it used to be saved as a full set of empty strings — which the app then
+  // reported as twelve separate things to fix, with no hint that the real problem
+  // was upstream. Say what actually came back instead.
+  if (filled === 0) {
+    const got = Object.keys(parsed).slice(0, 8).join(', ') || 'nothing';
+    throw new Error(
+      `The model replied but used none of the requested fields. It returned: ${got}. ` +
+        'This usually means the response was cut short or the model ignored the format. ' +
+        'Try again, or pick a stronger model in Settings.',
+    );
+  }
+  // A partial response is worth keeping, but the user should know it is partial
+  // rather than discover it as a list of empty steps.
+  if (filled < steps.length) {
+    out.__partial = `${filled} of ${steps.length} steps came back. The rest were left empty by the model.`;
+  }
   return out;
 }
 

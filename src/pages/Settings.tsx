@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Moon, Sun, Sparkles, Key, ExternalLink, Check, Database, RefreshCw, Loader2, UserRound, Wand2 } from 'lucide-react';
+import { Moon, Sun, Sparkles, Key, ExternalLink, Check, Database, RefreshCw, Loader2, UserRound, Wand2, Zap, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { AnimatedLogo } from '../components/UI/AnimatedLogo';
 import { AIProvider, PROVIDER_META, loadAIConfig, saveAIConfig } from '../lib/aiConfig';
@@ -50,6 +50,9 @@ export const Settings: React.FC = () => {
     setModelsError('');
   };
 
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+
   const handleLoadModels = async () => {
     if (!apiKey.trim()) { setModelsError('Enter your API key first.'); return; }
     setModelsError('');
@@ -65,6 +68,7 @@ export const Settings: React.FC = () => {
         throw new Error(message);
       }
       setLoadedModels(data?.models ?? []);
+      setTestResult(null);
     } catch (e) {
       setModelsError(e instanceof Error ? e.message : 'Could not load models.');
     } finally {
@@ -86,6 +90,41 @@ export const Settings: React.FC = () => {
   // Reset clears it. The default IS blank: with nothing here the method pack
   // governs alone, which is stronger than any persona line placed after it.
   const resetPrompt = (key: PromptKey) => setPrompts((p) => ({ ...p, [key]: '' }));
+
+  /**
+   * Proves the key can actually generate, not merely that it authenticates.
+   *
+   * Listing models only checks the key is valid. The failures people hit are
+   * downstream of that — the chosen model does not exist for this account, there
+   * is no credit, the key lacks the scope — and they used to surface halfway
+   * through generating a proposal, as an error about the proposal. One word out
+   * of the real model, capped at a handful of tokens, answers it up front.
+   */
+  const handleTestKey = async () => {
+    if (!apiKey.trim()) { setTestResult({ ok: false, message: 'Enter your API key first.' }); return; }
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke<{ ok: boolean; model: string; reply: string }>(
+        'list-models',
+        { body: { action: 'test', provider, apiKey: apiKey.trim(), model: (model || meta.defaultModel).trim() } },
+      );
+      if (error) {
+        let message = error.message;
+        const ctx = (error as { context?: Response }).context;
+        if (ctx?.json) { const b = await ctx.json().catch(() => null); if (b?.error) message = b.error; }
+        throw new Error(message);
+      }
+      setTestResult({
+        ok: true,
+        message: `${data?.model} answered "${data?.reply || 'ok'}". Your key works and this model can generate.`,
+      });
+    } catch (e) {
+      setTestResult({ ok: false, message: e instanceof Error ? e.message : 'The test failed.' });
+    } finally {
+      setTesting(false);
+    }
+  };
 
   const handleSaveAI = () => {
     saveAIConfig({
@@ -197,10 +236,35 @@ export const Settings: React.FC = () => {
             </a>
           </div>
 
-          <button onClick={handleSaveAI} className="btn-primary flex items-center">
-            {saved ? <Check className="w-4 h-4 mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
-            {saved ? 'Saved' : 'Save AI Settings'}
-          </button>
+          {testResult && (
+            <div
+              className={`flex items-start text-sm p-4 rounded-xl border ${
+                testResult.ok
+                  ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                  : 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+              }`}
+            >
+              {testResult.ok
+                ? <Check className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+                : <AlertCircle className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />}
+              <span>{testResult.message}</span>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-3">
+            <button onClick={handleSaveAI} className="btn-primary flex items-center">
+              {saved ? <Check className="w-4 h-4 mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+              {saved ? 'Saved' : 'Save AI Settings'}
+            </button>
+            <button
+              onClick={handleTestKey}
+              disabled={testing}
+              className="btn-secondary flex items-center disabled:opacity-50"
+            >
+              {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />}
+              {testing ? 'Testing…' : 'Test this key'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -348,7 +412,7 @@ export const Settings: React.FC = () => {
           <button
             onClick={toggleTheme}
             className={`
-              relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-upwork-500 focus:ring-offset-2 transform hover:scale-105
+              relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-upwork-500 focus:ring-offset-2
               ${theme === 'dark' ? 'bg-upwork-500 shadow-lg' : 'bg-gray-300'}
             `}
           >
