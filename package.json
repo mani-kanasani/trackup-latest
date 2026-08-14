@@ -15,7 +15,8 @@
     "method:test": "esbuild scripts/smokeMethod.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/smoke.mjs --log-level=error && node node_modules/.cache/smoke.mjs",
     "proof:test": "esbuild scripts/smokeProof.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/proof.mjs --log-level=error && node node_modules/.cache/proof.mjs",
     "qualify:test": "esbuild scripts/smokeQualify.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/qualify.mjs --log-level=error && node node_modules/.cache/qualify.mjs",
-    "cadence:test": "esbuild scripts/smokeCadence.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/cadence.mjs --log-level=error && node node_modules/.cache/cadence.mjs"
+    "cadence:test": "esbuild scripts/smokeCadence.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/cadence.mjs --log-level=error && node node_modules/.cache/cadence.mjs",
+    "import:test": "esbuild scripts/smokeImport.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/import.mjs --log-level=error && node node_modules/.cache/import.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

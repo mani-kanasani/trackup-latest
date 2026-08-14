@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft, Linkedin, Plus, Sparkles, Copy, Check, Trash2, Loader2, ExternalLink, X,
-  ThumbsUp, ThumbsDown, Lightbulb,
+  ThumbsUp, ThumbsDown, Lightbulb, Upload,
 } from 'lucide-react';
 import { useLeads, type MutationResult } from './useLeads';
 import { Lead, LeadStatus, OutreachFlow, GenerationMeta, migrateFlow, readSentSteps, isTerminal } from './types';
@@ -14,6 +14,7 @@ import { loadUserContext, senderAbout } from '../../lib/userContext';
 import { buildChannelPrompt, checkAgainstMethod } from '../../lib/method/forChannel';
 import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
+import { ImportLeadsModal } from './ImportLeadsModal';
 import { qualify, isBlocked } from '../../lib/qualify/score';
 import type { QualificationInput } from '../../lib/qualify/types';
 import type { ValidationResult } from '../../lib/method/types';
@@ -51,9 +52,10 @@ const GROUPED_STEPS = LINKEDIN_PACK.structure.reduce<{ group: string; steps: typ
 const TRACKED_GROUPS = new Set(['The sequence']);
 
 export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
-  const { leads, loading, addLead, updateLead, deleteLead } = useLeads();
+  const { leads, loading, addLead, importLeads, updateLead, deleteLead } = useLeads();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [showDue, setShowDue] = useState(true);
   const selected = leads.find((l) => l.id === selectedId) ?? null;
 
@@ -86,9 +88,14 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
               <span className="font-bold text-gray-900 dark:text-white">LinkedIn DM Generator</span>
             </div>
           </div>
-          <button onClick={() => setShowAdd(true)} className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-linkedin-600 hover:bg-linkedin-700 shadow-sm">
-            <Plus className="w-4 h-4 mr-1.5" /> Add lead
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowImport(true)} className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-linkedin-700 dark:text-linkedin-300 border border-linkedin-200 dark:border-linkedin-800 hover:bg-linkedin-50 dark:hover:bg-linkedin-900/20">
+              <Upload className="w-4 h-4 mr-1.5" /> Import
+            </button>
+            <button onClick={() => setShowAdd(true)} className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-linkedin-600 hover:bg-linkedin-700 shadow-sm">
+              <Plus className="w-4 h-4 mr-1.5" /> Add lead
+            </button>
+          </div>
         </div>
       </header>
 
@@ -212,6 +219,13 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
       </div>
 
       {showAdd && <AddLeadModal onClose={() => setShowAdd(false)} onAdd={addLead} />}
+      {showImport && (
+        <ImportLeadsModal
+          existingUrls={leads.map((l) => l.linkedin_url)}
+          onClose={() => setShowImport(false)}
+          onImport={importLeads}
+        />
+      )}
     </div>
   );
 };
