@@ -46,7 +46,7 @@ export const Apply: React.FC = () => {
     [generatedData],
   );
   const describeViolation = (v: NonNullable<typeof check>['violations'][number]) =>
-    `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`;
+    `${v.message}${v.excerpt ? `, "${v.excerpt}"` : ''}`;
   const warnings = (check?.violations ?? []).filter((v) => v.level === 'hard').map(describeViolation);
   const softNotes = (check?.violations ?? []).filter((v) => v.level === 'soft').map(describeViolation);
   const [proofUsed, setProofUsed] = useState<string | null>(null);
@@ -362,7 +362,7 @@ export const Apply: React.FC = () => {
                   onClick={() => setOverride(true)}
                   className="mt-2 text-xs font-semibold text-red-700 dark:text-red-300 underline underline-offset-2"
                 >
-                  I disagree — write it anyway
+                  I disagree, write it anyway
                 </button>
               )}
             </div>
@@ -464,7 +464,7 @@ export const Apply: React.FC = () => {
                 library is ~500KB and the diagram never appears in the PDF the
                 buyer receives. What was here before was a button labelled "Show
                 Preview" that revealed the sentence "Mermaid diagram preview
-                would be rendered here" — a promise the app could not keep. The
+                would be rendered here", a promise the app could not keep. The
                 source is a real deliverable to paste into a doc tool, so it is
                 labelled as exactly that. */}
             {generatedData.mermaid_code && (

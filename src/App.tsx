@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { Settings as SettingsIcon } from 'lucide-react';
+import { AppBar } from './components/Layout/AppBar';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
@@ -17,11 +18,7 @@ import { AppId } from './apps/registry';
 // Shared platform settings (AI provider, database connection, theme).
 const PlatformSettings: React.FC<{ onExit: () => void }> = ({ onExit }) => (
   <div className="min-h-screen app-canvas accent-ember">
-    <div className="h-9 bg-ember-500 text-white flex items-center px-4">
-      <button onClick={onExit} className="flex items-center text-sm font-semibold hover:opacity-90">
-        <ArrowLeft className="w-4 h-4 mr-1.5" /> All apps
-      </button>
-    </div>
+    <AppBar title="Settings" icon={SettingsIcon} gradient="from-ember-400 to-ember-600" onExit={onExit} />
     <Settings />
   </div>
 );

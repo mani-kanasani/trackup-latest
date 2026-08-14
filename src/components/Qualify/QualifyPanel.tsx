@@ -134,7 +134,7 @@ export const QualifyPanel: React.FC<{
         {open ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
       </button>
 
-      {/* The verdict's reasoning stays visible when collapsed — a screen you have
+      {/* The verdict's reasoning stays visible when collapsed, a screen you have
           to expand to understand is one people stop reading. */}
       {(result.blockers.length > 0 || (!open && result.reasons.length > 0)) && (
         <div className="px-4 pb-4 -mt-1 space-y-1">
@@ -184,7 +184,7 @@ export const QualifyPanel: React.FC<{
               Bonus signals
             </h4>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              Not a gate. Boredom is a buying signal — predictable work is what makes an early win reliable.
+              Not a gate. Boredom is a buying signal, predictable work is what makes an early win reliable.
             </p>
             <div className="space-y-2">
               {BONUS.map((b) => (
@@ -294,7 +294,7 @@ export const QualifyPanel: React.FC<{
           {result.tier && (
             <section className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/60 rounded-lg p-3">
               <p className="font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                {TIERS[result.tier].label} — {TIERS[result.tier].share}
+                {TIERS[result.tier].label}, {TIERS[result.tier].share}
               </p>
               <p>{TIERS[result.tier].effort}</p>
             </section>

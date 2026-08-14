@@ -47,7 +47,7 @@ export const ProofInterview: React.FC<{
         <div className="flex items-center gap-2 min-w-0">
           <Lightbulb className="w-4 h-4 text-ember-600 dark:text-ember-400 flex-shrink-0" />
           <h4 className="font-semibold text-gray-900 dark:text-white">
-            {done ? 'That is all seven' : `Finding your proof — ${index + 1} of ${INTERVIEW.length}`}
+            {done ? 'That is all seven' : `Finding your proof, ${index + 1} of ${INTERVIEW.length}`}
           </h4>
         </div>
         <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600" aria-label="Close">

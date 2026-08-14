@@ -45,6 +45,22 @@ for (const p of ALL_PACKS) {
   check(`${p.id}: a complete response passes`, graded.ok, `${graded.hardCount} hard`);
 }
 
+// ---- the doctrine must obey the rules it imposes
+//
+// Every pack hard-bans the em dash on the grounds that it reads as
+// machine-written, and the doctrine itself used to contain 214 of them. A prompt
+// is written in the register its output copies, so this was the app asking for
+// exactly what it then rejected.
+for (const p of ALL_PACKS) {
+  const authored = [
+    p.thesis,
+    p.primeDirective,
+    ...p.laws.flatMap((l) => [l.rule, l.because]),
+    ...p.structure.flatMap((st) => [st.label, st.purpose, ...st.constraints]),
+  ].join(' ');
+  check(`${p.id}: doctrine contains no em or en dash`, !/[—–]/.test(authored));
+}
+
 // ---- the prompt actually carries the doctrine
 const pack = getPack('coldEmail');
 const prompt = composeSystemPrompt({

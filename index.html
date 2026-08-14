@@ -2,9 +2,18 @@
 <html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <!-- SVG first for modern browsers, ICO as the fallback everything understands. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/favicon-64.png" />
+    <meta name="theme-color" content="#f97316" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ember — AI outreach suite</title>
+    <!--
+      No em dash. The app hard-bans them in everything it writes, on the grounds
+      that they read as machine-written, and having one in our own tab title was
+      the product not taking its own advice.
+    -->
+    <title>Ember · AI outreach suite</title>
     <meta name="description" content="Generate method-backed outreach that gets replies. Upwork proposals, LinkedIn DMs and cold email, grounded in your own case studies." />
   </head>
   <body class="h-full">

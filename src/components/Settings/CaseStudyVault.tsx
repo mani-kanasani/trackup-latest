@@ -129,7 +129,7 @@ export const CaseStudyVault: React.FC = () => {
         Your proof, stored properly. Ember picks the <span className="font-semibold">one</span> case study
         closest to each prospect's world rather than dumping everything into the prompt, and it will never
         state a number that is not recorded here.{' '}
-        <span className="font-semibold">This is optional</span> — with an empty vault, Ember writes from
+        <span className="font-semibold">This is optional</span>, with an empty vault, Ember writes from
         your background instead and avoids claiming results you do not have.
       </p>
 

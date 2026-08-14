@@ -118,7 +118,7 @@ export const QUADRANTS = {
 export const RUNGS: Record<LadderRung, RungDef> = {
   top: {
     id: 'top',
-    label: 'Top — choosing a provider',
+    label: 'Top, choosing a provider',
     jobs: 1,
     state: 'Problem-aware and solution-aware. They are deciding who to pick.',
     instruction:
@@ -127,7 +127,7 @@ export const RUNGS: Record<LadderRung, RungDef> = {
   },
   middle: {
     id: 'middle',
-    label: 'Middle — knows the problem, not the solution',
+    label: 'Middle, knows the problem, not the solution',
     jobs: 2,
     state: 'Problem-aware, solution-unaware. They feel the pain and are living with it.',
     instruction:
@@ -137,7 +137,7 @@ export const RUNGS: Record<LadderRung, RungDef> = {
   },
   bottom: {
     id: 'bottom',
-    label: 'Bottom — has not named the problem',
+    label: 'Bottom, has not named the problem',
     jobs: 3,
     state: 'Problem-unaware. They have normalised the thing you would fix.',
     instruction:

@@ -142,7 +142,7 @@ const checkTables = async (config: SupabaseConfig): Promise<Check> => {
       label: 'Database tables',
       status: 'fail',
       detail: `Present but not readable: ${blocked.join(', ')}.`,
-      fix: 'The tables exist but their row-level security policies did not apply. Re-run the migrations that create the policies — the CREATE POLICY statements are idempotent.',
+      fix: 'The tables exist but their row-level security policies did not apply. Re-run the migrations that create the policies, the CREATE POLICY statements are idempotent.',
     };
   }
   return {
@@ -178,7 +178,7 @@ const checkColumns = async (config: SupabaseConfig): Promise<Check> => {
       label: 'Schema up to date',
       status: 'fail',
       detail: `${stale.length} later migration${stale.length === 1 ? '' : 's'} not applied: ${stale.join('; ')}.`,
-      fix: 'The tables exist but the newer migrations did not run. Work through the SQL below from the top — every migration is idempotent, so re-running the ones that already applied is harmless.',
+      fix: 'The tables exist but the newer migrations did not run. Work through the SQL below from the top, every migration is idempotent, so re-running the ones that already applied is harmless.',
     };
   }
   return { id: 'columns', label: 'Schema up to date', status: 'ok', detail: 'All migrations applied.' };
@@ -219,7 +219,7 @@ const checkFunctions = async (config: SupabaseConfig): Promise<Check> => {
       label: 'Edge functions',
       status: 'fail',
       detail: `${missing.length} of ${REQUIRED_FUNCTIONS.length} not deployed: ${missing.join(', ')}.`,
-      fix: 'Deploy them with `npm run setup`, or paste each source below into a new function in the dashboard. Every one must have Verify JWT turned OFF — the app calls them with the publishable key and they check the signed-in user themselves.',
+      fix: 'Deploy them with `npm run setup`, or paste each source below into a new function in the dashboard. Every one must have Verify JWT turned OFF, the app calls them with the publishable key and they check the signed-in user themselves.',
     };
   }
   return {
@@ -244,9 +244,9 @@ export const runReadinessChecks = async (config: SupabaseConfig): Promise<Check[
     // guessing. Say so rather than inventing two more red rows.
     return [
       connection,
-      { id: 'tables', label: 'Database tables', status: 'warn', detail: 'Not checked — no connection yet.' },
-      { id: 'columns', label: 'Schema up to date', status: 'warn', detail: 'Not checked — no connection yet.' },
-      { id: 'functions', label: 'Edge functions', status: 'warn', detail: 'Not checked — no connection yet.' },
+      { id: 'tables', label: 'Database tables', status: 'warn', detail: 'Not checked, no connection yet.' },
+      { id: 'columns', label: 'Schema up to date', status: 'warn', detail: 'Not checked, no connection yet.' },
+      { id: 'functions', label: 'Edge functions', status: 'warn', detail: 'Not checked, no connection yet.' },
     ];
   }
 
@@ -260,7 +260,7 @@ export const runReadinessChecks = async (config: SupabaseConfig): Promise<Check[
           id: 'columns',
           label: 'Schema up to date',
           status: 'warn' as const,
-          detail: 'Not checked — the tables have to exist first.',
+          detail: 'Not checked, the tables have to exist first.',
         };
 
   return [connection, tables, columns, await checkFunctions(config)];

@@ -53,7 +53,7 @@ export const ModelSelect: React.FC<ModelSelectProps> = ({ value, onChange, optio
         <div className="absolute z-30 mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl overflow-hidden">
           <div className="flex items-center px-3 py-2 text-xs text-gray-400 border-b border-gray-100 dark:border-gray-700">
             <Search className="w-3.5 h-3.5 mr-2" />
-            {list.length} model{list.length === 1 ? '' : 's'} — type to filter
+            {list.length} model{list.length === 1 ? '' : 's'}, type to filter
           </div>
           <div className="max-h-64 overflow-y-auto py-1">
             {list.map((o) => (

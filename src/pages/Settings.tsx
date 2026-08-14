@@ -333,7 +333,7 @@ export const Settings: React.FC = () => {
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">System prompts</h3>
         </div>
         <p className="text-base text-gray-600 dark:text-gray-400 mb-6">
-          Rewrite how the AI thinks for each generator — its voice, strategy, and what to emphasize. The
+          Rewrite how the AI thinks for each generator, its voice, strategy, and what to emphasize. The
           required output format is enforced automatically, so edits can't break generation. Stored in this browser.
         </p>
         <div className="space-y-6">

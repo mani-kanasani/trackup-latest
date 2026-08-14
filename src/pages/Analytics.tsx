@@ -10,7 +10,8 @@
 // to make decisions on noise.
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Send, MessageSquare, CalendarCheck, Trophy, AlertTriangle } from 'lucide-react';
+import { Send, MessageSquare, CalendarCheck, Trophy, AlertTriangle, BarChart3 } from 'lucide-react';
+import { AppBar } from '../components/Layout/AppBar';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { supabase } from '../lib/supabase';
@@ -112,11 +113,7 @@ export const Analytics: React.FC<{ onExit: () => void }> = ({ onExit }) => {
 
   return (
     <div className="min-h-screen app-canvas accent-ember">
-      <div className="h-9 bg-ember-500 text-white flex items-center px-4">
-        <button onClick={onExit} className="flex items-center text-sm font-semibold hover:opacity-90">
-          <ArrowLeft className="w-4 h-4 mr-1.5" /> All apps
-        </button>
-      </div>
+      <AppBar title="Your numbers" icon={BarChart3} gradient="from-ember-400 to-ember-600" onExit={onExit} />
 
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         <div>

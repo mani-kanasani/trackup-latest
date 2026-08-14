@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { Send } from 'lucide-react';
+import { AppBar } from '../../components/Layout/AppBar';
 import { Sidebar } from '../../components/Layout/Sidebar';
 import { Header } from '../../components/Layout/Header';
 import { Dashboard } from '../../pages/Dashboard';
@@ -29,13 +30,7 @@ export const TrackUpApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   return (
     <div className="flex flex-col h-screen app-canvas accent-upwork">
       {/* Platform bar */}
-      <div className="h-9 flex-shrink-0 bg-ember-500 text-white flex items-center px-4">
-        <button onClick={onExit} className="flex items-center text-sm font-semibold hover:opacity-90 transition-opacity">
-          <ArrowLeft className="w-4 h-4 mr-1.5" /> All apps
-        </button>
-        <span className="mx-2 opacity-50">/</span>
-        <span className="text-sm font-medium opacity-90">TrackUp</span>
-      </div>
+      <AppBar title="TrackUp" icon={Send} gradient="from-upwork-400 to-upwork-600" onExit={onExit} />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar

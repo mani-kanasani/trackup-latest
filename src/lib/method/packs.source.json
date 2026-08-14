@@ -11,7 +11,7 @@
         "rule": "Ask for a reply, never for a meeting, a demo, or a click.",
         "because": "A cold ask has to be answerable in one word and cost the reader nothing; a call request asks a stranger to spend time before you have given them anything.",
         "source": {
-          "label": "Cold Email Lab §3 — the CTA rule",
+          "label": "Cold Email Lab §3: the CTA rule",
           "claim": "A cold CTA must be answerable in one word, cost the reader nothing, and offer something rather than request time; meeting asks, demo asks and link clicks are all named as bad CTAs.",
           "selfReported": false
         }
@@ -21,7 +21,7 @@
         "rule": "Make the ask give something away, permission to send an example, a list, a short walkthrough, instead of requesting time.",
         "because": "The more free-sounding and valuable the ask, the better the response; an offer to send something free is claimed to beat a call request every single time.",
         "source": {
-          "label": "Cold Email Lab §3 — the CTA rule",
+          "label": "Cold Email Lab §3: the CTA rule",
           "claim": "An offer to send a free example outperforms a call request 'every single time'; the shortest possible permission ask is the strongest. He also states that strengthening the offer outperforms strengthening the words, and that a free or performance-based ask is the largest single lift available.",
           "selfReported": true
         }
@@ -31,7 +31,7 @@
         "rule": "Put no links, images, HTML or attachments in any message sent before they have replied; a plain-text opt-out is the only permitted extra element.",
         "because": "Links and images cost deliverability, and deliverability is the one variable a cold campaign cannot afford to spend.",
         "source": {
-          "label": "Cold Email Lab §5 — where a link first appears",
+          "label": "Cold Email Lab §5: where a link first appears",
           "claim": "Links and images hurt deliverability very substantially; no links, no images, nothing fancy, in any email of the sequence, and the only permitted extra element is a plain-text opt-out mechanism. Independently corroborated by a second course's send settings: no HTML, no links in the body, no images.",
           "selfReported": true
         }
@@ -41,7 +41,7 @@
         "rule": "Open with one specific, true, verifiable observation about them.",
         "because": "It proves a human researched this recipient rather than blasting a list, which is the whole job of the first line.",
         "source": {
-          "label": "Cold Email Lab §3 — the callout hook",
+          "label": "Cold Email Lab §3: the callout hook",
           "claim": "The callout hook is one specific, true, verifiable observation about them, their business or their situation, and its job is to prove the email was not blasted.",
           "selfReported": false
         }
@@ -51,7 +51,7 @@
         "rule": "Write in first person, in the shape 'I help [narrow niche] [specific outcome]', use 'you' more often than 'I', and put their situation before your credentials.",
         "because": "An abstract corporate subject attached to an unfalsifiable claim reads like an infomercial, and a credentials-first opening makes the email about the sender, in a medium that is one-to-one correspondence.",
         "source": {
-          "label": "Cold Email Lab §2 — copy principles",
+          "label": "Cold Email Lab §2: copy principles",
           "claim": "Write first person, always, in the shape 'I help [niche] do [outcome]'; third-person company boilerplate reads like an infomercial. Use 'you' more than 'I' and lead with their problem or situation, letting credibility arrive later; you do have to talk about yourself, it just cannot all be about you.",
           "selfReported": false
         }
@@ -61,7 +61,7 @@
         "rule": "Attach one concrete substantiating fact to every claim. Where you have no client result, substitute an honest alternative, niche expertise, years in the work, or a result you got for yourself, rather than asserting one you cannot support.",
         "because": "Everyone can assert; few can substantiate. A value proposition with no credibility element gives no reason to believe.",
         "source": {
-          "label": "Cold Email Lab §3 — social proof and credibility",
+          "label": "Cold Email Lab §3: social proof and credibility",
           "claim": "A value prop with no credibility element gives no reason to believe; one concrete substantiating result where you have one, and where you have none, substitute honest alternatives such as years of experience, niche expertise or personal results. He flags that specific results claims may be non-compliant under FTC-type rules depending on jurisdiction.",
           "selfReported": false
         }
@@ -71,7 +71,7 @@
         "rule": "Cut until only a callout, a value proposition and an ask survive; drop the credibility line first when compressing.",
         "because": "A workable cold email survives compression to roughly three lines, and a five- or ten-sentence email gets glanced at and discarded.",
         "source": {
-          "label": "Cold Email Lab §3 — the minimum-viable email",
+          "label": "Cold Email Lab §3: the minimum-viable email",
           "claim": "As short as possible while still communicating value, 50 words instead of 100 where you can; a workable email compresses to about three lines and credibility is the droppable component.",
           "selfReported": true
         }
@@ -81,7 +81,7 @@
         "rule": "Write subject lines under three words, lowercase and plain, with no punctuation tricks, and stop optimizing them.",
         "because": "Testing across hundreds of lines produced negligible difference, so subject-line effort is where testing budget goes to die.",
         "source": {
-          "label": "Cold Email Lab §4 — subject line strategy",
+          "label": "Cold Email Lab §4: subject line strategy",
           "claim": "Dozens, probably hundreds of subject lines tested and the difference was negligible; use either a fragment of the observation or a bare label.",
           "selfReported": true
         }
@@ -91,7 +91,7 @@
         "rule": "Send at most three cold emails to a stranger, spaced two to seven days apart, and fewer on a very large market.",
         "because": "Interest is front-loaded into the first email; later sends increasingly hit dead inboxes, raise spam complaints and degrade the sending domain itself.",
         "source": {
-          "label": "Cold Email Lab §6 — sequence length and diminishing returns",
+          "label": "Cold Email Lab §6: sequence length and diminishing returns",
           "claim": "Three emails maximum in most cases, spaced two to seven days; the fourth touch is effectively worthless, and one email to 10,000 people substantially outperforms ten emails to 1,000.",
           "selfReported": true
         }
@@ -101,7 +101,7 @@
         "rule": "Change the ask at every touch: a different asset at the second, a bare status check or a redirect at the last.",
         "because": "A repeated ask reads as a repeat; a different asset makes the second touch land as new information rather than a nag.",
         "source": {
-          "label": "Cold Email Lab §5 — CTA variation across the sequence",
+          "label": "Cold Email Lab §5: CTA variation across the sequence",
           "claim": "Vary the CTA across the sequence rather than repeating it: permission-to-send at the first touch, a different permission-to-send at the second, a bare status check at the last. There is no perfect formula.",
           "selfReported": false
         }
@@ -111,7 +111,7 @@
         "rule": "Make the final touch deliberately very short, shorter than every earlier touch, and prefer asking who else should be handling this over asking again for their attention.",
         "because": "A redirect is short and easy to answer, which is the reason given for preferring it over a status bump.",
         "source": {
-          "label": "Cold Email Lab §5 — the third email",
+          "label": "Cold Email Lab §5: the third email",
           "claim": "The third email is a deliberate pattern interrupt, very short; the preferred form is a referral redirect asking who else at the organization to speak to, and the stated reason for the preference is that these work because they are short and to the point.",
           "selfReported": true
         }
@@ -121,7 +121,7 @@
         "rule": "In the first reply after interest, answer their question, say why a call helps them, then pitch three specific slots in their own time zone.",
         "because": "The single biggest beginner mistake is answering the question and never asking for the call; a bare 'when are you free?' or a naked calendar link is where most bookings are lost.",
         "source": {
-          "label": "Cold Email Lab §7 — the three-step reply framework",
+          "label": "Cold Email Lab §7: the three-step reply framework",
           "claim": "Answer what they asked, position the call as useful to them, then pitch three to four specific slots in the prospect's time zone with the calendar link only as an 'if easier' fallback.",
           "selfReported": true
         }
@@ -131,7 +131,7 @@
         "rule": "Send whatever you offered before you ask for anything else.",
         "because": "Promising a resource and then swapping it for a call ask is bait and switch, and it is tied directly to a poor booking rate.",
         "source": {
-          "label": "Cold Email Lab §7 — reply handling failures",
+          "label": "Cold Email Lab §7: reply handling failures",
           "claim": "Bait and switch, promising a resource in the email and swapping it for a call ask when they say yes, is named as a cause of poor booking rates.",
           "selfReported": true
         }
@@ -141,7 +141,7 @@
         "rule": "Stop the cold sequence the instant anyone replies; a human answers from that point, and any further chase runs as a separate thread.",
         "because": "An automated send landing on top of a live conversation destroys everything the earlier emails built.",
         "source": {
-          "label": "Delivered outbound sequence — pause on reply",
+          "label": "Delivered outbound sequence: pause on reply",
           "claim": "Any reply pauses the sequence immediately; no further automated send goes to that address, including the final touch, and a human takes the conversation from that point.",
           "selfReported": false
         }
@@ -151,7 +151,7 @@
         "rule": "Carry a clear opt-out in the footer of every send; it need not be a link, and what the footer must contain differs by jurisdiction, so check yours before sending.",
         "because": "It is the one legally required element of a commercial email, and the no-links rule is exactly what makes senders leave it out.",
         "source": {
-          "label": "Cold Email Lab §5 — the permitted extra element",
+          "label": "Cold Email Lab §5: the permitted extra element",
           "claim": "The only permitted extra element alongside the plain-text body is an opt-out mechanism, required for compliance; he notes it need not be an unsubscribe link, only a clear way to opt out, and tells you to check your own jurisdiction.",
           "selfReported": false
         }
@@ -161,7 +161,7 @@
         "rule": "Stop rather than optimize when the addressable market is too small to sustain volume, when you cannot close cold traffic, or when a stated send volume has produced nothing at acceptable bounce and warm-up scores.",
         "because": "These are named as reasons the channel may not work at all rather than parameters to tune, and named verticals were ground for months before the fix turned out to be changing the market.",
         "source": {
-          "label": "Cold Email Lab §11 — the fit scorecard and the two disqualifiers",
+          "label": "Cold Email Lab §11: the fit scorecard and the two disqualifiers",
           "claim": "Four factors trade off rather than gate: an expensive offer or high lifetime value, a large addressable market, B2B, and low competition. Two named disqualifiers sit apart from them, too small a total addressable market and an inability to close cold traffic, both stated as reasons the channel may not work for you at all. He names software dev agencies, IT service providers and expensive enterprise products as verticals to stop optimizing against rather than grind.",
           "selfReported": true
         }
@@ -171,7 +171,7 @@
         "rule": "Write the opening email in at least two versions and run them against each other.",
         "because": "Copy improves by comparison rather than conviction, and the source treats more than one variant of email one as mandatory before launch.",
         "source": {
-          "label": "Cold Email Lab §9 — split testing",
+          "label": "Cold Email Lab §9: split testing",
           "claim": "Build at least three variations of email one before launching; more than one variant is mandatory and fifty is unnecessary. Roughly 2,000 to 3,000 prospects per variation for a usable sample, and do not split test at all if the list is too small to support it.",
           "selfReported": true
         }
@@ -181,7 +181,7 @@
         "rule": "Treat a finished list as a resting list: re-contact the same names in a fresh short campaign every two to three months rather than extending the thread.",
         "because": "A three-touch cap only survives a finite prospect pool if the pool renews, and a timing objection calls for re-sequencing later rather than more sends now.",
         "source": {
-          "label": "Cold Email Lab §5 — timing objections and market refresh",
+          "label": "Cold Email Lab §5: timing objections and market refresh",
           "claim": "If timing was the obstacle, do not extend the thread; re-sequence the same people later in a fresh one-to-three-email campaign. The general market-refresh cadence is given as every two to three months, and treating markets as renewable is what makes the short-sequence rule affordable.",
           "selfReported": true
         }
@@ -280,7 +280,7 @@
     "structure": [
       {
         "key": "preflight",
-        "label": "Preflight — does this channel fit this offer",
+        "label": "Preflight: does this channel fit this offer",
         "purpose": "Decide whether cold email is the right channel for this offer at all, before any of it is written.",
         "constraints": [
           "Score four factors that trade off rather than gate: an expensive offer or high lifetime value, a large addressable market, B2B, and low competition in the target market",
@@ -295,7 +295,7 @@
       },
       {
         "key": "openingEmail",
-        "label": "Email 1 — the pitch",
+        "label": "Email 1: the pitch",
         "purpose": "Earn a one-word reply from a stranger by proving the email was written for them and asking for something that costs them nothing.",
         "day": 0,
         "maxChars": 450,
@@ -315,7 +315,7 @@
       },
       {
         "key": "angleShift",
-        "label": "Email 2 — the same offer, a second angle",
+        "label": "Email 2: the same offer, a second angle",
         "purpose": "Restate the same offer from a different angle so it reads as new information rather than a repeat of email one.",
         "day": 4,
         "maxChars": 350,
@@ -331,7 +331,7 @@
       },
       {
         "key": "patternInterrupt",
-        "label": "Email 3 — the redirect",
+        "label": "Email 3: the redirect",
         "purpose": "Close the loop in the fewest possible words by asking who else should be handling this, rather than asking again for their attention.",
         "day": 9,
         "maxChars": 320,
@@ -346,7 +346,7 @@
       },
       {
         "key": "answerTheQuestion",
-        "label": "Reply, part 1 — answer what they asked",
+        "label": "Reply, part 1: answer what they asked",
         "purpose": "Answer the exact question the prospect asked, before anything else happens in the message.",
         "maxChars": 320,
         "constraints": [
@@ -361,7 +361,7 @@
       },
       {
         "key": "positionTheCall",
-        "label": "Reply, part 2 — why a call helps them",
+        "label": "Reply, part 2: why a call helps them",
         "purpose": "Give one reason a conversation is useful to the prospect in their own situation, framed as their benefit rather than as a sales meeting.",
         "maxChars": 200,
         "constraints": [
@@ -374,7 +374,7 @@
       },
       {
         "key": "offerTimes",
-        "label": "Reply, part 3 — three specific slots",
+        "label": "Reply, part 3: three specific slots",
         "purpose": "Make booking cost the prospect one word by naming concrete times in their time zone.",
         "maxChars": 400,
         "constraints": [
@@ -428,7 +428,7 @@
       },
       {
         "key": "chaseStatusCheck",
-        "label": "Chase 1 — the permission-to-decline check",
+        "label": "Chase 1: the permission-to-decline check",
         "purpose": "Re-open an interested lead who never booked, by making a decline as easy to send as a yes.",
         "maxChars": 280,
         "constraints": [
@@ -441,7 +441,7 @@
       },
       {
         "key": "chaseBookingNudge",
-        "label": "Chase 2 — the booking nudge",
+        "label": "Chase 2: the booking nudge",
         "purpose": "Give an interested lead one frictionless way to book, and then stop chasing by email.",
         "maxChars": 200,
         "constraints": [
@@ -455,97 +455,97 @@
     ],
     "evidence": [
       {
-        "label": "Cold Email Lab, opening claims — operator scale",
+        "label": "Cold Email Lab, opening claims: operator scale",
         "claim": "Upwards of 10,000,000 cold emails sent across close to four years, currently over 1,000,000 per month on behalf of roughly 30 clients, with close to 4,000 sales meetings booked to date.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §1 — where copy sits in the stack",
+        "label": "Cold Email Lab §1: where copy sits in the stack",
         "claim": "He states the priority order twice in consecutive sentences and the two differ: first 'infrastructure, then list, then copy', then 'infrastructure, list, offer, and then copy'. He does not resolve whether offer sits third or above the whole stack. What is constant across both statements is that infrastructure is first and copy is last, so effort past the point where copy clears the bar has better homes.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §8 — reply-rate benchmark",
+        "label": "Cold Email Lab §8: reply-rate benchmark",
         "claim": "Reply rate at or above 1 percent of emails sent is the target; 0.9 percent is close enough, and 0.5 percent or below indicates a deliverability problem rather than a copy problem. No 25 percent reply figure appears anywhere in the source and none should be attributed.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §8 — the denominator rule",
+        "label": "Cold Email Lab §8: the denominator rule",
         "claim": "Reply rate is total replies divided by total emails sent, never a share of leads contacted. A live campaign showing roughly 300 replies on about 29,000 sends is 1.1 percent, while the sending tool displayed 3 percent because it divided by leads across three sequence steps. Out-of-office replies are included in the calculation.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §8 — positive reply benchmark",
-        "claim": "Positive replies should exceed 5 percent of replies; the observed customer spread is 5 to 15 percent, averaging about 10 percent. Below 5 percent, investigate list quality first (named most common), then the offer (named the big lever), then the script (named as rarely the main driver if you followed best practices), and consider that the market itself may be structurally poor — he names software dev agencies, IT service providers and expensive enterprise products as verticals to abandon rather than grind.",
+        "label": "Cold Email Lab §8: positive reply benchmark",
+        "claim": "Positive replies should exceed 5 percent of replies; the observed customer spread is 5 to 15 percent, averaging about 10 percent. Below 5 percent, investigate list quality first (named most common), then the offer (named the big lever), then the script (named as rarely the main driver if you followed best practices), and consider that the market itself may be structurally poor, he names software dev agencies, IT service providers and expensive enterprise products as verticals to abandon rather than grind.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §7 — booking benchmark",
+        "label": "Cold Email Lab §7: booking benchmark",
         "claim": "Roughly 20 to 30 percent of positive replies become meetings; relentless multichannel follow-up is claimed to lift this materially, though two lessons give ranges (30 to 50 percent, and 20 to 30 percent) that do not reconcile.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §8 — north star",
+        "label": "Cold Email Lab §8: north star",
         "claim": "Roughly 3,000 emails sent per booked meeting; about one positive reply per 700 sends; roughly one in five repliers books. Best observed customer cases book off as few as 300 sends, others need 5,000 or more.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §8 — significance threshold",
+        "label": "Cold Email Lab §8: significance threshold",
         "claim": "Do not diagnose a campaign before 3,000 emails have been sent, ideally 5,000 to 10,000; a low reply rate on a small send is usually just insufficient send.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §4 — subject line testing",
+        "label": "Cold Email Lab §4: subject line testing",
         "claim": "Dozens, probably hundreds of subject lines tested, with negligible difference in outcome; subject-line obsession appears on the list of things that do not drive results.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §9 — split-test sample floor",
+        "label": "Cold Email Lab §9: split-test sample floor",
         "claim": "At least three variations of email one before launch, at roughly 2,000 to 3,000 prospects per variation, which puts a three-variant test at 6,000 or more people in the campaign. Do not split test at all if the list is too small to support it; he skipped testing on his own demonstrated campaign for exactly that reason.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §6 — demonstrated campaign",
+        "label": "Cold Email Lab §6: demonstrated campaign",
         "claim": "3,000 emails sent over three days in a hyper-specific niche produced 8 leads and 4 booked calls. This is a lead-and-call count, not a reply rate.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §12 — segmentation",
+        "label": "Cold Email Lab §12: segmentation",
         "claim": "Some customers get two to five times better responses purely from segmenting, and segmenting has rarely if ever made results worse. The figure is unevidenced within the lesson itself.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §8 — bounce and list quality",
+        "label": "Cold Email Lab §8: bounce and list quality",
         "claim": "Bounce rate under 3 percent is healthy, above 5 percent needs immediate action. Open 20 random sites from the list: if more than 20 percent are not genuine targets, replace the list before changing anything else.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab §11 — channel-fit floors",
+        "label": "Cold Email Lab §11: channel-fit floors",
         "claim": "An ideal minimum lifetime value of about $10,000, worked as roughly $2,000 a month retained for about five months, and a budget floor of about $500 a month, which he says buys roughly 1,000 sends a day. Below $500 he says any marketing will be hard. The four fit factors are additive rather than pass/fail: failing all of them is what actually kills the channel.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook — personalization uplift",
+        "label": "30-Day First-Client Playbook, personalization uplift",
         "claim": "Reply rates moved from about 2 percent to 5 to 10 percent or more with a personalized opening line, with a best campaign around 20 percent and an average uplift of about 2.5x.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook — offer wrappers",
+        "label": "30-Day First-Client Playbook, offer wrappers",
         "claim": "A risk-reversed offer is claimed to lift reply rate up to 10x versus none. Two worked examples: a free 500-word blog post across roughly 20,000 emails at about 8 percent reply rate, and an outcome guarantee at a best reply rate of 7 percent across a few hundred emails.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook — reply speed",
+        "label": "30-Day First-Client Playbook, reply speed",
         "claim": "A five-minute reply is claimed to convert around 400 percent higher, and the notification path is built six days before launch so the first send can be answered that fast.",
         "selfReported": true
       },
       {
-        "label": "Maker School six-month arc — reply-rate floor",
+        "label": "Maker School six-month arc: reply-rate floor",
         "claim": "Five real campaigns ran at 4.8, 6.0, 6.1, 6.3 and 11.6 percent, and 4 to 5 percent is stated as sufficient: below the floor fix the message, at or above it the constraint is volume rather than copy.",
         "selfReported": true
       },
       {
-        "label": "Maker School six-month arc — the incumbent and challenger ladder",
+        "label": "Maker School six-month arc: the incumbent and challenger ladder",
         "claim": "Six live sequences are cut to one winner, and one fresh challenger is written the next day, giving a permanent one-incumbent, one-challenger ladder so the campaign cannot plateau on a sequence nobody revisits. The losing sequence in each niche is turned off rather than left running.",
         "selfReported": true
       }
@@ -589,7 +589,7 @@
     "id": "linkedin",
     "version": "1.1.0",
     "label": "a LinkedIn connection request plus a short DM sequence with reply branches",
-    "thesis": "LinkedIn outreach is one person writing to one named person in a channel where the reader can see exactly who you are, check what you claim, and recognise instantly whether the same message went to four hundred other people. That makes it the wrong channel for volume and the right channel for precision: a connection request plus at most three short messages, each of which has to survive being read on a phone by someone who owes you nothing. It is not email in a different wrapper — there is no subject line to hide behind, the note is capped at a couple of sentences, a rejected request is a door that stays shut, and the account carrying all of it is your identity rather than a replaceable sending domain. This pack governs one job only: earning a first reply from a stranger, and handing the conversation to a human the moment one arrives. It is not for nurturing warm contacts, not for posting content, and not for anything after the reply — those are different activities with different rules, and applying cold-sequence doctrine to a live conversation is how good conversations get killed.",
+    "thesis": "LinkedIn outreach is one person writing to one named person in a channel where the reader can see exactly who you are, check what you claim, and recognise instantly whether the same message went to four hundred other people. That makes it the wrong channel for volume and the right channel for precision: a connection request plus at most three short messages, each of which has to survive being read on a phone by someone who owes you nothing. It is not email in a different wrapper, there is no subject line to hide behind, the note is capped at a couple of sentences, a rejected request is a door that stays shut, and the account carrying all of it is your identity rather than a replaceable sending domain. This pack governs one job only: earning a first reply from a stranger, and handing the conversation to a human the moment one arrives. It is not for nurturing warm contacts, not for posting content, and not for anything after the reply, those are different activities with different rules, and applying cold-sequence doctrine to a live conversation is how good conversations get killed.",
     "primeDirective": "Every message before a reply exists to earn a reply. If a line asks the reader for time, attention or a click they have not yet agreed to give, cut it.",
     "laws": [
       {
@@ -597,7 +597,7 @@
         "rule": "Ask for a reply, never a meeting, before they have engaged. Every cold touch ends on a question answerable in one word at no cost to them.",
         "because": "A cold call ask makes the reader pay with time before you have given them a reason to spend it. A reply costs one sentence, so it is the only ask a stranger can say yes to cheaply, and it is what makes silence informative rather than ambiguous.",
         "source": {
-          "label": "Cold Email Lab — email anatomy, the CTA rule",
+          "label": "Cold Email Lab: email anatomy, the CTA rule",
           "claim": "A cold CTA must be answerable in one word, cost the reader nothing, and offer something rather than request time; a meeting request, a demo request and a link click are named as the three bad CTAs.",
           "selfReported": false
         }
@@ -647,7 +647,7 @@
         "rule": "Use \"you\" more than \"I\". Put the reader's situation before anything about you.",
         "because": "Credentials-first openings make the message about the sender, and the reader has no reason yet to care about the sender.",
         "source": {
-          "label": "Cold Email Lab — copy principles",
+          "label": "Cold Email Lab: copy principles",
           "claim": "Use \"you\" more than \"I\"; credentials-first openings make the email about the sender, so callout and value proposition come first and credibility after.",
           "selfReported": false
         }
@@ -657,18 +657,18 @@
         "rule": "Cut to the shortest version that still carries the observation, the point and the ask. Prefer fifty words to a hundred.",
         "because": "These are read on a phone by someone with no obligation to finish. Length past the point is the most common reason a good message is never read.",
         "source": {
-          "label": "Cold Email Lab — copy principles",
-          "claim": "As short as possible while still communicating value — 50 words instead of 100 if you can; a five- or ten-sentence email gets glanced at and discarded, or not read at all.",
+          "label": "Cold Email Lab: copy principles",
+          "claim": "As short as possible while still communicating value, 50 words instead of 100 if you can; a five- or ten-sentence email gets glanced at and discarded, or not read at all.",
           "selfReported": true
         }
       },
       {
         "id": "giveOutright",
-        "rule": "Where you can give something outright — an example, a short list, a teardown — give it unasked and unconditioned rather than dangling it in exchange for a call.",
+        "rule": "Where you can give something outright: an example, a short list, a teardown, give it unasked and unconditioned rather than dangling it in exchange for a call.",
         "because": "A free thing handed over demonstrates accuracy instead of claiming it, and it costs the reader nothing to accept. Making it conditional converts a gift into a trade, which is the move they have seen a thousand times.",
         "source": {
-          "label": "Cold Email Lab — the offer-strength ladder",
-          "claim": "Strengthening the offer outperforms strengthening the words; if you can make it free or performance-based, do it. The more free-sounding and valuable the ask, the better the response — an offer to send a free example is claimed to outperform a call request \"every single time\".",
+          "label": "Cold Email Lab: the offer-strength ladder",
+          "claim": "Strengthening the offer outperforms strengthening the words; if you can make it free or performance-based, do it. The more free-sounding and valuable the ask, the better the response, an offer to send a free example is claimed to outperform a call request \"every single time\".",
           "selfReported": true
         }
       },
@@ -697,7 +697,7 @@
         "rule": "Attach a number, a named outcome or a concrete detail to every claim you make about yourself. If you cannot, delete the claim.",
         "because": "Anyone can assert. A claim without something behind it gives the reader no reason to believe and costs you the credibility the observation line just bought.",
         "source": {
-          "label": "Cold Email Lab — copy principles",
+          "label": "Cold Email Lab: copy principles",
           "claim": "Everyone can make a claim; not everyone can substantiate one. A value proposition with no credibility element gives no reason to believe.",
           "selfReported": false
         }
@@ -737,7 +737,7 @@
         "rule": "In the first human reply, answer what they actually asked before anything else, then ask for the next step in the same message: three specific slots in their time zone, an offer to work from their calendar, and the link last. Never ask when they are free.",
         "because": "Answering and stopping is the most common way an interested lead dies, and most people will never ask to book, so the initiative has to be yours. Asking for availability creates a second reply-wait, and the opportunity cools inside it.",
         "source": {
-          "label": "Cold Email Lab — the three-step reply framework",
+          "label": "Cold Email Lab: the three-step reply framework",
           "claim": "Answer the question they actually asked, position the call as useful to them, then pitch three to four specific time slots in the prospect's own time zone with the calendar link only as an \"if easier\" fallback. The single biggest beginner mistake, named as such, is answering the question and never asking for the call.",
           "selfReported": true
         }
@@ -745,9 +745,9 @@
       {
         "id": "stopAtThree",
         "rule": "Stop at three DMs after the connection request. Spend the effort of a fourth on a new prospect instead.",
-        "because": "Interest is front-loaded into the first message; later touches mostly reach people who already decided, while complaints and blocks accumulate against your account. Count the connection request as a touch: three DMs after it is four cold touches, one past the cited cap of three. That is a deliberate departure, taken because LinkedIn's pool per operator is small and each prospect carries more research — not an application of the doctrine, and never taken past four.",
+        "because": "Interest is front-loaded into the first message; later touches mostly reach people who already decided, while complaints and blocks accumulate against your account. Count the connection request as a touch: three DMs after it is four cold touches, one past the cited cap of three. That is a deliberate departure, taken because LinkedIn's pool per operator is small and each prospect carries more research, not an application of the doctrine, and never taken past four.",
         "source": {
-          "label": "Cold Email Lab — sequence length and diminishing returns",
+          "label": "Cold Email Lab: sequence length and diminishing returns",
           "claim": "Three cold touches maximum to a stranger. Interest is front-loaded into email one; by emails three and four you are mostly reaching uninterested people, the fourth touch is effectively worthless, and complaints damage the sending asset. Reallocate volume from follow-ups to fresh prospects.",
           "selfReported": true
         }
@@ -757,7 +757,7 @@
         "rule": "Make the last message a redirect ask: if it is not you, who is it.",
         "because": "A redirect is easier to answer than another request for their own attention, and it often produces the right person.",
         "source": {
-          "label": "Cold Email Lab — sequence length and diminishing returns",
+          "label": "Cold Email Lab: sequence length and diminishing returns",
           "claim": "The final follow-up is a deliberately short pattern interrupt; the stated preference is a referral redirect asking whether someone else at the organisation is the right person, because it is short and to the point.",
           "selfReported": true
         }
@@ -765,10 +765,10 @@
       {
         "id": "invitationCeiling",
         "rule": "Hold weekly connection requests well below the platform's invitation cap, watch the acceptance rate, and withdraw invitations still pending after three weeks. Check the current cap before you scale.",
-        "because": "A burned email domain is replaceable — delete it, buy a new one, warm up, relaunch. A restricted LinkedIn account is not: it carries your identity, your history and the profile this pack assumes the reader will check. A low acceptance rate and a large pile of pending invitations are the two signals that produce a restriction, and a restriction costs the whole channel.",
+        "because": "A burned email domain is replaceable: delete it, buy a new one, warm up, relaunch. A restricted LinkedIn account is not: it carries your identity, your history and the profile this pack assumes the reader will check. A low acceptance rate and a large pile of pending invitations are the two signals that produce a restriction, and a restriction costs the whole channel.",
         "source": {
           "label": "LinkedIn platform limits, checked August 2026",
-          "claim": "LinkedIn enforces a weekly invitation cap — widely reported at roughly 100 invitations per week for standard accounts — and restricts accounts with persistently low acceptance rates or large volumes of unanswered pending invitations. These figures are platform policy rather than a measured result, and they move; verify against LinkedIn's current documentation before writing volume plans to them.",
+          "claim": "LinkedIn enforces a weekly invitation cap: widely reported at roughly 100 invitations per week for standard accounts, and restricts accounts with persistently low acceptance rates or large volumes of unanswered pending invitations. These figures are platform policy rather than a measured result, and they move; verify against LinkedIn's current documentation before writing volume plans to them.",
           "selfReported": false
         }
       }
@@ -787,7 +787,7 @@
         "label": "Compliment on their logo, branding or web design",
         "patternSource": "\\b(?:i\\s+(?:love|really\\s+like)|love|really\\s+like|admire|nice|great)\\s+(?:your|the)\\s+(?:new\\s+)?(?:logo|branding|web\\s?site\\s+design|web\\s+design)\\b|\\byour\\s+(?:web\\s?site|site|branding|logo)\\s+(?:looks|is)\\s+(?:great|amazing|awesome|beautiful|stunning|fantastic|really\\s+nice)\\b",
         "patternFlags": "i",
-        "because": "A compliment about their marketing tells the reader a stranger sat and judged their marketing. The possessive is required and bare \"website\" is excluded, so comparatives and traffic observations — \"like the website export\", \"great website traffic\" — are not blocked; those are exactly the specific observations the observation line asks for.",
+        "because": "A compliment about their marketing tells the reader a stranger sat and judged their marketing. The possessive is required and bare \"website\" is excluded, so comparatives and traffic observations, \"like the website export\", \"great website traffic\", are not blocked; those are exactly the specific observations the observation line asks for.",
         "level": "hard"
       },
       {
@@ -827,7 +827,7 @@
         "label": "Unfilled merge field or placeholder",
         "patternSource": "\\{\\{[^}]*\\}\\}|\\*\\|[A-Za-z_]{2,20}\\|\\*|\\{(?:first ?name|last ?name|full ?name|company ?name|company|name|city|state|country|title|industry|role|website|domain|position)\\}|%(?:first ?name|last ?name|full ?name|company ?name|company|name|city|state|country|title|industry|role|website|domain|position)%|<<(?:first ?name|last ?name|full ?name|company ?name|company|name|city|state|country|title|industry|role|website|domain|position)>>|\\[(?:first ?name|last ?name|full ?name|company ?name|company|name|city|state|country|title|industry|role|website|domain|position)\\]",
         "patternFlags": "i",
-        "because": "A visible placeholder proves the message was machine-assembled and never read, which is the exact impression the whole sequence exists to avoid. All five prevalent dialects are covered — double brace, single brace, percent, Mailchimp pipe and angle bracket — and every single-delimiter branch is bound to a known field name so braces in pasted code or notes cannot match.",
+        "because": "A visible placeholder proves the message was machine-assembled and never read, which is the exact impression the whole sequence exists to avoid. All five prevalent dialects are covered, double brace, single brace, percent, Mailchimp pipe and angle bracket, and every single-delimiter branch is bound to a known field name so braces in pasted code or notes cannot match.",
         "level": "hard"
       },
       {
@@ -859,7 +859,7 @@
         "label": "Link in the message",
         "patternSource": "https?://\\S+|\\bwww\\.[a-z0-9-]+\\.[a-z]{2,}",
         "patternFlags": "i",
-        "because": "No link belongs in any touch before the reader has replied. This pattern is scoped to the pre-reply steps only — connectionNote, openerDm, proofDm and closeFileDm. The validator must skip it on offerTimes, chaseBookingNudge and the other reply branches, where the link is mandated by the step's own constraints; until the schema carries step scoping on a pattern, treat a hit on those steps as noise rather than a finding.",
+        "because": "No link belongs in any touch before the reader has replied. This pattern is scoped to the pre-reply steps only, connectionNote, openerDm, proofDm and closeFileDm. The validator must skip it on offerTimes, chaseBookingNudge and the other reply branches, where the link is mandated by the step's own constraints; until the schema carries step scoping on a pattern, treat a hit on those steps as noise rather than a finding.",
         "level": "soft"
       }
     ],
@@ -903,9 +903,9 @@
         "maxChars": 700,
         "constraints": [
           "Reference the first message in one clause; do not restate it.",
-          "Exactly one proof point, from a business the reader would recognise as like theirs. The one-proof limit is an editorial constraint of this pack, not a sourced law — the citation supports only the matching requirement.",
+          "Exactly one proof point, from a business the reader would recognise as like theirs. The one-proof limit is an editorial constraint of this pack, not a sourced law, the citation supports only the matching requirement.",
           "State the result as a number or a named outcome.",
-          "With no in-niche result, step down the ladder — an out-of-domain result with revenue, then an impressive association without revenue, then a result you produced and measured in your own business. Name the next rung down rather than leaving the section empty.",
+          "With no in-niche result, step down the ladder, an out-of-domain result with revenue, then an impressive association without revenue, then a result you produced and measured in your own business. Name the next rung down rather than leaving the section empty.",
           "Close with an offer to send something concrete and free, phrased so that \"yes\" is the whole reply.",
           "Different ask from the first message, so it reads as new information rather than a repeat.",
           "No link. No call ask."
@@ -920,7 +920,7 @@
         "maxChars": 500,
         "constraints": [
           "Ask who the right person is if it is not them. This redirect is the sourced element of the message.",
-          "Frame it as closing the file and say plainly that this is the last message. Pack doctrine, not sourced — the cited material prescribes only a short pattern interrupt.",
+          "Frame it as closing the file and say plainly that this is the last message. Pack doctrine, not sourced, the cited material prescribes only a short pattern interrupt.",
           "Offer two or three face-saving exits, each answerable in one word. Pack doctrine, carried over from the practitioner sequence's final touch.",
           "Promise one return at a named time, and keep it to once.",
           "No new pitch, no link, no guilt."
@@ -1010,7 +1010,7 @@
         "maxChars": 300,
         "constraints": [
           "Send two days after the unanswered reply.",
-          "Two lines, and explicitly grant permission to decline — that is what makes it answerable and therefore what makes it work.",
+          "Two lines, and explicitly grant permission to decline, that is what makes it answerable and therefore what makes it work.",
           "A human sends this one.",
           "Re-enter at the stage the person previously reached; never drag them back to the start of the sequence.",
           "Everything stops the moment they answer."
@@ -1026,7 +1026,7 @@
           "Send two days after the status check.",
           "The entire content is the booking link.",
           "Stop here. Never chase past this message, and never drop a positive reply after a single unanswered attempt.",
-          "If both go unanswered, file the person for a dated reactivation sweep rather than restarting the cold sequence — reviving someone who already engaged costs nothing to attempt.",
+          "If both go unanswered, file the person for a dated reactivation sweep rather than restarting the cold sequence, reviving someone who already engaged costs nothing to attempt.",
           "This is a reply-branch step, so the link belongs here; a pre-reply link warning fired on this step is noise."
         ],
         "group": "If interest goes quiet"
@@ -1039,22 +1039,22 @@
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab — metrics and benchmarks",
+        "label": "Cold Email Lab: metrics and benchmarks",
         "claim": "Reply rate benchmark of 1% of emails sent; positive replies 5-15% of replies, averaging around 10%; booking rate 20-30% of positives; a north star of roughly 3,000 emails sent per booked meeting.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab — sequence length and diminishing returns",
+        "label": "Cold Email Lab: sequence length and diminishing returns",
         "claim": "One email to 10,000 people substantially outperforms ten emails to 1,000 people; the fourth touch is effectively worthless while spam complaints and reputation damage accumulate.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab — multichannel follow-up",
+        "label": "Cold Email Lab: multichannel follow-up",
         "claim": "A LinkedIn connection request with a short note referencing the earlier message is recommended specifically because it proves a human is on the other end and takes two seconds; relentless multichannel follow-up is claimed to move booking rate from a ~20% baseline to 30-50%. The two ranges he gives across lessons do not reconcile.",
         "selfReported": true
       },
       {
-        "label": "Cold Email Lab — segmentation",
+        "label": "Cold Email Lab: segmentation",
         "claim": "Some customers get two to five times better responses purely from segmenting; he goes to pull up campaigns to evidence this and does not, so the figure is unevidenced within the lesson.",
         "selfReported": true
       },
@@ -1090,34 +1090,34 @@
       },
       {
         "label": "LinkedIn platform invitation limits, checked August 2026",
-        "claim": "LinkedIn enforces a weekly invitation cap — widely reported at roughly 100 invitations per week for standard accounts — and restricts accounts with persistently low acceptance rates or large volumes of unanswered pending invitations. Platform policy rather than a measured result, and it moves; verify before writing volume plans to it.",
+        "claim": "LinkedIn enforces a weekly invitation cap: widely reported at roughly 100 invitations per week for standard accounts, and restricts accounts with persistently low acceptance rates or large volumes of unanswered pending invitations. Platform policy rather than a measured result, and it moves; verify before writing volume plans to it.",
         "selfReported": false
       }
     ],
     "knownTensions": [
       {
-        "tension": "Note or no note on the connection request. The invitation note is capped at 200 characters on free accounts and 300 on Premium — roughly one to two sentences — and the cap has moved before, so verify it on the account you are actually sending from. A note lets the observation line do its work before the reader ever decides whether to accept, and the sources are unanimous that the specific observation is the highest-value element available. But a note also lets a busy reader classify the request as sales and decline it, where a blank invite is often accepted on profile alone and preserves the observation for the first DM, where there is room to use it properly.",
-        "resolution": "Write to 200 characters unless you have confirmed 300 on this account. Send the note only when the observation survives that limit intact and is genuinely specific — a fact about their business that took real research. Send the invite blank when the best you have would be truncated into a generic line, and spend the observation in the first DM instead. Never split an observation across the note and the first message; a compressed version in the note makes the full version read as a repeat."
+        "tension": "Note or no note on the connection request. The invitation note is capped at 200 characters on free accounts and 300 on Premium, roughly one to two sentences, and the cap has moved before, so verify it on the account you are actually sending from. A note lets the observation line do its work before the reader ever decides whether to accept, and the sources are unanimous that the specific observation is the highest-value element available. But a note also lets a busy reader classify the request as sales and decline it, where a blank invite is often accepted on profile alone and preserves the observation for the first DM, where there is room to use it properly.",
+        "resolution": "Write to 200 characters unless you have confirmed 300 on this account. Send the note only when the observation survives that limit intact and is genuinely specific, a fact about their business that took real research. Send the invite blank when the best you have would be truncated into a generic line, and spend the observation in the first DM instead. Never split an observation across the note and the first message; a compressed version in the note makes the full version read as a repeat."
       },
       {
         "tension": "Three cold messages versus five. The course doctrine caps cold outreach at three messages on the argument that interest is front-loaded and later touches accumulate complaints while returns fall. The worked practitioner sequence runs five touches and defends it on the grounds that a high-value, finite prospect pool justifies depth per prospect over breadth.",
-        "resolution": "This pack takes three DMs after the connection request. Counting the request as a touch, that is four cold touches — one past the cited cap, and it is labelled here as a departure rather than an application. The reasons: LinkedIn's pool per operator is small, the reader can see every prior message in one scroll, and the cost of a block is permanent where a burned sending domain is replaceable. Never take it past four, and never add a fifth on the argument that the sequence permits it."
+        "resolution": "This pack takes three DMs after the connection request. Counting the request as a touch, that is four cold touches, one past the cited cap, and it is labelled here as a departure rather than an application. The reasons: LinkedIn's pool per operator is small, the reader can see every prior message in one scroll, and the cost of a block is permanent where a burned sending domain is replaceable. Never take it past four, and never add a fifth on the argument that the sequence permits it."
       },
       {
         "tension": "How many times to propose. The Cold Email Lab prescribes three to four specific slots in the prospect's own time zone with the calendar link as an \"if easier\" fallback. The six-month arc's meeting-rate lever prescribes two proposed times plus an explicit offer to work from their calendar. The sources genuinely disagree, and each pack previously resolved it silently and differently, so a user running email and LinkedIn side by side got two numbers from one app for one behaviour, attributed to nobody.",
-        "resolution": "Three, everywhere — this pack, the email pack and the marketplace pack — with the arc's offer to work from their calendar carried alongside it and the link last. Three sits inside the Lab's stated band and one above the arc's, and the arc's real mechanism is the calendar offer rather than the count. Where you deviate, deviate consistently across channels rather than per pack."
+        "resolution": "Three, everywhere: this pack, the email pack and the marketplace pack, with the arc's offer to work from their calendar carried alongside it and the link last. Three sits inside the Lab's stated band and one above the arc's, and the arc's real mechanism is the calendar offer rather than the count. Where you deviate, deviate consistently across channels rather than per pack."
       },
       {
         "tension": "Position of strength versus honesty about being early. One source instructs writing with no hedging and names \"I just started\" as a line never to use. Another instructs transparency about being early on the grounds that it removes the credibility gap instead of pretending past it, and converts inexperience from a liability into a reason to help you.",
-        "resolution": "Never volunteer inexperience unprompted in a cold touch — it answers a question the reader has not asked. When they ask directly, answer in one forward-facing line with the offer attached rather than an apology. Transparency is a reply-branch move, not an opener."
+        "resolution": "Never volunteer inexperience unprompted in a cold touch, it answers a question the reader has not asked. When they ask directly, answer in one forward-facing line with the offer attached rather than an apology. Transparency is a reply-branch move, not an opener."
       },
       {
         "tension": "Give something away versus give away your work. The strongest documented lever is an offer that is free or risk-reversed, handed over unconditionally. But an unconditional giveaway is also a full discount, and one source names discounting as a mistake because it concedes the value figure you just walked them through was inflated.",
-        "resolution": "Give away something that is cheap for you to produce and expensive for them to obtain — a short list, one worked example, a teardown of something already public. Never give away the deliverable itself. If getting a lot of yeses would put you out of business, the giveaway is the wrong size."
+        "resolution": "Give away something that is cheap for you to produce and expensive for them to obtain, a short list, one worked example, a teardown of something already public. Never give away the deliverable itself. If getting a lot of yeses would put you out of business, the giveaway is the wrong size."
       },
       {
         "tension": "Personalisation in the copy versus relevance in the list. The observation line is the highest-value element in any message, and hand-writing it is what makes the first touch work. But the course position is that relevance is manufactured upstream in list construction and that no personalisation technique rescues a badly built list.",
-        "resolution": "Both, in order. Build the list around a reason for reaching out that will actually appear in the copy — a hiring signal, a new location, a published position — so the observation line has something true to draw on before you sit down to write it. Hand-write the line anyway. When observation lines start feeling forced, the list is the thing to fix, not the sentence."
+        "resolution": "Both, in order. Build the list around a reason for reaching out that will actually appear in the copy, a hiring signal, a new location, a published position, so the observation line has something true to draw on before you sit down to write it. Hand-write the line anyway. When observation lines start feeling forced, the list is the thing to fix, not the sentence."
       },
       {
         "tension": "Reply within the hour versus reply well. One source sets the standard at within the hour and another at five minutes, both on the argument that speed to lead dominates. Neither is achievable for an operator in a different time zone from their market, and a missed promise is worse than a slower one.",
@@ -1128,33 +1128,33 @@
   {
     "id": "upwork",
     "version": "1.2.0",
-    "label": "an Upwork / freelance-marketplace proposal — cover letter plus its supporting assets",
-    "thesis": "A marketplace proposal is a comparison document, not a pitch. The buyer has already decided the work is worth doing and has already decided a contractor is the answer — they posted the job and are now reading a stack of applications to settle one question: who do I pick? That single fact deletes most of what outreach copy normally does. There is no problem to establish, no category to explain, no permission to earn, no interruption to apologise for. What remains is differentiation under a truncated preview, against applicants who all claim the same competence, for a reader who is shortlisting rather than deliberating. This is also not a cold channel: asking for a call here is correct, where in cold email the same ask would be premature. And it is not free — every application costs connects and a hard fifteen-minute ceiling, so which jobs you decline is as much a part of the method as what you write. It also does not end when you press send: the buyer who replies is the most valuable reader you will get in this channel, and the method has to keep working after they do. What this channel is not: a place to introduce yourself, to educate the buyer about why the category matters, to advertise your tools, or to compete on price.",
-    "primeDirective": "The buyer is choosing between applicants, not deciding whether to act — so every sentence must do work that no other applicant's sentence is doing. When two rules here conflict, keep the one that makes the proposal harder to confuse with the rest of the stack.",
+    "label": "an Upwork / freelance-marketplace proposal, cover letter plus its supporting assets",
+    "thesis": "A marketplace proposal is a comparison document, not a pitch. The buyer has already decided the work is worth doing and has already decided a contractor is the answer, they posted the job and are now reading a stack of applications to settle one question: who do I pick? That single fact deletes most of what outreach copy normally does. There is no problem to establish, no category to explain, no permission to earn, no interruption to apologise for. What remains is differentiation under a truncated preview, against applicants who all claim the same competence, for a reader who is shortlisting rather than deliberating. This is also not a cold channel: asking for a call here is correct, where in cold email the same ask would be premature. And it is not free, every application costs connects and a hard fifteen-minute ceiling, so which jobs you decline is as much a part of the method as what you write. It also does not end when you press send: the buyer who replies is the most valuable reader you will get in this channel, and the method has to keep working after they do. What this channel is not: a place to introduce yourself, to educate the buyer about why the category matters, to advertise your tools, or to compete on price.",
+    "primeDirective": "The buyer is choosing between applicants, not deciding whether to act, so every sentence must do work that no other applicant's sentence is doing. When two rules here conflict, keep the one that makes the proposal harder to confuse with the rest of the stack.",
     "laws": [
       {
         "id": "only-job-is-standing-out",
         "rule": "Write to be picked, not to be understood. Assume the reader already wants the work done and is comparing applicants; cut every line that explains why the problem matters or that a solution exists.",
         "because": "Marketplace leads are the only leads that arrive problem-aware and solution-aware, so two of the three selling jobs are already done and spending words on them marks you as not understanding the room.",
         "source": {
-          "label": "30-Day First-Client Playbook §2 — the buying ladder",
-          "claim": "The marketplace delivers only top-rung leads: problem-aware AND solution-aware, choosing a provider. That collapses marketplace strategy to one problem — standing out.",
+          "label": "30-Day First-Client Playbook §2, the buying ladder",
+          "claim": "The marketplace delivers only top-rung leads: problem-aware AND solution-aware, choosing a provider. That collapses marketplace strategy to one problem, standing out.",
           "selfReported": true
         }
       },
       {
         "id": "first-line-names-their-job",
         "rule": "Spend the first sentence on their project, in their own words. Never open with your name, your title, your years of experience, or a salutation.",
-        "because": "Only a short preview is visible before the fold — roughly the first 150 characters on Upwork, different elsewhere — and that preview is what decides whether the rest is read at all.",
+        "because": "Only a short preview is visible before the fold, roughly the first 150 characters on Upwork, different elsewhere, and that preview is what decides whether the rest is read at all.",
         "source": {
-          "label": "30-Day First-Client Playbook §5.1 — the application artifact pair (figure as of the source's 2025-era material)",
-          "claim": "CV text, only the first ~150 characters visible: confident opening naming their thing, then the recorded video link, then one heavyweight social-proof line. One marketplace's fold at one moment — verify the current preview length on whichever marketplace you are applying to.",
+          "label": "30-Day First-Client Playbook §5.1, the application artifact pair (figure as of the source's 2025-era material)",
+          "claim": "CV text, only the first ~150 characters visible: confident opening naming their thing, then the recorded video link, then one heavyweight social-proof line. One marketplace's fold at one moment, verify the current preview length on whichever marketplace you are applying to.",
           "selfReported": true
         }
       },
       {
         "id": "give-something-away",
-        "rule": "Never submit a proposal without something they keep whether or not they hire you — a recorded walkthrough, a partial build, a mapped process, a checklist.",
+        "rule": "Never submit a proposal without something they keep whether or not they hire you, a recorded walkthrough, a partial build, a mapped process, a checklist.",
         "because": "A giveaway is the only element in a proposal that survives losing the job, and a free or money-back component is claimed to lift reply rate by up to 10x versus none.",
         "source": {
           "label": "30-Day First-Client Playbook §5.1 do-not list, with §5.5 offers",
@@ -1164,10 +1164,10 @@
       },
       {
         "id": "build-part-of-it-live",
-        "rule": "Devote the middle of the proposal to doing one specific piece of the work they described, and show it on screen — a page of copy, a mockup, a mapped flow, a cut scene, a working fragment.",
+        "rule": "Devote the middle of the proposal to doing one specific piece of the work they described, and show it on screen, a page of copy, a mockup, a mapped flow, a cut scene, a working fragment.",
         "because": "Every other applicant is describing capability; an applicant who has already started is in a different category and is no longer being compared on claims.",
         "source": {
-          "label": "30-Day First-Client Playbook §5.1 — the four-beat video, beat 3",
+          "label": "30-Day First-Client Playbook §5.1, the four-beat video, beat 3",
           "claim": "Solve or build part of their flow live, hyper-specifically, for a minute or two.",
           "selfReported": false
         }
@@ -1177,18 +1177,18 @@
         "rule": "Name the outcome they get and the one thing that visibly changes. Mention your tools once, late, and only to satisfy a technical reader.",
         "because": "The buyer wants the headache gone, not a particular pill; the architecture section persuades nobody and exists only to clear a technical reviewer.",
         "source": {
-          "label": "Acquisition playbook §12 / §19 — sell the outcome first",
-          "claim": "Sell the outcome first, the architecture second — the observed proposal leads with productivity outcomes and reaches the technology stack several sections later; the stack section exists to satisfy the technical reviewer, not to persuade the buyer.",
+          "label": "Acquisition playbook §12 / §19: sell the outcome first",
+          "claim": "Sell the outcome first, the architecture second, the observed proposal leads with productivity outcomes and reaches the technology stack several sections later; the stack section exists to satisfy the technical reviewer, not to persuade the buyer.",
           "selfReported": true
         }
       },
       {
         "id": "proof-is-one-line-with-a-number",
         "rule": "State proof as 'I did [accomplishment] for [company type] by [implementation]'. Reach for a dollar figure first, a percentage second, a named association third; a claim with none of the three does not go in.",
-        "because": "It is a preference order, not a floor — a percentage hides its base, so a dollar figure reads as a fact where 'grew it 30%' reads as evasion — but the source explicitly says not to stall on the number, and an operator whose real proof is an association still has something to say.",
+        "because": "It is a preference order, not a floor: a percentage hides its base, so a dollar figure reads as a fact where 'grew it 30%' reads as evasion, but the source explicitly says not to stall on the number, and an operator whose real proof is an association still has something to say.",
         "source": {
-          "label": "30-Day First-Client Playbook §5.5 — case-study format and specificity hierarchy",
-          "claim": "Write in the format 'I did [accomplishment] for [company type] by [implementation details]'; dollar figures > percentages > associations > vague claims. Specific results or metrics 'if possible — dollar figures best, but don't get hung up here.'",
+          "label": "30-Day First-Client Playbook §5.5, case-study format and specificity hierarchy",
+          "claim": "Write in the format 'I did [accomplishment] for [company type] by [implementation details]'; dollar figures > percentages > associations > vague claims. Specific results or metrics 'if possible, dollar figures best, but don't get hung up here.'",
           "selfReported": false
         }
       },
@@ -1197,7 +1197,7 @@
         "rule": "Lead with the case nearest their industry. If nothing is in-niche, name the closest adjacent one and add one clause saying why it transfers.",
         "because": "In-niche proof is described as roughly twice as effective as out-of-niche proof, and an unexplained out-of-niche case reads as padding.",
         "source": {
-          "label": "Maker School M2 — specialised marketplace profile",
+          "label": "Maker School M2: specialised marketplace profile",
           "claim": "In-niche proof is described as roughly twice as effective as out-of-niche proof.",
           "selfReported": true
         }
@@ -1207,38 +1207,38 @@
         "rule": "Never invent a metric. Conservative estimates grounded in real documentation are acceptable; unverifiable claims are not.",
         "because": "Fabricated claims surface eventually and damage a reputation irreparably, and on a platform with public work history the surface area is larger than elsewhere.",
         "source": {
-          "label": "30-Day First-Client Playbook §5.5 — mine documentation for numbers",
-          "claim": "Avoid fabricating claims — they tend to surface eventually and can damage your reputation irreparably. However, conservative estimates grounded in reality are acceptable.",
+          "label": "30-Day First-Client Playbook §5.5, mine documentation for numbers",
+          "claim": "Avoid fabricating claims: they tend to surface eventually and can damage your reputation irreparably. However, conservative estimates grounded in reality are acceptable.",
           "selfReported": false
         }
       },
       {
         "id": "never-disqualify-yourself",
-        "rule": "Never volunteer inexperience, availability anxiety, or a discount. If the buyer asks directly, answer in one forward-facing line with the offer attached — then move on.",
+        "rule": "Never volunteer inexperience, availability anxiety, or a discount. If the buyer asks directly, answer in one forward-facing line with the offer attached, then move on.",
         "because": "Volunteering it hands a shortlisting reader a reason to move on and is named on the do-not list as a defect rather than as honesty; being asked is a different situation, and the same source's own application artifact names zero reviews directly and reframes that as honesty.",
         "source": {
-          "label": "30-Day First-Client Playbook §5.1 — do-not list and the application artifact",
+          "label": "30-Day First-Client Playbook §5.1, do-not list and the application artifact",
           "claim": "Do not say 'I just started' / 'I'm in school' / 'I have no idea how to do this.' In the same section, the CV text names zero reviews directly and reframes them as honesty, and [EXPERIENCED VARIANT] notes exist because the beginner and proven cases diverge.",
           "selfReported": false
         }
       },
       {
         "id": "price-last",
-        "rule": "Never state a number before the outcome, the solution and the full component inventory — setup, hosting, testing and QA, optimisation, what you need from them, documentation and training, handover, maintenance if in scope.",
+        "rule": "Never state a number before the outcome, the solution and the full component inventory, setup, hosting, testing and QA, optimisation, what you need from them, documentation and training, handover, maintenance if in scope.",
         "because": "A price stated cold is compared to nothing; a price stated after the outcome and the inventory is compared to both.",
         "source": {
-          "label": "Acquisition playbook §7.7 — never present price first (with 30-Day First-Client Playbook §5.5 — the six-section proposal order)",
-          "claim": "§7.7: the order is transformation → solution and full component inventory → price; components to name before the number are setup, hosting, testing/QA, optimisation, client involvement (access, data, feedback), documentation/enablement/training, and maintenance if in scope — price stated cold is compared to nothing. §5.5 supplies the ordering: Title page, Problem, Solution, Scope of Work, Timeline, Pricing last, with the observation that newbies put price first and then try to justify it.",
+          "label": "Acquisition playbook §7.7: never present price first (with 30-Day First-Client Playbook §5.5, the six-section proposal order)",
+          "claim": "§7.7: the order is transformation → solution and full component inventory → price; components to name before the number are setup, hosting, testing/QA, optimisation, client involvement (access, data, feedback), documentation/enablement/training, and maintenance if in scope, price stated cold is compared to nothing. §5.5 supplies the ordering: Title page, Problem, Solution, Scope of Work, Timeline, Pricing last, with the observation that newbies put price first and then try to justify it.",
           "selfReported": true
         }
       },
       {
         "id": "price-from-their-arithmetic",
         "rule": "Build the price from figures the buyer supplied. Where the work recurs and the post gives volumes, show (time before − time after) × frequency × their loaded hourly cost. Where it does not, price against what their current alternative costs them and say which alternative you mean.",
-        "because": "When the client supplies every input the conclusion is their arithmetic rather than your assertion, which is what makes the number hard to dispute later — and where the inputs do not exist, a comparison they can check beats a saving you invented.",
+        "because": "When the client supplies every input the conclusion is their arithmetic rather than your assertion, which is what makes the number hard to dispute later, and where the inputs do not exist, a comparison they can check beats a saving you invented.",
         "source": {
-          "label": "Acquisition playbook §6.1 / §6.3 — the Process Identification Worksheet",
-          "claim": "Five answers — frequency, time per execution, people involved, hourly labour cost, error rate and cost — serve as the foundation of the ROI calculation; time saved = (manual − automated) × frequency, then converted to money twice.",
+          "label": "Acquisition playbook §6.1 / §6.3: the Process Identification Worksheet",
+          "claim": "Five answers: frequency, time per execution, people involved, hourly labour cost, error rate and cost, serve as the foundation of the ROI calculation; time saved = (manual − automated) × frequency, then converted to money twice.",
           "selfReported": true
         }
       },
@@ -1247,28 +1247,28 @@
         "rule": "When the budget sits under your number, remove scope or phase the project, and ask which capabilities they want dropped. Never lower the rate.",
         "because": "Discounting concedes that the value figure you just walked them through was inflated; cutting scope holds value-per-dollar constant and keeps the anchor for the next phase.",
         "source": {
-          "label": "Practitioner objection record — scope before price",
-          "claim": "'Can you do it for less?' is answered with 'Which features would you like to remove?' — nobody removes features. Never lower the price; change scope, terms or timeline, in that order.",
+          "label": "Practitioner objection record: scope before price",
+          "claim": "'Can you do it for less?' is answered with 'Which features would you like to remove?', nobody removes features. Never lower the price; change scope, terms or timeline, in that order.",
           "selfReported": true
         }
       },
       {
         "id": "qualify-before-you-write",
-        "rule": "Before writing a word, check the buyer — prior hires, average rating, money actually paid out, post recency, requirements you can meet — and note the budget band and whether it can carry your number. Once replies are arriving and you want fewer, better bids, add the tighter filters: payment verified, a posted budget that can carry your price, fewer than ten applicants. If it fails, skip the job.",
+        "rule": "Before writing a word, check the buyer: prior hires, average rating, money actually paid out, post recency, requirements you can meet, and note the budget band and whether it can carry your number. Once replies are arriving and you want fewer, better bids, add the tighter filters: payment verified, a posted budget that can carry your price, fewer than ten applicants. If it fails, skip the job.",
         "because": "Every application costs connects and the fifteen-minute ceiling, so a proposal into an unverified or already-crowded post is a paid lottery ticket; freed time is meant to go into vetting, and the tighter filters are for once you want fewer, better-qualified bids rather than for the cold start.",
         "source": {
-          "label": "Maker School M2 — the quota drop is a quality instruction (with 30-Day First-Client Playbook §5.1 — optional tighter filters)",
-          "claim": "M2: every time an application quota falls, the attached instruction is to spend the freed time vetting — client hire history, average rating, total money paid out, post recency, requirement fit; fewer applications are expected to travel further. §5.1 adds an optional refinement, explicitly framed as being for once you want fewer, better-qualified bids and drawn from the source's own case-study library rather than the module: client in the US, budget posted at $3,500, payment method verified, fewer than 10 proposals.",
+          "label": "Maker School M2: the quota drop is a quality instruction (with 30-Day First-Client Playbook §5.1, optional tighter filters)",
+          "claim": "M2: every time an application quota falls, the attached instruction is to spend the freed time vetting, client hire history, average rating, total money paid out, post recency, requirement fit; fewer applications are expected to travel further. §5.1 adds an optional refinement, explicitly framed as being for once you want fewer, better-qualified bids and drawn from the source's own case-study library rather than the module: client in the US, budget posted at $3,500, payment method verified, fewer than 10 proposals.",
           "selfReported": true
         }
       },
       {
         "id": "two-of-four-or-decline",
-        "rule": "Only pitch work that clears at least two of four tests — repetitive, time-consuming, error-prone, scalable. Score the work the post actually describes. If it clears none, do not apply.",
+        "rule": "Only pitch work that clears at least two of four tests, repetitive, time-consuming, error-prone, scalable. Score the work the post actually describes. If it clears none, do not apply.",
         "because": "Starting in the wrong place means the buyer sees the return slowly or not at all, concludes the whole category was oversold, and there is no second engagement; what you agree to take on is a commercial decision, not a technical one.",
         "source": {
-          "label": "Acquisition playbook §4.1 — the four pillars",
-          "claim": "A process must clear at least two of four — repetitive, time-consuming, error-prone, scalable — or it isn't worth automating yet. This doubles as a reason to decline a deal.",
+          "label": "Acquisition playbook §4.1: the four pillars",
+          "claim": "A process must clear at least two of four: repetitive, time-consuming, error-prone, scalable, or it isn't worth automating yet. This doubles as a reason to decline a deal.",
           "selfReported": true
         }
       },
@@ -1277,17 +1277,17 @@
         "rule": "Close by assuming the engagement and proposing specific times in their timezone. Never close by asking whether they are interested or whether they would like to hear more.",
         "because": "A close that ends on a booked date converts; a close that ends on verbal enthusiasm gives the reader another decision to defer.",
         "source": {
-          "label": "Acquisition playbook §8 — S.A.R.B.",
-          "claim": "Summarize, Ask, Recommend a scoped next step, Book — the rule is that the close ends on a booked date, not on verbal agreement.",
+          "label": "Acquisition playbook §8: S.A.R.B.",
+          "claim": "Summarize, Ask, Recommend a scoped next step, Book, the rule is that the close ends on a booked date, not on verbal agreement.",
           "selfReported": true
         }
       },
       {
         "id": "reply-in-five-minutes",
-        "rule": "Apply while the post is still fresh, and answer anything the buyer sends within five minutes during working hours — within one business day at the absolute outside. Build the notification path before you apply.",
+        "rule": "Apply while the post is still fresh, and answer anything the buyer sends within five minutes during working hours, within one business day at the absolute outside. Build the notification path before you apply.",
         "because": "Instant replies are claimed to convert at around 400% higher, and a buyer who is actively shortlisting will have moved on before a next-day answer arrives.",
         "source": {
-          "label": "30-Day First-Client Playbook §3 — daily standing habits, with the reply-speed conversion claim",
+          "label": "30-Day First-Client Playbook §3, daily standing habits, with the reply-speed conversion claim",
           "claim": "Check and respond to inbound within 24 hours, replying to interested parties within 5 minutes. The reply-speed claim in the same source is that instant replies convert at 'around the 400% mark' higher; the notification path is built six days before launch so the five-minute reply is achievable from the first send.",
           "selfReported": true
         }
@@ -1295,10 +1295,10 @@
       {
         "id": "sweep-unanswered-proposals",
         "rule": "Sweep unanswered proposals once a week and re-enter at the stage the person already reached, not at the beginning. Never drop a buyer who replied positively after a single unanswered message.",
-        "because": "A proposal left untouched decays fast — a deal sitting more than 72 hours without follow-up is described as much likelier to die — and reviving something that already engaged costs nothing, where a fresh application costs connects and the fifteen-minute ceiling.",
+        "because": "A proposal left untouched decays fast: a deal sitting more than 72 hours without follow-up is described as much likelier to die, and reviving something that already engaged costs nothing, where a fresh application costs connects and the fifteen-minute ceiling.",
         "source": {
-          "label": "Maker School M4 — the optimisation diagnostic, pipeline and follow-up",
-          "claim": "A deal in Proposal Sent for more than 72 hours without follow-up has a much higher chance of dying. Standing reactivation sweeps run on a calendar date — unanswered proposals after a week — and re-enter at the stage the person previously reached rather than dragging everyone back to a call, which is what keeps the sweep economical at volume.",
+          "label": "Maker School M4: the optimisation diagnostic, pipeline and follow-up",
+          "claim": "A deal in Proposal Sent for more than 72 hours without follow-up has a much higher chance of dying. Standing reactivation sweeps run on a calendar date, unanswered proposals after a week, and re-enter at the stage the person previously reached rather than dragging everyone back to a call, which is what keeps the sweep economical at volume.",
           "selfReported": true
         }
       },
@@ -1307,7 +1307,7 @@
         "rule": "Never put a payment link, invoice, off-platform contract, or outside contact channel into a marketplace proposal. If you attach a document, have it reference payment on the platform.",
         "because": "An off-platform proposal with payment functionality risks the account being banned, and this overrides the usual advice to bundle proposal, agreement and invoice into one signable document.",
         "source": {
-          "label": "30-Day First-Client Playbook §5.5 — marketplace exception",
+          "label": "30-Day First-Client Playbook §5.5, marketplace exception",
           "claim": "Do NOT send an off-platform proposal with payment functionality to a marketplace client; it risks getting the account banned. Deliver it in a message instead, and if sending a file make sure it references payment on the marketplace.",
           "selfReported": false
         }
@@ -1361,7 +1361,7 @@
         "label": "Competing on price or need",
         "patternSource": "\\bplease\\s+give\\s+me\\s+a\\s+chance\\b|\\bI\\s+really\\s+need\\s+th(?:is|e)\\s+(?:job|work|project)\\b|\\bI\\s+(?:can|will|am\\s+happy\\s+to)\\s+(?:offer|give|do)\\b[^.]{0,40}\\b(?:lowest|cheapest)\\s+(?:price|rate|bid)\\b|\\bcheapest\\s+rate\\b|\\bI\\s+can\\s+do\\s+it\\s+cheaper\\b",
         "patternFlags": "i",
-        "because": "Discounting concedes the value argument, and pleading moves the decision from who is best to who is most desperate. The phrase is bound to a first-person offer so that refusing to be the cheapest bid — the scope-not-price law said out loud — is not blocked by the ban against competing on price.",
+        "because": "Discounting concedes the value argument, and pleading moves the decision from who is best to who is most desperate. The phrase is bound to a first-person offer so that refusing to be the cheapest bid, the scope-not-price law said out loud, is not blocked by the ban against competing on price.",
         "level": "hard"
       },
       {
@@ -1369,7 +1369,7 @@
         "label": "Promised multiple or guaranteed rate of return",
         "patternSource": "\\bguarantee(?:d|s)?\\s+(?:you\\s+)?(?:a\\s+)?(?:\\d+\\s*x\\b|\\d+\\s*%\\s+(?:ROI\\b|return|uplift|growth|increase)|ROI\\b|return\\s+on\\s+investment\\b)|\\b\\d+x\\s+(?:your\\s+)?(?:ROI|return)\\b",
         "patternFlags": "i",
-        "because": "The 10x rule is a sales anchor, not an observed outcome — the same source's own deals compute at roughly 2.3x to 5x — so a promised multiple or rate of return is a claim you cannot defend. It covers multiples and rates only: guaranteeing the work itself, or offering money back, is the risk-reversed offer this pack instructs you to make.",
+        "because": "The 10x rule is a sales anchor, not an observed outcome, the same source's own deals compute at roughly 2.3x to 5x, so a promised multiple or rate of return is a claim you cannot defend. It covers multiples and rates only: guaranteeing the work itself, or offering money back, is the risk-reversed offer this pack instructs you to make.",
         "level": "hard"
       },
       {
@@ -1385,7 +1385,7 @@
         "label": "Off-platform contact solicitation",
         "patternSource": "\\b(?:add|message|contact|reach|ping|DM|find)\\s+me\\s+(?:on|at|via|through)\\s+(?:WhatsApp|Telegram|Skype|Signal)\\b|\\bmy\\s+(?:WhatsApp|Telegram|Skype)\\s+(?:is\\b|handle|number|ID\\b|username)|\\bemail\\s+me\\s+at\\b|\\breach\\s+me\\s+(?:at|on)\\s+\\S+@",
         "patternFlags": "i",
-        "because": "Soliciting contact off the platform carries the same account risk as off-platform payment, though a buyer may legitimately name a messaging tool first and wiring those tools is routine scope — so this matches the solicitation frame rather than the vendor name, and warns rather than blocks.",
+        "because": "Soliciting contact off the platform carries the same account risk as off-platform payment, though a buyer may legitimately name a messaging tool first and wiring those tools is routine scope, so this matches the solicitation frame rather than the vendor name, and warns rather than blocks.",
         "level": "soft"
       },
       {
@@ -1435,7 +1435,7 @@
         "maxChars": 500,
         "constraints": [
           "Reuse their nouns for the work, the tools and the roles involved.",
-          "Add exactly one observation they did not make — a failure mode, a hidden handoff, a downstream cost.",
+          "Add exactly one observation they did not make, a failure mode, a hidden handoff, a downstream cost.",
           "Ask at most one question, and only where the answer is needed to price the work.",
           "Describe none of your services in this section."
         ],
@@ -1447,7 +1447,7 @@
         "purpose": "Convert a claim of capability into an artifact the buyer can look at.",
         "maxChars": 700,
         "constraints": [
-          "Describe one specific piece of the work they described that you have already done — a page of copy, a mockup, a mapped flow, a cut scene, a working fragment.",
+          "Describe one specific piece of the work they described that you have already done, a page of copy, a mockup, a mapped flow, a cut scene, a working fragment.",
           "Link to it as a streamed link, never as a downloadable file or a drive attachment.",
           "Keep any recording under five minutes.",
           "If it is a prototype or a rough, state plainly which parts are placeholder and which are real."
@@ -1462,7 +1462,7 @@
         "constraints": [
           "Format: I did [accomplishment] for [company type] by [implementation detail].",
           "Lead with the case nearest their industry; if none is in-niche, name the adjacent one and add one clause on why it transfers.",
-          "Reach for a dollar figure first, a percentage second, a named association third — in that order of preference, not as a floor.",
+          "Reach for a dollar figure first, a percentage second, a named association third, in that order of preference, not as a floor.",
           "If you have no revenue figures at all, work down the fallback: in-domain with revenue, out-of-domain with revenue, an impressive association without revenue, or a template you implemented in your own business with the measured delta.",
           "One heavyweight social-proof line in the cover letter; anything further belongs in the walkthrough."
         ],
@@ -1470,12 +1470,12 @@
       },
       {
         "key": "roiFrame",
-        "label": "The value case — arithmetic where the post supplies numbers",
+        "label": "The value case: arithmetic where the post supplies numbers",
         "purpose": "Make the price a consequence of the buyer's own situation rather than of your effort.",
         "maxChars": 500,
         "constraints": [
           "If the post supplies volumes, frequencies or throughput, show the subtraction and the multiplication using only their figures, and state the saving monthly and annually.",
-          "If it does not, skip the arithmetic entirely and frame value as the outcome set against what their current alternative costs them — the agency quote, the in-house hire, the hours the owner is spending now.",
+          "If it does not, skip the arithmetic entirely and frame value as the outcome set against what their current alternative costs them, the agency quote, the in-house hire, the hours the owner is spending now.",
           "Where the work recurs and the figures are missing, ask for frequency, time per run and people involved rather than asserting a saving.",
           "Promise no multiple, no percentage return and no guarantee of a rate."
         ],
@@ -1490,7 +1490,7 @@
           "List in-scope items as testable capabilities, not as activities.",
           "Put an explicit out-of-scope line directly beside the in-scope list.",
           "Name every component before the number: setup, hosting, testing and QA, optimisation, what you need from them (access, data, feedback), documentation and training, handover, maintenance if in scope.",
-          "State the price once, after the inventory, as a non-round figure — never $50, $100 or $2,000.",
+          "State the price once, after the inventory, as a non-round figure, never $50, $100 or $2,000.",
           "Offer a phased or reduced-scope version instead of a lower price.",
           "No payment link, invoice, or off-platform contract."
         ],
@@ -1515,7 +1515,7 @@
         "constraints": [
           "It must be usable without you present.",
           "It must be reusable across applications, or producible inside the fifteen-minute ceiling.",
-          "It must not contain the paid scope — it is a sample of judgement, not a free build of the deliverable.",
+          "It must not contain the paid scope: it is a sample of judgement, not a free build of the deliverable.",
           "Name it in one line inside the cover letter, saying what it contains."
         ],
         "group": "Supporting assets"
@@ -1534,13 +1534,13 @@
       },
       {
         "key": "replyInterested",
-        "label": "Reply — interested, or asking price",
+        "label": "Reply: interested, or asking price",
         "purpose": "Answer what they actually asked, then put specific times on the table.",
         "maxChars": 600,
         "constraints": [
-          "Answer the question they asked in one or two plain sentences; if it was price, give a range and name what moves it — deferring price to a call reads as having something to hide.",
+          "Answer the question they asked in one or two plain sentences; if it was price, give a range and name what moves it, deferring price to a call reads as having something to hide.",
           "Say in one sentence why a call helps them, framed as walking through how this would work in their situation.",
-          "Offer two or three specific slots in their timezone, with a booking link only as an 'if easier' fallback — never a bare link and never 'when are you free?'.",
+          "Offer two or three specific slots in their timezone, with a booking link only as an 'if easier' fallback, never a bare link and never 'when are you free?'.",
           "Write and send this one by hand; automation starts only after it.",
           "If it goes quiet, chase twice inside the platform: at two days a short status check that explicitly grants permission to decline, at four days a single message whose entire content is the booking link."
         ],
@@ -1548,12 +1548,12 @@
       },
       {
         "key": "replyNotNow",
-        "label": "Reply — not now",
+        "label": "Reply: not now",
         "purpose": "Convert a vague deferral into a dated one.",
         "maxChars": 400,
         "constraints": [
           "Get a specific week or month, and say you will come back then, once.",
-          "Calendar it and come back exactly once — returning twice makes the promise worthless.",
+          "Calendar it and come back exactly once: returning twice makes the promise worthless.",
           "Leave the giveaway with them regardless of the date.",
           "No pitch, no counter-offer, no second ask."
         ],
@@ -1561,7 +1561,7 @@
       },
       {
         "key": "replyWrongFit",
-        "label": "Reply — wrong fit, wrong person, or lost",
+        "label": "Reply: wrong fit, wrong person, or lost",
         "purpose": "Exit clean and take the one thing the exchange can still produce.",
         "maxChars": 350,
         "constraints": [
@@ -1575,148 +1575,148 @@
     ],
     "evidence": [
       {
-        "label": "30-Day First-Client Playbook §2 — the buying ladder",
-        "claim": "Marketplace leads are the only top-rung leads — problem-aware and solution-aware, already choosing a provider — which collapses the channel to one problem: standing out.",
+        "label": "30-Day First-Client Playbook §2, the buying ladder",
+        "claim": "Marketplace leads are the only top-rung leads, problem-aware and solution-aware, already choosing a provider, which collapses the channel to one problem: standing out.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook §5.1 — funnel diagnostic",
+        "label": "30-Day First-Client Playbook §5.1, funnel diagnostic",
         "claim": "If roughly 85% of sent proposals are viewed but only about 5% open a conversation, the cover letter is the problem, not the volume.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook §5.1 — view-to-reply estimate",
-        "claim": "More than 50% of application views produce a reply — stated explicitly as the source's estimate, with no hard statistics behind it.",
+        "label": "30-Day First-Client Playbook §5.1, view-to-reply estimate",
+        "claim": "More than 50% of application views produce a reply, stated explicitly as the source's estimate, with no hard statistics behind it.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook §5.1 — cold-start expectation",
+        "label": "30-Day First-Client Playbook §5.1, cold-start expectation",
         "claim": "You may not get a single hit from 30, 40, or 50 proposals sent.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook §5.1 — application economics (as stated in the source's 2025-era material)",
-        "claim": "Connects run about $0.15 each at 10–15 per project, so an application costs roughly $1.50–$2.00 against a typical $500–$5,000 deal, on a stated 10% platform fee. One marketplace's pricing observed at one moment, not a measurement — the flat 10% fee in particular no longer describes Upwork's schedule. Verify current connect pricing and fees before using these numbers.",
+        "label": "30-Day First-Client Playbook §5.1, application economics (as stated in the source's 2025-era material)",
+        "claim": "Connects run about $0.15 each at 10-15 per project, so an application costs roughly $1.50-$2.00 against a typical $500-$5,000 deal, on a stated 10% platform fee. One marketplace's pricing observed at one moment, not a measurement, the flat 10% fee in particular no longer describes Upwork's schedule. Verify current connect pricing and fees before using these numbers.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook §5.1 — visible characters (as stated in the source's 2025-era material)",
-        "claim": "About the first 150 characters of a cover letter are visible before the fold, and about 100 characters of a profile. This is one marketplace's UI at one moment — Freelancer, Contra and Fiverr truncate differently, and the source itself substitutes a different platform for under-18 operators. Treat 150 as a per-marketplace default and check the live value.",
+        "label": "30-Day First-Client Playbook §5.1, visible characters (as stated in the source's 2025-era material)",
+        "claim": "About the first 150 characters of a cover letter are visible before the fold, and about 100 characters of a profile. This is one marketplace's UI at one moment, Freelancer, Contra and Fiverr truncate differently, and the source itself substitutes a different platform for under-18 operators. Treat 150 as a per-marketplace default and check the live value.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook §5.1 — time ceiling",
+        "label": "30-Day First-Client Playbook §5.1, time ceiling",
         "claim": "Hard ceiling of about 15 minutes per application including the first; if the job is unfamiliar, spend the first ~10 minutes on AI triage rather than skipping it.",
         "selfReported": false
       },
       {
-        "label": "30-Day First-Client Playbook §5.1 — recording rule (vendor tiers as stated in 2025-era material)",
-        "claim": "Record on a link-sharing platform, not a file-based system: downloadable anonymous ~200MB video files add a lot of friction to the client experience. The free-tier ceiling of 5 minutes on the source's named platform is described as almost always sufficient — free-tier limits change; verify.",
+        "label": "30-Day First-Client Playbook §5.1, recording rule (vendor tiers as stated in 2025-era material)",
+        "claim": "Record on a link-sharing platform, not a file-based system: downloadable anonymous ~200MB video files add a lot of friction to the client experience. The free-tier ceiling of 5 minutes on the source's named platform is described as almost always sufficient, free-tier limits change; verify.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook §5.1 — optional tighter filters",
+        "label": "30-Day First-Client Playbook §5.1, optional tighter filters",
         "claim": "An optional refinement, framed by the source as being for once you want fewer, better-qualified bids rather than for the cold start, and drawn from its case-study library rather than the module: client in the US, budget posted at $3,500, payment method verified, fewer than 10 proposals.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook §5.1 — one heavyweight proof line",
+        "label": "30-Day First-Client Playbook §5.1, one heavyweight proof line",
         "claim": "The application's CV text carries a confident opening naming their thing, the recorded video link, one heavyweight social-proof line, and a short 'about me'. Zero reviews are named directly and reframed as honesty.",
         "selfReported": false
       },
       {
-        "label": "30-Day First-Client Playbook §5.1 — non-round rate",
+        "label": "30-Day First-Client Playbook §5.1, non-round rate",
         "claim": "Use a non-round rate such as $63.46 rather than $50 or $100; over $50,000 in earnings is attributed to this, as an attribution rather than a measurement.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook §5.5 — offers",
+        "label": "30-Day First-Client Playbook §5.5, offers",
         "claim": "A risk-reversed offer is claimed to lift reply rate by up to 10x versus none; the canonical example ran about 20,000 emails at roughly 8% reply, and the second at 7%. Neither is a comparison against a no-offer control.",
         "selfReported": true
       },
       {
-        "label": "30-Day First-Client Playbook §5.5 — specificity hierarchy and the four-tier fallback",
-        "claim": "Dollar figures beat percentages beat associations beat vague claims, because 'scaled a business by 30%' could mean scaling it from $1 to $1.30 — but metrics are wanted 'if possible… don't get hung up here'. The fallback runs: in-domain with revenue outcomes; out-of-domain with revenue outcomes; impressive associations without revenue; or implement a supplied template in your own business and claim the measured delta.",
+        "label": "30-Day First-Client Playbook §5.5, specificity hierarchy and the four-tier fallback",
+        "claim": "Dollar figures beat percentages beat associations beat vague claims, because 'scaled a business by 30%' could mean scaling it from $1 to $1.30, but metrics are wanted 'if possible… don't get hung up here'. The fallback runs: in-domain with revenue outcomes; out-of-domain with revenue outcomes; impressive associations without revenue; or implement a supplied template in your own business and claim the measured delta.",
         "selfReported": false
       },
       {
-        "label": "30-Day First-Client Playbook §5.5 — marketplace exception",
+        "label": "30-Day First-Client Playbook §5.5, marketplace exception",
         "claim": "Do not send an off-platform proposal with payment functionality to a marketplace client; it risks an account ban. Deliver it in a message and reference payment on the platform.",
         "selfReported": false
       },
       {
-        "label": "Maker School M2 — quota drop as a quality instruction",
+        "label": "Maker School M2: quota drop as a quality instruction",
         "claim": "Every application-quota cut carries an instruction to spend the freed time vetting: client hire history, average rating, total money paid out, post recency, requirement fit.",
         "selfReported": false
       },
       {
-        "label": "Maker School M2 — in-niche proof",
+        "label": "Maker School M2: in-niche proof",
         "claim": "In-niche proof is described as roughly twice as effective as out-of-niche proof.",
         "selfReported": true
       },
       {
-        "label": "Maker School M2 — marketplace acquisition cost (as stated in 2025-era material)",
-        "claim": "A $2,000 marketplace deal costs about $20 in connects, ~$80 of selling time and ~$200 in platform fees — roughly 15% of project value spent before work starts. Built on the same volatile connect pricing and fee schedule; recompute against current rates.",
+        "label": "Maker School M2: marketplace acquisition cost (as stated in 2025-era material)",
+        "claim": "A $2,000 marketplace deal costs about $20 in connects, ~$80 of selling time and ~$200 in platform fees, roughly 15% of project value spent before work starts. Built on the same volatile connect pricing and fee schedule; recompute against current rates.",
         "selfReported": true
       },
       {
-        "label": "Maker School M4 — pipeline staleness",
+        "label": "Maker School M4: pipeline staleness",
         "claim": "A deal sitting in Proposal Sent for more than 72 hours without follow-up has a much higher chance of dying; the daily pipeline check runs backwards from Closed Won and asks only what the smallest action is that moves each deal forward.",
         "selfReported": true
       },
       {
-        "label": "Maker School M4 — reactivation sweeps",
-        "claim": "Standing reactivation sweeps run on a calendar date — past clients monthly or quarterly, unanswered proposals after a week — and re-enter at the stage the person previously reached rather than dragging everyone back to a call, which is what keeps the sweep economical at around 200 leads a month.",
+        "label": "Maker School M4: reactivation sweeps",
+        "claim": "Standing reactivation sweeps run on a calendar date, past clients monthly or quarterly, unanswered proposals after a week, and re-enter at the stage the person previously reached rather than dragging everyone back to a call, which is what keeps the sweep economical at around 200 leads a month.",
         "selfReported": true
       },
       {
-        "label": "Cold-email course — the three-step reply framework",
+        "label": "Cold-email course: the three-step reply framework",
         "claim": "Answer the question they actually asked; position the call as useful to them rather than as a sales meeting; pitch three to four specific slots in their timezone with the calendar link only as an 'if easier' fallback. The single biggest named beginner mistake is answering the question and never asking for the call; replying 'when are you free?' or with a bare link is where most bookings are lost.",
         "selfReported": true
       },
       {
-        "label": "Cold-email course — the two-step chase, plus the delivered reply-handling doctrine",
+        "label": "Cold-email course: the two-step chase, plus the delivered reply-handling doctrine",
         "claim": "Tag everyone who replied but has not booked; two days later send a short status check whose distinguishing feature is that it grants explicit permission to decline; two days after that send a single nudge whose entire content is the booking link. The first response is always manual. A positive reply is never dropped after one unanswered attempt. Reply branches are handled as interested (price answered in one line, then slots), not now (get a date, return once), wrong person (take the referral, never forward the thread) and hostile (one line, then remove).",
         "selfReported": true
       },
       {
-        "label": "Acquisition playbook §4.1 — the four pillars",
+        "label": "Acquisition playbook §4.1: the four pillars",
         "claim": "A candidate process must clear at least two of repetitive, time-consuming, error-prone and scalable, or it is not worth automating yet; the threshold doubles as a reason to decline.",
         "selfReported": true
       },
       {
-        "label": "Acquisition playbook §6.1 and §6.3 — the ROI worksheet",
-        "claim": "Frequency, time per execution, people involved, hourly labour cost and error cost are the five inputs; time saved = (manual − automated) × frequency, then converted to money twice — as cost reduction and as revenue from freed hours.",
+        "label": "Acquisition playbook §6.1 and §6.3: the ROI worksheet",
+        "claim": "Frequency, time per execution, people involved, hourly labour cost and error cost are the five inputs; time saved = (manual − automated) × frequency, then converted to money twice, as cost reduction and as revenue from freed hours.",
         "selfReported": true
       },
       {
-        "label": "Acquisition playbook §7.7 — never present price first",
+        "label": "Acquisition playbook §7.7: never present price first",
         "claim": "The order is transformation → solution and full component inventory → price. Components to name before the number: setup, hosting, testing/QA, optimisation, client involvement (access, data, feedback), documentation/enablement/training, and maintenance if in scope. Price stated cold is compared to nothing; price stated after the outcome and the inventory is compared to both.",
         "selfReported": true
       },
       {
-        "label": "Acquisition playbook §7.2 — the 10x rule against observed deals",
+        "label": "Acquisition playbook §7.2: the 10x rule against observed deals",
         "claim": "The stated rule is a visible 10x return within twelve months, but the multiples computed on his own deals run about 2.3x to 5x, with a single example at 12x.",
         "selfReported": true
       },
       {
-        "label": "Acquisition playbook §7.5 — close-rate diagnostic",
+        "label": "Acquisition playbook §7.5: close-rate diagnostic",
         "claim": "If more than 50% of people say yes, the price is probably too low.",
         "selfReported": true
       },
       {
-        "label": "Acquisition playbook §7.6 — objection handling",
+        "label": "Acquisition playbook §7.6: objection handling",
         "claim": "Adjust the scope, never the price: reduce complexity, remove a non-essential feature, or phase the project, because discounting concedes the value figure was inflated.",
         "selfReported": true
       },
       {
-        "label": "Practitioner deal record — prototype-first close",
+        "label": "Practitioner deal record: prototype-first close",
         "claim": "A verbal yes landed at minute 19 of a demo call, before any pricing existed; the operator's own summary was that the proposal did not sell him, the prototype did.",
         "selfReported": true
       },
       {
-        "label": "Practitioner deal record — close speed",
-        "claim": "Never ask permission to send the link — every question is another chance to sleep on it. Closes on record at 60 seconds, 12 minutes, 17 minutes and 36 minutes.",
+        "label": "Practitioner deal record: close speed",
+        "claim": "Never ask permission to send the link: every question is another chance to sleep on it. Closes on record at 60 seconds, 12 minutes, 17 minutes and 36 minutes.",
         "selfReported": true
       }
     ],
@@ -1726,11 +1726,11 @@
         "resolution": "The rules differ because the rungs differ. A cold recipient has not agreed that the problem is worth solving, so a call ask is premature. A marketplace buyer posted the job and is shortlisting, so the call is the next step they already intend to take. Keep the direct ask here; do not carry it into cold email."
       },
       {
-        "tension": "The channel rewards volume — ten applications a day at fifteen minutes each — while also demanding vetting, a live-built demonstration and a bespoke giveaway per job.",
+        "tension": "The channel rewards volume: ten applications a day at fifteen minutes each, while also demanding vetting, a live-built demonstration and a bespoke giveaway per job.",
         "resolution": "Volume days and selection days are different days. Early on, quota is the point: the reps are the product and the ceiling protects them. Once replies start arriving, the quota halves and the freed hours go into vetting and into deeper demonstrations on fewer, better jobs. Never let the ceiling break; make the components reusable instead."
       },
       {
-        "tension": "Give something away for free, but never discount — a free build is a 100% discount that the sources never frame as one.",
+        "tension": "Give something away for free, but never discount, a free build is a 100% discount that the sources never frame as one.",
         "resolution": "The giveaway is paid for in proof, not in cash, so it must be bounded: reusable across applications or producible inside the fifteen-minute ceiling, and never a slice of the paid scope. The moment the giveaway is the deliverable, it is a discount and the never-discount rule applies."
       },
       {
@@ -1738,7 +1738,7 @@
         "resolution": "Use the arithmetic to justify the price and let the multiple be whatever the buyer's own numbers produce. State the saving; never state a promised multiple. Treat 10x as an internal sanity check on whether a price is defensible, not as a claim that goes into copy."
       },
       {
-        "tension": "Everywhere else the method says bundle proposal, agreement and invoice into one signable, payable document — six post-call steps down to two. On a marketplace that same move risks an account ban.",
+        "tension": "Everywhere else the method says bundle proposal, agreement and invoice into one signable, payable document, six post-call steps down to two. On a marketplace that same move risks an account ban.",
         "resolution": "The marketplace exception wins inside this channel. Deliver the proposal as a message, a link or plain text, keep payment on the platform, and only reach for the bundled document on follow-up work that has legitimately moved off-platform."
       },
       {
@@ -1747,14 +1747,14 @@
       },
       {
         "tension": "Write from a position of strength and never disqualify yourself, while the same source's own application artifact names zero reviews directly and reframes that as honesty.",
-        "resolution": "Never volunteer it unprompted — no 'I just started', no 'I'm still learning', no apology for a thin history. When the buyer asks directly, answer in one forward-facing line with the offer attached: what you have done, what you will do here, and what they keep if it does not work out. Being asked is a different situation from confessing, and the direct answer beats the evasion because the buyer can already see the review count."
+        "resolution": "Never volunteer it unprompted: no 'I just started', no 'I'm still learning', no apology for a thin history. When the buyer asks directly, answer in one forward-facing line with the offer attached: what you have done, what you will do here, and what they keep if it does not work out. Being asked is a different situation from confessing, and the direct answer beats the evasion because the buyer can already see the review count."
       },
       {
         "tension": "Two of the most-endorsed qualification filters disagree: one screens purely on the buyer's sales economics, the other requires that the buyer already be spending on the category.",
-        "resolution": "On a marketplace the disagreement mostly dissolves — posting the job is itself evidence of category appetite, so screen on economics: verified payment, money actually paid out, deal size that can carry your price, and a decision-maker who can say yes."
+        "resolution": "On a marketplace the disagreement mostly dissolves, posting the job is itself evidence of category appetite, so screen on economics: verified payment, money actually paid out, deal size that can carry your price, and a decision-maker who can say yes."
       },
       {
-        "tension": "The pack must generalise across marketplaces and trades, while its richest figures — connect pricing, platform fees, the 150-character fold — come from one platform at one moment.",
+        "tension": "The pack must generalise across marketplaces and trades, while its richest figures, connect pricing, platform fees, the 150-character fold, come from one platform at one moment.",
         "resolution": "Treat every vendor figure as a default with an as-of date, not as a constant. The doctrine (apply cheaply, write to the fold, price after the inventory) travels; the numbers do not. Check the live value of anything you are about to hard-code, and where the work has no throughput to measure, use the alternative value frame rather than manufacturing arithmetic to fit the shape."
       }
     ]

@@ -173,7 +173,7 @@ export const qualify = (input: QualificationInput = {}): QualificationResult => 
   if (quadrant === 'timeWaster') {
     verdict = 'decline';
     blockers.push(
-      'Low impact and high complexity. This is the quadrant the doctrine says to refuse outright — ' +
+      'Low impact and high complexity. This is the quadrant the doctrine says to refuse outright, ' +
         'it costs the most and shows the least, which is how a first build ends the relationship.',
     );
   } else if (cleared.length >= PILLAR_THRESHOLD) {

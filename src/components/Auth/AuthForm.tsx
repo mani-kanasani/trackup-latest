@@ -57,7 +57,7 @@ export const AuthForm: React.FC = () => {
           <p className="text-lg text-gray-600 dark:text-gray-400">
             {mode === 'login'
               ? 'Welcome back to your AI outreach suite.'
-              : 'AI-powered outreach — Upwork proposals, LinkedIn DMs and more.'}
+              : 'AI-powered outreach, Upwork proposals, LinkedIn DMs and more.'}
           </p>
         </div>
 

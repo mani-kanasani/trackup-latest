@@ -13,7 +13,7 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  ArrowLeft, Mail, Plus, Sparkles, Copy, Check, Trash2, Loader2, X, Ban,
+  Mail, Plus, Sparkles, Copy, Check, Trash2, Loader2, X, Ban,
 } from 'lucide-react';
 import { useProspects, type MutationResult } from './useProspects';
 import { Prospect, ProspectStatus, EmailSequence, isProspectTerminal } from './types';
@@ -25,6 +25,7 @@ import { buildChannelPrompt, checkAgainstMethod } from '../../lib/method/forChan
 import { getPack } from '../../lib/method/packs';
 import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
+import { AppBar } from '../../components/Layout/AppBar';
 import { qualify, isBlocked } from '../../lib/qualify/score';
 import type { QualificationInput } from '../../lib/qualify/types';
 import type { ValidationResult } from '../../lib/method/types';
@@ -62,24 +63,11 @@ export const ColdEmailApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
 
   return (
     <div className="min-h-screen flex flex-col app-canvas accent-ember">
-      <header className="border-b border-ember-100 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md flex-shrink-0">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={onExit} className="flex items-center text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-ember-600">
-              <ArrowLeft className="w-4 h-4 mr-1.5" /> All apps
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-ember-500 flex items-center justify-center">
-                <Mail className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-bold text-gray-900 dark:text-white">Cold Email</span>
-            </div>
-          </div>
-          <button onClick={() => setShowAdd(true)} className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-ember-600 hover:bg-ember-700 shadow-sm">
-            <Plus className="w-4 h-4 mr-1.5" /> Add prospect
-          </button>
-        </div>
-      </header>
+      <AppBar title="Cold Email" icon={Mail} gradient="from-ember-400 to-ember-600" onExit={onExit}>
+        <button onClick={() => setShowAdd(true)} className="btn-primary !py-2 !px-4 text-sm">
+          <Plus className="w-4 h-4 mr-1.5" /> Add prospect
+        </button>
+      </AppBar>
 
       <div className="flex-1 max-w-6xl w-full mx-auto px-6 py-6 grid lg:grid-cols-[320px_1fr] gap-6 overflow-hidden">
         <div className="overflow-y-auto pr-1">
@@ -167,7 +155,7 @@ const ProspectDetail: React.FC<{
     [sequence],
   );
   const describe = (v: ValidationResult['violations'][number]) =>
-    `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`;
+    `${v.message}${v.excerpt ? `, "${v.excerpt}"` : ''}`;
   const warnings = (check?.violations ?? []).filter((v) => v.level === 'hard').map(describe);
   const softNotes = (check?.violations ?? []).filter((v) => v.level === 'soft').map(describe);
 
@@ -272,7 +260,7 @@ const ProspectDetail: React.FC<{
       });
       if (saved.error) {
         setLocalSeq(data);
-        throw new Error(`Generated, but saving failed: ${saved.error}. The sequence is below — copy anything you need.`);
+        throw new Error(`Generated, but saving failed: ${saved.error}. The sequence is below, copy anything you need.`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate the sequence.');
@@ -386,7 +374,7 @@ const ProspectDetail: React.FC<{
               </p>
             ) : (
               <button onClick={() => setOverride(true)} className="mt-2 text-xs font-semibold text-red-700 dark:text-red-300 underline underline-offset-2">
-                I disagree — write it anyway
+                I disagree, write it anyway
               </button>
             )}
           </div>
@@ -462,7 +450,7 @@ const ProspectDetail: React.FC<{
       ) : (
         <div className="card-modern p-8 text-center text-gray-400">
           <Sparkles className="w-8 h-8 mx-auto mb-2 text-ember-300" />
-          <p>No sequence yet — click <span className="font-semibold">Write the sequence</span>.</p>
+          <p>No sequence yet, click <span className="font-semibold">Write the sequence</span>.</p>
         </div>
       )}
     </div>

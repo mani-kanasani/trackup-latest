@@ -24,7 +24,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Ask for a reply, never for a meeting, a demo, or a click.",
     because: "A cold ask has to be answerable in one word and cost the reader nothing; a call request asks a stranger to spend time before you have given them anything.",
     source: {
-      "label": "Cold Email Lab §3 — the CTA rule",
+      "label": "Cold Email Lab §3: the CTA rule",
       "claim": "A cold CTA must be answerable in one word, cost the reader nothing, and offer something rather than request time; meeting asks, demo asks and link clicks are all named as bad CTAs.",
       "selfReported": false
     },
@@ -34,7 +34,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Make the ask give something away, permission to send an example, a list, a short walkthrough, instead of requesting time.",
     because: "The more free-sounding and valuable the ask, the better the response; an offer to send something free is claimed to beat a call request every single time.",
     source: {
-      "label": "Cold Email Lab §3 — the CTA rule",
+      "label": "Cold Email Lab §3: the CTA rule",
       "claim": "An offer to send a free example outperforms a call request 'every single time'; the shortest possible permission ask is the strongest. He also states that strengthening the offer outperforms strengthening the words, and that a free or performance-based ask is the largest single lift available.",
       "selfReported": true
     },
@@ -44,7 +44,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Put no links, images, HTML or attachments in any message sent before they have replied; a plain-text opt-out is the only permitted extra element.",
     because: "Links and images cost deliverability, and deliverability is the one variable a cold campaign cannot afford to spend.",
     source: {
-      "label": "Cold Email Lab §5 — where a link first appears",
+      "label": "Cold Email Lab §5: where a link first appears",
       "claim": "Links and images hurt deliverability very substantially; no links, no images, nothing fancy, in any email of the sequence, and the only permitted extra element is a plain-text opt-out mechanism. Independently corroborated by a second course's send settings: no HTML, no links in the body, no images.",
       "selfReported": true
     },
@@ -54,7 +54,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Open with one specific, true, verifiable observation about them.",
     because: "It proves a human researched this recipient rather than blasting a list, which is the whole job of the first line.",
     source: {
-      "label": "Cold Email Lab §3 — the callout hook",
+      "label": "Cold Email Lab §3: the callout hook",
       "claim": "The callout hook is one specific, true, verifiable observation about them, their business or their situation, and its job is to prove the email was not blasted.",
       "selfReported": false
     },
@@ -64,7 +64,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Write in first person, in the shape 'I help [narrow niche] [specific outcome]', use 'you' more often than 'I', and put their situation before your credentials.",
     because: "An abstract corporate subject attached to an unfalsifiable claim reads like an infomercial, and a credentials-first opening makes the email about the sender, in a medium that is one-to-one correspondence.",
     source: {
-      "label": "Cold Email Lab §2 — copy principles",
+      "label": "Cold Email Lab §2: copy principles",
       "claim": "Write first person, always, in the shape 'I help [niche] do [outcome]'; third-person company boilerplate reads like an infomercial. Use 'you' more than 'I' and lead with their problem or situation, letting credibility arrive later; you do have to talk about yourself, it just cannot all be about you.",
       "selfReported": false
     },
@@ -74,7 +74,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Attach one concrete substantiating fact to every claim. Where you have no client result, substitute an honest alternative, niche expertise, years in the work, or a result you got for yourself, rather than asserting one you cannot support.",
     because: "Everyone can assert; few can substantiate. A value proposition with no credibility element gives no reason to believe.",
     source: {
-      "label": "Cold Email Lab §3 — social proof and credibility",
+      "label": "Cold Email Lab §3: social proof and credibility",
       "claim": "A value prop with no credibility element gives no reason to believe; one concrete substantiating result where you have one, and where you have none, substitute honest alternatives such as years of experience, niche expertise or personal results. He flags that specific results claims may be non-compliant under FTC-type rules depending on jurisdiction.",
       "selfReported": false
     },
@@ -84,7 +84,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Cut until only a callout, a value proposition and an ask survive; drop the credibility line first when compressing.",
     because: "A workable cold email survives compression to roughly three lines, and a five- or ten-sentence email gets glanced at and discarded.",
     source: {
-      "label": "Cold Email Lab §3 — the minimum-viable email",
+      "label": "Cold Email Lab §3: the minimum-viable email",
       "claim": "As short as possible while still communicating value, 50 words instead of 100 where you can; a workable email compresses to about three lines and credibility is the droppable component.",
       "selfReported": true
     },
@@ -94,7 +94,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Write subject lines under three words, lowercase and plain, with no punctuation tricks, and stop optimizing them.",
     because: "Testing across hundreds of lines produced negligible difference, so subject-line effort is where testing budget goes to die.",
     source: {
-      "label": "Cold Email Lab §4 — subject line strategy",
+      "label": "Cold Email Lab §4: subject line strategy",
       "claim": "Dozens, probably hundreds of subject lines tested and the difference was negligible; use either a fragment of the observation or a bare label.",
       "selfReported": true
     },
@@ -104,7 +104,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Send at most three cold emails to a stranger, spaced two to seven days apart, and fewer on a very large market.",
     because: "Interest is front-loaded into the first email; later sends increasingly hit dead inboxes, raise spam complaints and degrade the sending domain itself.",
     source: {
-      "label": "Cold Email Lab §6 — sequence length and diminishing returns",
+      "label": "Cold Email Lab §6: sequence length and diminishing returns",
       "claim": "Three emails maximum in most cases, spaced two to seven days; the fourth touch is effectively worthless, and one email to 10,000 people substantially outperforms ten emails to 1,000.",
       "selfReported": true
     },
@@ -114,7 +114,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Change the ask at every touch: a different asset at the second, a bare status check or a redirect at the last.",
     because: "A repeated ask reads as a repeat; a different asset makes the second touch land as new information rather than a nag.",
     source: {
-      "label": "Cold Email Lab §5 — CTA variation across the sequence",
+      "label": "Cold Email Lab §5: CTA variation across the sequence",
       "claim": "Vary the CTA across the sequence rather than repeating it: permission-to-send at the first touch, a different permission-to-send at the second, a bare status check at the last. There is no perfect formula.",
       "selfReported": false
     },
@@ -124,7 +124,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Make the final touch deliberately very short, shorter than every earlier touch, and prefer asking who else should be handling this over asking again for their attention.",
     because: "A redirect is short and easy to answer, which is the reason given for preferring it over a status bump.",
     source: {
-      "label": "Cold Email Lab §5 — the third email",
+      "label": "Cold Email Lab §5: the third email",
       "claim": "The third email is a deliberate pattern interrupt, very short; the preferred form is a referral redirect asking who else at the organization to speak to, and the stated reason for the preference is that these work because they are short and to the point.",
       "selfReported": true
     },
@@ -134,7 +134,7 @@ export const coldEmailPack: MethodPack = {
     rule: "In the first reply after interest, answer their question, say why a call helps them, then pitch three specific slots in their own time zone.",
     because: "The single biggest beginner mistake is answering the question and never asking for the call; a bare 'when are you free?' or a naked calendar link is where most bookings are lost.",
     source: {
-      "label": "Cold Email Lab §7 — the three-step reply framework",
+      "label": "Cold Email Lab §7: the three-step reply framework",
       "claim": "Answer what they asked, position the call as useful to them, then pitch three to four specific slots in the prospect's time zone with the calendar link only as an 'if easier' fallback.",
       "selfReported": true
     },
@@ -144,7 +144,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Send whatever you offered before you ask for anything else.",
     because: "Promising a resource and then swapping it for a call ask is bait and switch, and it is tied directly to a poor booking rate.",
     source: {
-      "label": "Cold Email Lab §7 — reply handling failures",
+      "label": "Cold Email Lab §7: reply handling failures",
       "claim": "Bait and switch, promising a resource in the email and swapping it for a call ask when they say yes, is named as a cause of poor booking rates.",
       "selfReported": true
     },
@@ -154,7 +154,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Stop the cold sequence the instant anyone replies; a human answers from that point, and any further chase runs as a separate thread.",
     because: "An automated send landing on top of a live conversation destroys everything the earlier emails built.",
     source: {
-      "label": "Delivered outbound sequence — pause on reply",
+      "label": "Delivered outbound sequence: pause on reply",
       "claim": "Any reply pauses the sequence immediately; no further automated send goes to that address, including the final touch, and a human takes the conversation from that point.",
       "selfReported": false
     },
@@ -164,7 +164,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Carry a clear opt-out in the footer of every send; it need not be a link, and what the footer must contain differs by jurisdiction, so check yours before sending.",
     because: "It is the one legally required element of a commercial email, and the no-links rule is exactly what makes senders leave it out.",
     source: {
-      "label": "Cold Email Lab §5 — the permitted extra element",
+      "label": "Cold Email Lab §5: the permitted extra element",
       "claim": "The only permitted extra element alongside the plain-text body is an opt-out mechanism, required for compliance; he notes it need not be an unsubscribe link, only a clear way to opt out, and tells you to check your own jurisdiction.",
       "selfReported": false
     },
@@ -174,7 +174,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Stop rather than optimize when the addressable market is too small to sustain volume, when you cannot close cold traffic, or when a stated send volume has produced nothing at acceptable bounce and warm-up scores.",
     because: "These are named as reasons the channel may not work at all rather than parameters to tune, and named verticals were ground for months before the fix turned out to be changing the market.",
     source: {
-      "label": "Cold Email Lab §11 — the fit scorecard and the two disqualifiers",
+      "label": "Cold Email Lab §11: the fit scorecard and the two disqualifiers",
       "claim": "Four factors trade off rather than gate: an expensive offer or high lifetime value, a large addressable market, B2B, and low competition. Two named disqualifiers sit apart from them, too small a total addressable market and an inability to close cold traffic, both stated as reasons the channel may not work for you at all. He names software dev agencies, IT service providers and expensive enterprise products as verticals to stop optimizing against rather than grind.",
       "selfReported": true
     },
@@ -184,7 +184,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Write the opening email in at least two versions and run them against each other.",
     because: "Copy improves by comparison rather than conviction, and the source treats more than one variant of email one as mandatory before launch.",
     source: {
-      "label": "Cold Email Lab §9 — split testing",
+      "label": "Cold Email Lab §9: split testing",
       "claim": "Build at least three variations of email one before launching; more than one variant is mandatory and fifty is unnecessary. Roughly 2,000 to 3,000 prospects per variation for a usable sample, and do not split test at all if the list is too small to support it.",
       "selfReported": true
     },
@@ -194,7 +194,7 @@ export const coldEmailPack: MethodPack = {
     rule: "Treat a finished list as a resting list: re-contact the same names in a fresh short campaign every two to three months rather than extending the thread.",
     because: "A three-touch cap only survives a finite prospect pool if the pool renews, and a timing objection calls for re-sequencing later rather than more sends now.",
     source: {
-      "label": "Cold Email Lab §5 — timing objections and market refresh",
+      "label": "Cold Email Lab §5: timing objections and market refresh",
       "claim": "If timing was the obstacle, do not extend the thread; re-sequence the same people later in a fresh one-to-three-email campaign. The general market-refresh cadence is given as every two to three months, and treating markets as renewable is what makes the short-sequence rule affordable.",
       "selfReported": true
     },
@@ -285,7 +285,7 @@ export const coldEmailPack: MethodPack = {
   structure: [
   {
     key: "preflight",
-    label: "Preflight — does this channel fit this offer",
+    label: "Preflight: does this channel fit this offer",
     group: "Before you send",
     purpose: "Decide whether cold email is the right channel for this offer at all, before any of it is written.",
     constraints: [
@@ -300,7 +300,7 @@ export const coldEmailPack: MethodPack = {
   },
   {
     key: "openingEmail",
-    label: "Email 1 — the pitch",
+    label: "Email 1: the pitch",
     group: "The sequence",
     purpose: "Earn a one-word reply from a stranger by proving the email was written for them and asking for something that costs them nothing.",
     day: 0,
@@ -320,7 +320,7 @@ export const coldEmailPack: MethodPack = {
   },
   {
     key: "angleShift",
-    label: "Email 2 — the same offer, a second angle",
+    label: "Email 2: the same offer, a second angle",
     group: "The sequence",
     purpose: "Restate the same offer from a different angle so it reads as new information rather than a repeat of email one.",
     day: 4,
@@ -336,7 +336,7 @@ export const coldEmailPack: MethodPack = {
   },
   {
     key: "patternInterrupt",
-    label: "Email 3 — the redirect",
+    label: "Email 3: the redirect",
     group: "The sequence",
     purpose: "Close the loop in the fewest possible words by asking who else should be handling this, rather than asking again for their attention.",
     day: 9,
@@ -351,7 +351,7 @@ export const coldEmailPack: MethodPack = {
   },
   {
     key: "answerTheQuestion",
-    label: "Reply, part 1 — answer what they asked",
+    label: "Reply, part 1: answer what they asked",
     group: "If they are interested",
     purpose: "Answer the exact question the prospect asked, before anything else happens in the message.",
     maxChars: 320,
@@ -366,7 +366,7 @@ export const coldEmailPack: MethodPack = {
   },
   {
     key: "positionTheCall",
-    label: "Reply, part 2 — why a call helps them",
+    label: "Reply, part 2: why a call helps them",
     group: "If they are interested",
     purpose: "Give one reason a conversation is useful to the prospect in their own situation, framed as their benefit rather than as a sales meeting.",
     maxChars: 200,
@@ -379,7 +379,7 @@ export const coldEmailPack: MethodPack = {
   },
   {
     key: "offerTimes",
-    label: "Reply, part 3 — three specific slots",
+    label: "Reply, part 3: three specific slots",
     group: "If they are interested",
     purpose: "Make booking cost the prospect one word by naming concrete times in their time zone.",
     maxChars: 400,
@@ -433,7 +433,7 @@ export const coldEmailPack: MethodPack = {
   },
   {
     key: "chaseStatusCheck",
-    label: "Chase 1 — the permission-to-decline check",
+    label: "Chase 1: the permission-to-decline check",
     group: "If interest goes quiet",
     purpose: "Re-open an interested lead who never booked, by making a decline as easy to send as a yes.",
     maxChars: 280,
@@ -446,7 +446,7 @@ export const coldEmailPack: MethodPack = {
   },
   {
     key: "chaseBookingNudge",
-    label: "Chase 2 — the booking nudge",
+    label: "Chase 2: the booking nudge",
     group: "If interest goes quiet",
     purpose: "Give an interested lead one frictionless way to book, and then stop chasing by email.",
     maxChars: 200,
@@ -461,97 +461,97 @@ export const coldEmailPack: MethodPack = {
 
   evidence: [
     {
-      "label": "Cold Email Lab, opening claims — operator scale",
+      "label": "Cold Email Lab, opening claims: operator scale",
       "claim": "Upwards of 10,000,000 cold emails sent across close to four years, currently over 1,000,000 per month on behalf of roughly 30 clients, with close to 4,000 sales meetings booked to date.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §1 — where copy sits in the stack",
+      "label": "Cold Email Lab §1: where copy sits in the stack",
       "claim": "He states the priority order twice in consecutive sentences and the two differ: first 'infrastructure, then list, then copy', then 'infrastructure, list, offer, and then copy'. He does not resolve whether offer sits third or above the whole stack. What is constant across both statements is that infrastructure is first and copy is last, so effort past the point where copy clears the bar has better homes.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §8 — reply-rate benchmark",
+      "label": "Cold Email Lab §8: reply-rate benchmark",
       "claim": "Reply rate at or above 1 percent of emails sent is the target; 0.9 percent is close enough, and 0.5 percent or below indicates a deliverability problem rather than a copy problem. No 25 percent reply figure appears anywhere in the source and none should be attributed.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §8 — the denominator rule",
+      "label": "Cold Email Lab §8: the denominator rule",
       "claim": "Reply rate is total replies divided by total emails sent, never a share of leads contacted. A live campaign showing roughly 300 replies on about 29,000 sends is 1.1 percent, while the sending tool displayed 3 percent because it divided by leads across three sequence steps. Out-of-office replies are included in the calculation.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §8 — positive reply benchmark",
-      "claim": "Positive replies should exceed 5 percent of replies; the observed customer spread is 5 to 15 percent, averaging about 10 percent. Below 5 percent, investigate list quality first (named most common), then the offer (named the big lever), then the script (named as rarely the main driver if you followed best practices), and consider that the market itself may be structurally poor — he names software dev agencies, IT service providers and expensive enterprise products as verticals to abandon rather than grind.",
+      "label": "Cold Email Lab §8: positive reply benchmark",
+      "claim": "Positive replies should exceed 5 percent of replies; the observed customer spread is 5 to 15 percent, averaging about 10 percent. Below 5 percent, investigate list quality first (named most common), then the offer (named the big lever), then the script (named as rarely the main driver if you followed best practices), and consider that the market itself may be structurally poor, he names software dev agencies, IT service providers and expensive enterprise products as verticals to abandon rather than grind.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §7 — booking benchmark",
+      "label": "Cold Email Lab §7: booking benchmark",
       "claim": "Roughly 20 to 30 percent of positive replies become meetings; relentless multichannel follow-up is claimed to lift this materially, though two lessons give ranges (30 to 50 percent, and 20 to 30 percent) that do not reconcile.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §8 — north star",
+      "label": "Cold Email Lab §8: north star",
       "claim": "Roughly 3,000 emails sent per booked meeting; about one positive reply per 700 sends; roughly one in five repliers books. Best observed customer cases book off as few as 300 sends, others need 5,000 or more.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §8 — significance threshold",
+      "label": "Cold Email Lab §8: significance threshold",
       "claim": "Do not diagnose a campaign before 3,000 emails have been sent, ideally 5,000 to 10,000; a low reply rate on a small send is usually just insufficient send.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §4 — subject line testing",
+      "label": "Cold Email Lab §4: subject line testing",
       "claim": "Dozens, probably hundreds of subject lines tested, with negligible difference in outcome; subject-line obsession appears on the list of things that do not drive results.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §9 — split-test sample floor",
+      "label": "Cold Email Lab §9: split-test sample floor",
       "claim": "At least three variations of email one before launch, at roughly 2,000 to 3,000 prospects per variation, which puts a three-variant test at 6,000 or more people in the campaign. Do not split test at all if the list is too small to support it; he skipped testing on his own demonstrated campaign for exactly that reason.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §6 — demonstrated campaign",
+      "label": "Cold Email Lab §6: demonstrated campaign",
       "claim": "3,000 emails sent over three days in a hyper-specific niche produced 8 leads and 4 booked calls. This is a lead-and-call count, not a reply rate.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §12 — segmentation",
+      "label": "Cold Email Lab §12: segmentation",
       "claim": "Some customers get two to five times better responses purely from segmenting, and segmenting has rarely if ever made results worse. The figure is unevidenced within the lesson itself.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §8 — bounce and list quality",
+      "label": "Cold Email Lab §8: bounce and list quality",
       "claim": "Bounce rate under 3 percent is healthy, above 5 percent needs immediate action. Open 20 random sites from the list: if more than 20 percent are not genuine targets, replace the list before changing anything else.",
       "selfReported": true
     },
     {
-      "label": "Cold Email Lab §11 — channel-fit floors",
+      "label": "Cold Email Lab §11: channel-fit floors",
       "claim": "An ideal minimum lifetime value of about $10,000, worked as roughly $2,000 a month retained for about five months, and a budget floor of about $500 a month, which he says buys roughly 1,000 sends a day. Below $500 he says any marketing will be hard. The four fit factors are additive rather than pass/fail: failing all of them is what actually kills the channel.",
       "selfReported": true
     },
     {
-      "label": "30-Day First-Client Playbook — personalization uplift",
+      "label": "30-Day First-Client Playbook, personalization uplift",
       "claim": "Reply rates moved from about 2 percent to 5 to 10 percent or more with a personalized opening line, with a best campaign around 20 percent and an average uplift of about 2.5x.",
       "selfReported": true
     },
     {
-      "label": "30-Day First-Client Playbook — offer wrappers",
+      "label": "30-Day First-Client Playbook, offer wrappers",
       "claim": "A risk-reversed offer is claimed to lift reply rate up to 10x versus none. Two worked examples: a free 500-word blog post across roughly 20,000 emails at about 8 percent reply rate, and an outcome guarantee at a best reply rate of 7 percent across a few hundred emails.",
       "selfReported": true
     },
     {
-      "label": "30-Day First-Client Playbook — reply speed",
+      "label": "30-Day First-Client Playbook, reply speed",
       "claim": "A five-minute reply is claimed to convert around 400 percent higher, and the notification path is built six days before launch so the first send can be answered that fast.",
       "selfReported": true
     },
     {
-      "label": "Maker School six-month arc — reply-rate floor",
+      "label": "Maker School six-month arc: reply-rate floor",
       "claim": "Five real campaigns ran at 4.8, 6.0, 6.1, 6.3 and 11.6 percent, and 4 to 5 percent is stated as sufficient: below the floor fix the message, at or above it the constraint is volume rather than copy.",
       "selfReported": true
     },
     {
-      "label": "Maker School six-month arc — the incumbent and challenger ladder",
+      "label": "Maker School six-month arc: the incumbent and challenger ladder",
       "claim": "Six live sequences are cut to one winner, and one fresh challenger is written the next day, giving a permanent one-incumbent, one-challenger ladder so the campaign cannot plateau on a sequence nobody revisits. The losing sequence in each niche is turned off rather than left running.",
       "selfReported": true
     }

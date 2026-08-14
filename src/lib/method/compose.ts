@@ -64,7 +64,7 @@ export const composeSystemPrompt = ({
         const when = s.day === undefined ? '' : ` [day ${s.day}]`;
         const cap = s.maxChars ? ` [max ~${s.maxChars} characters]` : '';
         const cons = s.constraints.length ? `\n  ${s.constraints.map((c) => `· ${c}`).join('\n  ')}` : '';
-        return `- **${s.label}**${when}${cap} — ${s.purpose}${cons}`;
+        return `- **${s.label}**${when}${cap}, ${s.purpose}${cons}`;
       })
       .join('\n')}`,
   );

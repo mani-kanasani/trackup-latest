@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowLeft, Linkedin, Plus, Sparkles, Copy, Check, Trash2, Loader2, ExternalLink, X,
+  Linkedin, Plus, Sparkles, Copy, Check, Trash2, Loader2, ExternalLink, X,
   ThumbsUp, ThumbsDown, Lightbulb, Upload,
 } from 'lucide-react';
 import { useLeads, type MutationResult } from './useLeads';
@@ -14,6 +14,7 @@ import { loadUserContext, senderAbout } from '../../lib/userContext';
 import { buildChannelPrompt, checkAgainstMethod } from '../../lib/method/forChannel';
 import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
+import { AppBar } from '../../components/Layout/AppBar';
 import { ImportLeadsModal } from './ImportLeadsModal';
 import { qualify, isBlocked } from '../../lib/qualify/score';
 import { isStaleDeployment, stripContract, OUT_OF_DATE } from '../../lib/deployment';
@@ -76,29 +77,14 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
 
   return (
     <div className="min-h-screen flex flex-col app-canvas accent-linkedin">
-      <header className="border-b border-linkedin-100 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md flex-shrink-0">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={onExit} className="flex items-center text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-linkedin-600">
-              <ArrowLeft className="w-4 h-4 mr-1.5" /> All apps
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-linkedin-500 flex items-center justify-center">
-                <Linkedin className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-bold text-gray-900 dark:text-white">LinkedIn DM Generator</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setShowImport(true)} className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-linkedin-700 dark:text-linkedin-300 border border-linkedin-200 dark:border-linkedin-800 hover:bg-linkedin-50 dark:hover:bg-linkedin-900/20">
-              <Upload className="w-4 h-4 mr-1.5" /> Import
-            </button>
-            <button onClick={() => setShowAdd(true)} className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-linkedin-600 hover:bg-linkedin-700 shadow-sm">
-              <Plus className="w-4 h-4 mr-1.5" /> Add lead
-            </button>
-          </div>
-        </div>
-      </header>
+      <AppBar title="LinkedIn DM Generator" icon={Linkedin} gradient="from-linkedin-400 to-linkedin-600" onExit={onExit}>
+        <button onClick={() => setShowImport(true)} className="btn-secondary !py-2 !px-4 text-sm">
+          <Upload className="w-4 h-4 mr-1.5" /> Import
+        </button>
+        <button onClick={() => setShowAdd(true)} className="btn-primary !py-2 !px-4 text-sm">
+          <Plus className="w-4 h-4 mr-1.5" /> Add lead
+        </button>
+      </AppBar>
 
       {leads.length > 0 && (
         <div className="max-w-6xl w-full mx-auto px-6 pt-5">
@@ -276,7 +262,7 @@ const LeadDetail: React.FC<{
     [flow, flowIsEmpty],
   );
   const describeViolation = (v: ValidationResult['violations'][number]) =>
-    `${v.message}${v.excerpt ? ` — "${v.excerpt}"` : ''}`;
+    `${v.message}${v.excerpt ? `, "${v.excerpt}"` : ''}`;
   const warnings = (check?.violations ?? []).filter((v) => v.level === 'hard').map(describeViolation);
   const softNotes = (check?.violations ?? []).filter((v) => v.level === 'soft').map(describeViolation);
   // Read through the tolerant reader: rows written before steps carried times
@@ -448,7 +434,7 @@ const LeadDetail: React.FC<{
       if (saved.error) {
         setLocalFlow(flowData);
         throw new Error(
-          `Generated, but saving failed: ${saved.error}. The flow is shown below — copy anything you need before leaving this page.`,
+          `Generated, but saving failed: ${saved.error}. The flow is shown below, copy anything you need before leaving this page.`,
         );
       }
     } catch (err) {
@@ -571,7 +557,7 @@ const LeadDetail: React.FC<{
                 onClick={() => setOverride(true)}
                 className="mt-2 text-xs font-semibold text-red-700 dark:text-red-300 underline underline-offset-2"
               >
-                I disagree — write to them anyway
+                I disagree, write to them anyway
               </button>
             )}
           </div>
@@ -755,7 +741,7 @@ const LeadDetail: React.FC<{
       ) : (
         <div className="card-modern p-8 text-center text-gray-400">
           <Sparkles className="w-8 h-8 mx-auto mb-2 text-linkedin-300" />
-          <p>No flow yet — click <span className="font-semibold">Generate outreach flow</span>.</p>
+          <p>No flow yet, click <span className="font-semibold">Generate outreach flow</span>.</p>
         </div>
       )}
     </div>

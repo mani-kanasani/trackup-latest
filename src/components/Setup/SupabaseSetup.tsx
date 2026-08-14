@@ -64,7 +64,7 @@ export const SupabaseSetup: React.FC = () => {
       setCopied(id);
       setTimeout(() => setCopied(null), 2000);
     } catch {
-      setError('Could not copy to clipboard — select the text and copy manually.');
+      setError('Could not copy to clipboard, select the text and copy manually.');
     }
   };
 
@@ -183,7 +183,7 @@ export const SupabaseSetup: React.FC = () => {
         </div>
 
         <div className="card-modern p-8 animate-rise">
-          {/* Step 1 — Create database */}
+          {/* Step 1, Create database */}
           {step === 1 && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
@@ -197,7 +197,7 @@ export const SupabaseSetup: React.FC = () => {
               </p>
               <ol className="space-y-3 text-gray-700 dark:text-gray-300">
                 <li className="flex"><span className="font-bold text-ember-500 mr-3">1.</span>Open Supabase and click <span className="font-semibold mx-1">New project</span>.</li>
-                <li className="flex"><span className="font-bold text-ember-500 mr-3">2.</span>Give it a name and <span className="font-semibold mx-1">set a database password</span> — write it down, you'll need it.</li>
+                <li className="flex"><span className="font-bold text-ember-500 mr-3">2.</span>Give it a name and <span className="font-semibold mx-1">set a database password</span>, write it down, you'll need it.</li>
                 <li className="flex"><span className="font-bold text-ember-500 mr-3">3.</span>Pick a region and create it. Wait until it finishes provisioning.</li>
               </ol>
               <a href="https://supabase.com/dashboard/new" target="_blank" rel="noopener noreferrer" className={linkClass}>
@@ -212,7 +212,7 @@ export const SupabaseSetup: React.FC = () => {
             </div>
           )}
 
-          {/* Step 2 — Set up backend */}
+          {/* Step 2, Set up backend */}
           {step === 2 && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
@@ -250,7 +250,7 @@ export const SupabaseSetup: React.FC = () => {
                   In <span className="font-semibold">Edge Functions → Deploy a new function → Via editor</span>, create{' '}
                   <span className="font-semibold">three</span> functions. For each one: set the name <span className="font-semibold">exactly</span>{' '}
                   as shown (the dashboard suggests a random name like{' '}
-                  <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">swift-handler</code> — change it),
+                  <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">swift-handler</code>, change it),
                   paste the code, and click <span className="font-semibold">Deploy</span>.
                 </p>
                 <div className="text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 rounded-xl p-3">
@@ -283,13 +283,13 @@ export const SupabaseSetup: React.FC = () => {
                   <ArrowLeft className="w-4 h-4 mr-2" /> Back
                 </button>
                 <button onClick={() => setStep(3)} className="btn-primary flex items-center">
-                  Done — connect it <ArrowRight className="w-4 h-4 ml-2" />
+                  Done, connect it <ArrowRight className="w-4 h-4 ml-2" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 3 — Connect */}
+          {/* Step 3, Connect */}
           {step === 3 && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
@@ -334,7 +334,7 @@ export const SupabaseSetup: React.FC = () => {
                 <p className="flex items-start mt-2 text-xs text-gray-500 dark:text-gray-400">
                   <ShieldCheck className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-ember-500" />
                   Use the <span className="font-semibold">publishable</span> key
-                  (<span className="font-mono">sb_publishable_…</span>) for newer projects — the AI functions reject the
+                  (<span className="font-mono">sb_publishable_…</span>) for newer projects, the AI functions reject the
                   legacy anon key. Either key is public and safe in the browser; your data is protected by Row Level Security.
                 </p>
                 <p className="flex items-start mt-2 text-xs text-gray-400 dark:text-gray-500">

@@ -22,7 +22,7 @@ export const APPS: AppDef[] = [
     name: 'TrackUp',
     tagline: 'Upwork proposals',
     description:
-      'Generate tailored Upwork proposals — cover letter, workflow diagram, shareable PDF and Loom script — then track every application to won or lost.',
+      'Generate tailored Upwork proposals, cover letter, workflow diagram, shareable PDF and Loom script, then track every application to won or lost.',
     icon: Send,
     accent: 'upwork',
     gradient: 'from-upwork-500 to-upwork-600',
