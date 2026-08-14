@@ -18,7 +18,8 @@
     "cadence:test": "esbuild scripts/smokeCadence.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/cadence.mjs --log-level=error && node node_modules/.cache/cadence.mjs",
     "import:test": "esbuild scripts/smokeImport.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/import.mjs --log-level=error && node node_modules/.cache/import.mjs",
     "analytics:test": "esbuild scripts/smokeAnalytics.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/analytics.mjs --log-level=error && node node_modules/.cache/analytics.mjs",
-    "which-version": "node scripts/whichVersion.mjs"
+    "which-version": "node scripts/whichVersion.mjs",
+    "providers:test": "node scripts/liveProviderTest.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
