@@ -18,9 +18,14 @@ import {
 import {
   SupabaseConfig,
   saveSupabaseConfig,
-  testSupabaseConnection,
   looksLikeSupabaseUrl,
 } from '../../lib/supabaseConfig';
+import {
+  runReadinessChecks,
+  isReady,
+  canConnect,
+  type Check as ReadinessCheck,
+} from '../../lib/readiness';
 
 // Pulled straight from the repo so the SQL + function shown to the user always
 // match what's actually committed.
@@ -45,7 +50,8 @@ export const SupabaseSetup: React.FC = () => {
   const [url, setUrl] = useState('');
   const [anonKey, setAnonKey] = useState('');
   const [testing, setTesting] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [checks, setChecks] = useState<ReadinessCheck[] | null>(null);
+  const [forceSave, setForceSave] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -64,22 +70,51 @@ export const SupabaseSetup: React.FC = () => {
 
   const handleTest = async () => {
     setError('');
-    setResult(null);
+    setChecks(null);
+    setForceSave(false);
     if (!canSubmit) {
-      setError('Enter a valid Supabase URL and anon key first.');
+      setError('Enter a valid Supabase URL and publishable key first.');
       return;
     }
     setTesting(true);
-    setResult(await testSupabaseConnection(config));
+    setChecks(await runReadinessChecks(config));
     setTesting(false);
   };
 
-  const handleSave = () => {
+  /**
+   * Saving is gated on the checks having actually been run and passed.
+   *
+   * The previous version never read the test result at all: Save worked with the
+   * test unrun, or red. Someone whose SQL half-failed sailed through here and
+   * met the problem several screens later as a raw Postgres error, with nothing
+   * connecting the two. Now the wizard will not let that happen silently — but
+   * it is still overridable, because a check that cannot be argued with is a
+   * check that traps someone whose setup is fine in a way we did not anticipate.
+   */
+  const handleSave = async () => {
     setError('');
     if (!canSubmit) {
-      setError('Enter a valid Supabase URL and anon key first.');
+      setError('Enter a valid Supabase URL and publishable key first.');
       return;
     }
+
+    let current = checks;
+    if (!current) {
+      setTesting(true);
+      current = await runReadinessChecks(config);
+      setChecks(current);
+      setTesting(false);
+    }
+
+    if (!canConnect(current)) {
+      setError('Ember cannot reach that project yet, so there is nothing to save. Fix the connection first.');
+      return;
+    }
+    if (!isReady(current) && !forceSave) {
+      setForceSave(true);
+      return;
+    }
+
     saveSupabaseConfig(config);
     window.location.reload();
   };
@@ -316,20 +351,39 @@ export const SupabaseSetup: React.FC = () => {
                 </div>
               )}
 
-              {result && (
-                <div
-                  className={`flex items-center text-sm p-4 rounded-xl border ${
-                    result.ok
-                      ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                      : 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
-                  }`}
-                >
-                  {result.ok ? (
-                    <Check className="w-4 h-4 mr-2 flex-shrink-0" />
-                  ) : (
-                    <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
+              {checks && (
+                <div className="space-y-2">
+                  {checks.map((c) => (
+                    <div
+                      key={c.id}
+                      className={`text-sm p-4 rounded-xl border ${
+                        c.status === 'ok'
+                          ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                          : c.status === 'warn'
+                            ? 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700'
+                            : 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+                      }`}
+                    >
+                      <div className="flex items-start">
+                        {c.status === 'ok' ? (
+                          <Check className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-semibold">{c.label}</p>
+                          <p>{c.detail}</p>
+                          {c.fix && <p className="mt-1 opacity-90">{c.fix}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {forceSave && (
+                    <p className="text-sm text-amber-700 dark:text-amber-400 px-1">
+                      Ember will open, but the parts above will not work until they are fixed. Press
+                      Continue anyway if you would rather sort them out later.
+                    </p>
                   )}
-                  {result.message}
                 </div>
               )}
 
@@ -340,10 +394,10 @@ export const SupabaseSetup: React.FC = () => {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button onClick={handleTest} disabled={testing} className="btn-secondary flex items-center justify-center disabled:opacity-50">
                     {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                    {testing ? 'Testing...' : 'Test connection'}
+                    {testing ? 'Checking...' : 'Check my setup'}
                   </button>
-                  <button onClick={handleSave} className="btn-primary flex items-center justify-center">
-                    Save &amp; continue
+                  <button onClick={handleSave} disabled={testing} className="btn-primary flex items-center justify-center disabled:opacity-50">
+                    {forceSave ? 'Continue anyway' : 'Save & continue'}
                   </button>
                 </div>
               </div>
