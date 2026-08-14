@@ -175,7 +175,7 @@ export const qualify = (input: QualificationInput = {}): QualificationResult => 
     verdict = 'decline';
     blockers.push(
       `${ruledOut.length} of the four pillars are ruled out, so the threshold of ${PILLAR_THRESHOLD} ` +
-        'can no longer be met. There is not a process here worth automating yet.',
+        'can no longer be met. There is not enough of a repeating problem here to build against yet.',
     );
   }
 

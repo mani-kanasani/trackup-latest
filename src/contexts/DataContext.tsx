@@ -205,13 +205,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const kpiData = {
       proposalsGenerated: filtered.length,
       applied: filtered.filter(m => ['applied', 'responded', 'meeting', 'won', 'lost'].includes(m.status)).length,
-      responses: filtered.filter(m => ['responded', 'meeting', 'won', 'lost'].includes(m.status)).length,
+      // 'lost' is deliberately absent. Most lost proposals were never replied
+      // to at all, so counting them as responses inflated the rate with exactly
+      // the proposals that went nowhere.
+      responses: filtered.filter(m => ['responded', 'meeting', 'won'].includes(m.status)).length,
       meetingsScheduled: filtered.filter(m => ['meeting', 'won'].includes(m.status)).length,
       revenueGenerated,
       cashCollected
     };
 
-    console.log('KPI Data calculated:', kpiData, 'from', filtered.length, 'filtered materials');
     return kpiData;
   };
 

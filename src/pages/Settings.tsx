@@ -38,10 +38,9 @@ export const Settings: React.FC = () => {
     }
     setContext(loadUserContext());
     const sp = loadPrompts();
-    setPrompts({
-      proposal: sp.proposal || DEFAULT_PROMPTS.proposal,
-      outreach: sp.outreach || DEFAULT_PROMPTS.outreach,
-    });
+    // Load exactly what the user wrote. Falling back to the defaults here is
+    // what turned an example into a saved assertion about their business.
+    setPrompts({ proposal: sp.proposal, outreach: sp.outreach });
   }, []);
 
   const handleProviderChange = (next: AIProvider) => {
@@ -84,7 +83,9 @@ export const Settings: React.FC = () => {
     setPromptsSaved(true);
     setTimeout(() => setPromptsSaved(false), 2000);
   };
-  const resetPrompt = (key: PromptKey) => setPrompts((p) => ({ ...p, [key]: DEFAULT_PROMPTS[key] }));
+  // Reset clears it. The default IS blank: with nothing here the method pack
+  // governs alone, which is stronger than any persona line placed after it.
+  const resetPrompt = (key: PromptKey) => setPrompts((p) => ({ ...p, [key]: '' }));
 
   const handleSaveAI = () => {
     saveAIConfig({
@@ -212,18 +213,18 @@ export const Settings: React.FC = () => {
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Your context</h3>
         </div>
         <p className="text-base text-gray-600 dark:text-gray-400 mb-6">
-          Tell the AI about you and your agency. This is woven into every proposal and LinkedIn DM so
+          Tell the AI about you and what you do. This is woven into every proposal and LinkedIn DM so
           they're grounded in your real background, wins and proof. Stored in this browser.
         </p>
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">About you / your agency</label>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">About you and what you do</label>
             <textarea
               value={context.about}
               onChange={(e) => setContext((c) => ({ ...c, about: e.target.value }))}
               rows={3}
               className="input-modern resize-none"
-              placeholder="e.g. I run an AI automation agency that builds custom workflows and AI systems for B2B teams…"
+              placeholder="e.g. I design brand identities for early-stage consumer companies. Or: I run an AI automation agency building workflows for B2B teams."
             />
           </div>
           <div>
@@ -233,7 +234,7 @@ export const Settings: React.FC = () => {
               onChange={(e) => setContext((c) => ({ ...c, wins: e.target.value }))}
               rows={3}
               className="input-modern resize-none"
-              placeholder="e.g. Saved a client 20 hrs/week with a lead-routing system; shipped 30+ automations; 3x'd a team's reply rate…"
+              placeholder="e.g. Saved a client 20 hrs a week with a lead-routing system. Cut a bookkeeping close from 9 days to 3."
             />
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Used only when your case-study vault below is empty. Adding case studies there is better:
@@ -247,7 +248,7 @@ export const Settings: React.FC = () => {
               onChange={(e) => setContext((c) => ({ ...c, testimonials: e.target.value }))}
               rows={3}
               className="input-modern resize-none"
-              placeholder={'e.g. "Mani completely transformed our outreach." — Jane, CEO of Acme'}
+              placeholder={'e.g. "They completely transformed our outreach." Jane, CEO of Acme'}
             />
           </div>
           <button onClick={handleSaveContext} className="btn-primary flex items-center">
@@ -283,7 +284,7 @@ export const Settings: React.FC = () => {
                   onClick={() => resetPrompt(key)}
                   className="text-xs font-medium text-upwork-600 dark:text-upwork-400 hover:text-upwork-700"
                 >
-                  Reset to default
+                  Clear
                 </button>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{PROMPT_META[key].description}</p>
@@ -291,8 +292,13 @@ export const Settings: React.FC = () => {
                 value={prompts[key]}
                 onChange={(e) => setPrompts((p) => ({ ...p, [key]: e.target.value }))}
                 rows={4}
+                placeholder={DEFAULT_PROMPTS[key]}
                 className="input-modern resize-none text-sm"
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Leave blank unless you need it. Ember already writes to a full method for this channel,
+                and anything here is added on top of that, never instead of it.
+              </p>
             </div>
           ))}
           <button onClick={handleSavePrompts} className="btn-primary flex items-center">

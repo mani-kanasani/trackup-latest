@@ -20,15 +20,28 @@ export const PROMPT_META: Record<PromptKey, { label: string; description: string
   },
 };
 
+/**
+ * Example additions, shown as PLACEHOLDER text and never as a value.
+ *
+ * These used to be pre-filled into the Settings textarea, which meant pressing
+ * Save persisted "an expert automation & AI systems specialist" as the user's
+ * own stated direction — an offer a designer, a bookkeeper or a copywriter never
+ * claimed, injected into every generation as "The sender's own direction". Same
+ * class of defect as the hardcoded persona removed from generate-proposal.
+ *
+ * Left blank, nothing is added and the method pack governs alone, which is the
+ * correct default: the packs carry the doctrine, and a vague persona line placed
+ * after them can only dilute it.
+ */
 export const DEFAULT_PROMPTS: CustomPrompts = {
   proposal:
-    'You are an expert automation & AI systems specialist writing winning proposals on Upwork. ' +
-    'Your voice is professional, confident, clear, and intelligent — never casual, generic, or filler-heavy. ' +
-    'Tailor every proposal to the specific job and weave in the provided background, wins and proof.',
+    'Optional. Anything the method should know about how you specifically write. ' +
+    'For example: name the trade you actually work in, a constraint you always apply, ' +
+    'or a phrase you never use.',
   outreach:
-    'You are an expert B2B LinkedIn outreach strategist and copywriter. You write concise, human, specific, ' +
-    'non-salesy messages that get replies, and you design smart multi-step flows with branches for how prospects ' +
-    'respond. Use the provided background, wins and proof to make messages credible and personal.',
+    'Optional. Anything the method should know about how you specifically write. ' +
+    'For example: how formal you are, whether you use first names, ' +
+    'or a subject you will not open on.',
 };
 
 const STORAGE_KEY = 'ember.systemPrompts';
@@ -48,10 +61,4 @@ export const loadPrompts = (): CustomPrompts => {
 
 export const savePrompts = (prompts: CustomPrompts): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
-};
-
-// The prompt actually sent: the user's custom one, or the default if blank.
-export const effectivePrompt = (key: PromptKey): string => {
-  const stored = loadPrompts()[key].trim();
-  return stored || DEFAULT_PROMPTS[key];
 };

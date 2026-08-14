@@ -148,7 +148,7 @@ export const QualifyPanel: React.FC<{
               The four pillars
             </h4>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              At least two must hold, or there is no process here worth automating yet.
+              At least two must hold, or there is not enough of a repeating problem here to build against yet.
             </p>
             <div className="space-y-2">
               {PILLARS.map((p) => (

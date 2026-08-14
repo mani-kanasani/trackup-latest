@@ -53,7 +53,7 @@ export const senderAbout = (c: UserContext): string => c.about?.trim() ?? '';
  */
 export const contextToPrompt = (c: UserContext): string => {
   const parts: string[] = [];
-  if (c.about?.trim()) parts.push(`About me / my agency:\n${c.about.trim()}`);
+  if (c.about?.trim()) parts.push(`About the sender:\n${c.about.trim()}`);
   if (c.wins?.trim()) parts.push(`My wins & results (use specifics where relevant):\n${c.wins.trim()}`);
   if (c.testimonials?.trim()) parts.push(`Testimonials / social proof:\n${c.testimonials.trim()}`);
   return parts.join('\n\n');
