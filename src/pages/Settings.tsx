@@ -132,6 +132,11 @@ export const Settings: React.FC = () => {
       // the fastest way to tell a redeploy that landed from one that silently
       // did not, and it costs nothing extra because the round trip already
       // happened.
+      // The old list-models has no test path at all: it ignores `action` and
+      // returns its model list, so `reply` comes back undefined. Claiming "your
+      // key works and this model can generate" off that is a lie, and it printed
+      // "undefined answered ok" while doing it.
+      const ranTest = typeof data?.reply === 'string' && data.reply.length > 0;
       const live = contractOf(data);
       const backend =
         live === null
@@ -140,8 +145,10 @@ export const Settings: React.FC = () => {
             ? ` Your edge functions report version ${live}; this app needs ${EXPECTED_CONTRACT}. Redeploy all three.`
             : ` Backend version ${live}, up to date.`;
       setTestResult({
-        ok: live !== null && live >= EXPECTED_CONTRACT,
-        message: `${data?.model} answered "${data?.reply || 'ok'}". Your key works and this model can generate.${backend}`,
+        ok: ranTest && live !== null && live >= EXPECTED_CONTRACT,
+        message: ranTest
+          ? `${data?.model ?? 'The model'} answered "${data.reply}". Your key works and this model can generate.${backend}`
+          : `Your key reached Supabase, but this function is too old to run a generation test, so nothing about the model was proved.${backend}`,
       });
     } catch (e) {
       setTestResult({ ok: false, message: e instanceof Error ? e.message : 'The test failed.' });
@@ -264,6 +271,15 @@ export const Settings: React.FC = () => {
             <div className="text-sm p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 space-y-1">
               <p className="font-semibold text-gray-800 dark:text-gray-200 mb-1">
                 Deployed function versions (this app needs {EXPECTED_CONTRACT})
+              </p>
+              {/* The project being read, spelled out. When all three functions
+                  report stale after a redeploy that definitely happened, the
+                  usual cause is that the deploy landed in a different project
+                  from the one the app is pointed at, and nothing on screen said
+                  which project that was. */}
+              <p className="text-xs text-gray-500 dark:text-gray-400 pb-1 break-all">
+                Reading from <span className="font-mono">{supabaseConfig?.url ?? 'no project configured'}</span>. Deploy
+                your functions to <span className="font-semibold">this</span> project.
               </p>
               {versions.map((v) => (
                 <p
