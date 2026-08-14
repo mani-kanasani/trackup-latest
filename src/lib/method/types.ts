@@ -1,0 +1,99 @@
+// The method engine.
+//
+// A MethodPack is the difference between asking a model to "be an expert" and
+// telling it how the work is actually done. Each pack carries the doctrine for
+// one outreach channel: the laws that must hold, the patterns that must never
+// appear, the shape of the artifact, and the evidence that justifies each rule.
+//
+// Packs do two jobs:
+//   1. They compose into the system prompt, so the model writes to method.
+//   2. They are machine-checkable, so generated output can be VALIDATED against
+//      the same doctrine rather than merely hoped to follow it.
+//
+// That second job is the point. A rule the app can check is a rule that holds.
+
+export type ChannelId = 'upwork' | 'linkedin' | 'coldEmail';
+
+/** Where a rule came from. Every law cites one, so nothing is folklore. */
+export interface Source {
+  /** Short human label, e.g. "Cold Email Lab 4.2" or "Maker School M2". */
+  label: string;
+  /** What the source actually claims, in one line. */
+  claim: string;
+  /** True when the claim is one operator's self-report rather than measured. */
+  selfReported: boolean;
+}
+
+/** A non-negotiable rule. Violating one is a defect, not a style choice. */
+export interface Law {
+  id: string;
+  /** Imperative, second person, short. Goes into the prompt near-verbatim. */
+  rule: string;
+  /** The reason. Models follow rules better when the reason travels with them. */
+  because: string;
+  source?: Source;
+}
+
+/**
+ * A pattern that must never appear in output, expressed as a regex so the
+ * validator can enforce it. Keep patterns narrow: a false positive that blocks
+ * good copy is worse than a miss.
+ */
+export interface BannedPattern {
+  id: string;
+  /** Human description for the error message. */
+  label: string;
+  pattern: RegExp;
+  because: string;
+  /** `hard` fails validation. `soft` warns and lets the user decide. */
+  level: 'hard' | 'soft';
+}
+
+/** One step of the artifact being produced: an email, a DM, a proposal section. */
+export interface StructureStep {
+  key: string;
+  label: string;
+  /** What this step is FOR. One job per step. */
+  purpose: string;
+  /** Timing, where the channel has a cadence. */
+  day?: number;
+  /** Soft ceiling in characters; the validator warns past it. */
+  maxChars?: number;
+  /** Rules that apply to this step only. */
+  constraints: string[];
+}
+
+export interface MethodPack {
+  id: ChannelId;
+  version: string;
+  label: string;
+  /** One paragraph: what this channel is for and what it is not. */
+  thesis: string;
+  /** The single rule that overrides the others when they conflict. */
+  primeDirective: string;
+  laws: Law[];
+  banned: BannedPattern[];
+  structure: StructureStep[];
+  /** Numbers that justify the doctrine, carried so the UI can show its work. */
+  evidence: Source[];
+  /** Named, sourced trade-offs the user may legitimately choose to make. */
+  knownTensions?: { tension: string; resolution: string }[];
+}
+
+/** Result of checking generated output against a pack. */
+export interface Violation {
+  stepKey?: string;
+  lawId?: string;
+  patternId?: string;
+  level: 'hard' | 'soft';
+  message: string;
+  /** The offending excerpt, so the UI can highlight it. */
+  excerpt?: string;
+}
+
+export interface ValidationResult {
+  ok: boolean;
+  hardCount: number;
+  softCount: number;
+  violations: Violation[];
+}

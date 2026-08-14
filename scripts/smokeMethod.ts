@@ -1,0 +1,73 @@
+// End-to-end check of the method engine:
+//   pack -> composed system prompt -> validator against good and bad output.
+//
+//   npm run method:test
+
+import { getPack, ALL_PACKS } from '../src/lib/method/packs/index';
+import { composeSystemPrompt, describePack } from '../src/lib/method/compose';
+import { validateOutput } from '../src/lib/method/validate';
+
+let failures = 0;
+const check = (name: string, cond: boolean, detail = '') => {
+  console.log(`${cond ? 'ok  ' : 'FAIL'}  ${name}${detail ? `  ${detail}` : ''}`);
+  if (!cond) failures++;
+};
+
+// ---- every pack is structurally sound
+for (const p of ALL_PACKS) {
+  const keys = p.structure.map((s) => s.key);
+  check(`${p.id}: step keys unique`, new Set(keys).size === keys.length);
+  check(`${p.id}: every law cites a source`, p.laws.every((l) => !!l.source?.label));
+  check(`${p.id}: banned ids unique`, new Set(p.banned.map((b) => b.id)).size === p.banned.length);
+}
+
+// ---- the prompt actually carries the doctrine
+const pack = getPack('coldEmail');
+const prompt = composeSystemPrompt({
+  pack,
+  context: 'I build lead-routing systems for mid-size logistics firms.',
+  proof: 'Cut a dispatcher team from 6 hours of manual triage a day to about 40 minutes.',
+  userPrompt: 'Keep it dry. No exclamation marks.',
+});
+
+check('prompt includes the prime directive', prompt.includes(pack.primeDirective));
+check('prompt includes every law', pack.laws.every((l) => prompt.includes(l.rule)));
+check('prompt includes the user context', prompt.includes('logistics'));
+check('prompt includes the proof', prompt.includes('40 minutes'));
+check('prompt includes the user override', prompt.includes('No exclamation marks'));
+check('prompt forbids inventing numbers', prompt.includes('never round one up'));
+check('prompt is substantial', prompt.length > 3000, `${prompt.length} chars`);
+
+// ---- the validator catches what the doctrine forbids
+const stepKeys = pack.structure.map((s) => s.key);
+const clean: Record<string, string> = {};
+for (const k of stepKeys) {
+  clean[k] = 'Your team page lists four estimators and nobody on business development. When you want a particular kind of client, does one arrive through the network, or do you go find them?';
+}
+const cleanResult = validateOutput(pack, clean);
+check('clean output passes', cleanResult.ok, `${cleanResult.hardCount} hard, ${cleanResult.softCount} soft`);
+
+const dirty = { ...clean };
+dirty[stepKeys[1]] = 'Hi there — I hope this email finds you well. Just checking in, and I am not pitching. Book a demo: https://example.com';
+const dirtyResult = validateOutput(pack, dirty);
+check('dirty output fails', !dirtyResult.ok, `${dirtyResult.hardCount} hard violations`);
+check(
+  'em dash caught',
+  dirtyResult.violations.some((v) => v.patternId === 'em-dash'),
+);
+check(
+  'hedging caught',
+  dirtyResult.violations.some((v) => v.patternId === 'hedging'),
+);
+check(
+  'negated negative caught',
+  dirtyResult.violations.some((v) => v.patternId === 'negative-plant'),
+);
+
+const empty = { ...clean };
+empty[stepKeys[0]] = '';
+check('empty step caught', !validateOutput(pack, empty).ok);
+
+console.log(`\n${describePack(pack).split('\n').slice(-1)[0]}`);
+console.log(failures ? `\n${failures} FAILURES` : '\nall checks passed');
+process.exit(failures ? 1 : 0);
