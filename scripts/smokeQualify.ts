@@ -172,7 +172,27 @@ check('score never leaves 0–100', empty.score >= 0 && empty.score <= 100, Stri
 
 check('summary names the tier when qualified', summarise(researched).includes('Tier A'), summarise(researched));
 check('summary names the decline', summarise(oneYesRestNo) === 'Declined by the screen');
-check('summary counts open questions', /question/.test(summarise(empty)), summarise(empty));
+// An untouched screen is an offer, not a deficiency. It must never present as a
+// warning, or a bulk import turns into hundreds of amber panels demanding
+// attention for something nobody has to do.
+check('an untouched screen reads as optional', /optional/i.test(summarise(empty)), summarise(empty));
+check('an untouched screen raises no blocker', empty.blockers.length === 0, empty.blockers.join('|'));
+check('an untouched screen is not "answered"', empty.answered === false);
+check(
+  'an untouched lead is capped at Tier C so nothing is claimed',
+  empty.tier === 'C',
+  String(empty.tier),
+);
+check(
+  'and says that is why',
+  empty.reasons.join(' ').includes('claim nothing specific'),
+  empty.reasons.join(' | '),
+);
+// One deliberate "no" counts as engagement, and the panel switches to reporting.
+const touched = qualify({ pillars: { repetitive: 'no' } });
+check('a single answer marks the screen answered', touched.answered === true);
+check('and it starts reporting open questions', /question/.test(summarise(touched)), summarise(touched));
+check('a partly-answered screen does raise a blocker', touched.blockers.length > 0);
 check(
   'a low score on a qualified lead says what is missing',
   summarise(researched).includes('unanswered'),

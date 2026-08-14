@@ -80,6 +80,9 @@ export const renderQualification = (q: QualificationResult): string => {
  */
 export const summarise = (q: QualificationResult): string => {
   if (q.verdict === 'decline') return 'Declined by the screen';
+  // Named as the optional aid it is. Nobody has to run it, and a lead nobody
+  // ran it on is not deficient.
+  if (!q.answered) return 'Qualify this lead (optional)';
   if (q.verdict === 'notYet') return `Not enough known yet — ${q.openQuestions.length} question(s) open`;
   const open = q.openQuestions.length ? ` · ${q.openQuestions.length} unanswered` : '';
   return `Qualified · ${TIERS[q.tier!].label} · ${q.score}/100${open}`;

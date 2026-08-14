@@ -23,6 +23,12 @@ const ANSWERS: { value: Answer; label: string; icon: typeof Check }[] = [
 ];
 
 const TONE = {
+  /** Untouched. Nothing is wrong, so nothing should look like it is. */
+  optional: {
+    ring: 'border-gray-200 dark:border-gray-700 bg-transparent',
+    text: 'text-gray-600 dark:text-gray-400',
+    Icon: HelpCircle,
+  },
   qualified: {
     ring: 'border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/20',
     text: 'text-green-800 dark:text-green-300',
@@ -107,11 +113,11 @@ export const QualifyPanel: React.FC<{
 }> = ({ value, onChange, error }) => {
   const input = useMemo<QualificationInput>(() => value ?? {}, [value]);
   const result = useMemo(() => qualify(input), [input]);
-  const [open, setOpen] = useState(result.verdict === 'notYet' && !value);
+  const [open, setOpen] = useState(false);
 
   const patch = (next: (prev: QualificationInput) => Partial<QualificationInput>) =>
     onChange((prev) => ({ ...prev, ...next(prev) }));
-  const tone = TONE[result.verdict];
+  const tone = result.answered ? TONE[result.verdict] : TONE.optional;
 
   return (
     <div className={`card-modern overflow-hidden border ${tone.ring}`}>
@@ -139,6 +145,13 @@ export const QualifyPanel: React.FC<{
             <p key={`r${i}`} className="text-xs text-gray-500 dark:text-gray-400">{r}</p>
           ))}
         </div>
+      )}
+
+      {!open && !result.answered && (
+        <p className="px-4 pb-4 -mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Skip it and Ember writes from your background alone, claiming nothing specific about them.
+          Answer it and the copy gets sharper, and Ember will tell you when a lead is not worth writing to.
+        </p>
       )}
 
       {open && (

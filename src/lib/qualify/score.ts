@@ -54,7 +54,14 @@ const quadrantOf = (input: QualificationInput): Quadrant | null => {
  * copy would have to invent it. That is the exact failure the tiers exist to
  * prevent, so the observation is a requirement rather than a bonus.
  */
-const tierOf = (input: QualificationInput, reasons: string[]): TierId => {
+const tierOf = (input: QualificationInput, reasons: string[], answered: boolean): TierId => {
+  // Nothing recorded means nothing may be claimed. Tier C is the protective
+  // answer rather than a punishment: it caps the copy at firmographics, so an
+  // unqualified lead cannot receive a message implying research nobody did.
+  if (!answered) {
+    reasons.push('Nothing recorded about this lead yet, so the copy will claim nothing specific about them.');
+    return 'C';
+  }
   const niche = input.nicheClarity ?? 'generic';
   const reach = input.reachable ?? 'likely';
   const growth = input.growthSignal?.trim();
@@ -90,6 +97,13 @@ const tierOf = (input: QualificationInput, reasons: string[]): TierId => {
 };
 
 export const qualify = (input: QualificationInput = {}): QualificationResult => {
+  // Any answer at all, including a deliberate "no".
+  const answered =
+    Object.values(input.pillars ?? {}).some((v) => v && v !== 'unknown') ||
+    Object.values(input.bonus ?? {}).some((v) => v && v !== 'unknown') ||
+    Boolean(input.impact || input.complexity || input.rung || input.nicheClarity || input.reachable) ||
+    Boolean(input.growthSignal?.trim() || input.observation?.trim());
+
   const reasons: string[] = [];
   const blockers: string[] = [];
   const openQuestions: string[] = [];
@@ -166,7 +180,7 @@ export const qualify = (input: QualificationInput = {}): QualificationResult => 
     verdict = 'qualified';
   } else if (cleared.length + unknown.length >= PILLAR_THRESHOLD) {
     verdict = 'notYet';
-    blockers.push(
+    if (answered) blockers.push(
       `Only ${cleared.length} of the four pillars is confirmed and the threshold is ${PILLAR_THRESHOLD}. ` +
         `${unknown.length} question${unknown.length === 1 ? ' is' : 's are'} still unanswered, so this is ` +
         'a research gap, not a rejection.',
@@ -179,7 +193,7 @@ export const qualify = (input: QualificationInput = {}): QualificationResult => 
     );
   }
 
-  const tier = verdict === 'decline' ? null : tierOf(input, reasons);
+  const tier = verdict === 'decline' ? null : tierOf(input, reasons, answered);
 
   if (verdict === 'qualified' && tier) {
     reasons.push(TIERS[tier].effort);
@@ -187,6 +201,7 @@ export const qualify = (input: QualificationInput = {}): QualificationResult => 
 
   return {
     verdict,
+    answered,
     tier,
     score: Math.max(0, Math.min(100, score)),
     quadrant,

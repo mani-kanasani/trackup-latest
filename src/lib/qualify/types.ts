@@ -113,6 +113,15 @@ export interface QualificationInput {
 
 export interface QualificationResult {
   verdict: Verdict;
+  /**
+   * False when nothing has been answered at all.
+   *
+   * Distinct from `notYet`, which means someone started and stopped. An
+   * untouched lead has no deficiency to report — nobody has claimed it needs
+   * qualifying — so presenting it as a warning turns an optional aid into 200
+   * amber panels after a bulk import.
+   */
+  answered: boolean;
   /** Null when the verdict is `decline` — a declined lead has earned no effort. */
   tier: TierId | null;
   /** 0–100. Confidence that this is worth the effort, not a probability of closing. */
