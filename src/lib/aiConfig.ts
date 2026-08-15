@@ -66,15 +66,17 @@ export const PROVIDER_META: Record<AIProvider, ProviderMeta> = {
     // Sonnet's $3 / $15: the same job for a fraction of the spend, which is the
     // reason people ask for this provider by name.
     defaultModel: 'moonshotai/kimi-k2-0905',
-    // A spread across price points rather than a leaderboard. Every one of these
-    // was checked against the live /models feed for structured-output support,
-    // because the generator asks for JSON and a model that cannot promise it
-    // fails halfway through a sequence instead of at the point of choosing.
+    // Quick picks only. The full catalogue, 350+ models across 44 labs, loads
+    // from the provider with "Load models". This is a spread across price
+    // points and labs rather than a leaderboard, and every entry was checked
+    // live for the ability to return JSON on request.
     modelOptions: [
       'moonshotai/kimi-k2-0905',
       'moonshotai/kimi-k3',
       'deepseek/deepseek-v4-flash-0731',
       'z-ai/glm-5.2',
+      'qwen/qwen3.7-plus',
+      'anthropic/claude-sonnet-5',
       'openai/gpt-oss-20b:free',
     ],
     keyLabel: 'OpenRouter API key',

@@ -242,10 +242,15 @@ async function testOpenRouter(model) {
 async function testModelList() {
   line('\n--- Model lists (what the app offers must exist) ---');
 
-  const a = await fetch('https://api.anthropic.com/v1/models?limit=100', {
-    headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
-  });
-  if (a.ok) {
+  if (!ANTHROPIC_KEY) line('  --  Anthropic skipped (no ANTHROPIC_API_KEY)');
+  const a = ANTHROPIC_KEY
+    ? await fetch('https://api.anthropic.com/v1/models?limit=100', {
+        headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
+      })
+    : null;
+  if (!a) {
+    // skipped
+  } else if (a.ok) {
     const ids = ((await a.json()).data ?? []).map((m) => m.id);
     ok(`Anthropic lists ${ids.length} models`);
     for (const preset of ['claude-sonnet-5', 'claude-opus-5', 'claude-haiku-4-5', 'claude-fable-5']) {
@@ -258,8 +263,13 @@ async function testModelList() {
     failures++;
   }
 
-  const g = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_KEY}`);
-  if (g.ok) {
+  if (!GEMINI_KEY) line('  --  Gemini skipped (no GEMINI_API_KEY)');
+  const g = GEMINI_KEY
+    ? await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_KEY}`)
+    : null;
+  if (!g) {
+    // skipped
+  } else if (g.ok) {
     const ids = ((await g.json()).models ?? []).map((m) => m.name.replace(/^models\//, ''));
     ok(`Gemini lists ${ids.length} models`);
     for (const preset of ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro']) {
@@ -277,14 +287,24 @@ async function testModelList() {
   const o = await fetch(`${OPENROUTER_BASE}/models`);
   if (o.ok) {
     const all = (await o.json()).data ?? [];
+    // response_format, matching what the generator sends. Not
+    // structured_outputs: nothing here sends a json_schema.
     const usable = all
-      .filter((m) => (m.supported_parameters ?? []).includes('structured_outputs'))
+      .filter((m) => (m.supported_parameters ?? []).includes('response_format'))
       .map((m) => m.id);
-    ok(`OpenRouter lists ${all.length} models, ${usable.length} of them able to honour a JSON schema`);
+    const labs = new Set(usable.map((id) => id.split('/')[0].replace(/^~/, '')));
+    ok(`OpenRouter lists ${all.length} models, ${usable.length} usable across ${labs.size} labs`);
     for (const preset of OPENROUTER_PRESETS) {
       const live = usable.includes(preset);
-      (live ? ok : bad)(`preset ${preset} ${live ? 'exists and supports structured output' : 'NOT USABLE (missing, or cannot do structured output)'}`);
+      (live ? ok : bad)(`preset ${preset} ${live ? 'exists and can return JSON' : 'NOT USABLE (missing, or cannot return JSON)'}`);
       if (!live) failures++;
+    }
+    // Breadth is the whole reason for this provider, so assert it rather than
+    // trusting that a filter which happens to pass Kimi passes everything else.
+    for (const lab of ['anthropic', 'openai', 'google', 'meta-llama', 'mistralai', 'qwen', 'deepseek', 'moonshotai', 'x-ai', 'z-ai']) {
+      const n = usable.filter((id) => id.startsWith(`${lab}/`)).length;
+      (n > 0 ? ok : bad)(`${lab}: ${n} models offered`);
+      if (!n) failures++;
     }
   } else {
     bad(`OpenRouter model list failed (${o.status})`);
@@ -298,8 +318,13 @@ async function testModelList() {
   }
 }
 
-if (!ANTHROPIC_KEY || !GEMINI_KEY) {
-  console.error('Set ANTHROPIC_API_KEY and GEMINI_API_KEY in the environment.');
+// At least one key, not all of them.
+//
+// Demanding every key meant you could not check a single provider without
+// holding live credentials for the other two, which is exactly the moment you
+// want this script: one provider just changed, or one key is short-lived.
+if (!ANTHROPIC_KEY && !GEMINI_KEY && !OPENROUTER_KEY) {
+  console.error('Set at least one of ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY.');
   process.exit(1);
 }
 
@@ -323,12 +348,14 @@ const OPENROUTER_PRESETS = [
   'moonshotai/kimi-k3',
   'deepseek/deepseek-v4-flash-0731',
   'z-ai/glm-5.2',
+  'qwen/qwen3.7-plus',
+  'anthropic/claude-sonnet-5',
   'openai/gpt-oss-20b:free',
 ];
 
 await testModelList();
-for (const m of ANTHROPIC_PRESETS) await testAnthropic(m);
-for (const m of GEMINI_PRESETS) await testGemini(m);
+if (ANTHROPIC_KEY) for (const m of ANTHROPIC_PRESETS) await testAnthropic(m);
+if (GEMINI_KEY) for (const m of GEMINI_PRESETS) await testGemini(m);
 if (OPENROUTER_KEY) {
   for (const m of OPENROUTER_PRESETS) await testOpenRouter(m);
 } else {

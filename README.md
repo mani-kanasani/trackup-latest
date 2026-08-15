@@ -36,12 +36,19 @@ Provider**. Supported providers:
 | OpenAI | `gpt-4o-mini` | Paid | https://platform.openai.com/api-keys |
 | Anthropic | `claude-sonnet-5` | Paid | https://console.anthropic.com/settings/keys |
 
-**OpenRouter** is one key for 400+ models from every major lab — Kimi, DeepSeek,
-GLM, Qwen, plus the OpenAI and Anthropic ones. It sits between the free Gemini
-tier and the expensive options: Kimi K2 runs about $0.60 in / $2.50 out per
-million tokens against Claude Sonnet's $3 / $15, with no daily cap. The model
-dropdown lists only models that can honour a JSON schema, because the generator
-asks for structured output and the rest fail mid-sequence.
+**OpenRouter** is one key for the whole field. "Load models" returns roughly 345
+models across 44 labs, verified live: OpenAI 94, Qwen 50, Google 41, Anthropic
+24, Mistral 17, DeepSeek 12, GLM 12, Moonshot 7, xAI 6, plus Cohere, Nvidia,
+Microsoft, MiniMax and the rest. One key, one balance, switch model whenever.
+
+On price it sits between the free Gemini tier and the expensive options: Kimi K2
+runs about $0.60 in / $2.50 out per million tokens against Claude Sonnet's
+$3 / $15, and DeepSeek V4 Flash about $0.14 / $0.28, none of them capped daily.
+
+The list is filtered to models that can return JSON on request
+(`response_format`), because that is what the generator sends. It is not
+filtered on full json_schema support — nothing here sends a schema, and
+filtering on it hid 21 usable models for no reason.
 
 The key is stored in the browser's `localStorage` and sent to the Edge Function
 only at generation time — it is never persisted in the database.

@@ -147,10 +147,16 @@ async function geminiModels(apiKey: string): Promise<string[]> {
  * before it. Without that, a bad key populates a healthy-looking dropdown and
  * the failure surfaces later as a broken generation.
  *
- * Second, the catalogue is 400+ entries and roughly a fifth of them cannot
- * honour a JSON schema. The generator asks for structured output, so offering
- * those models means selling a choice that fails halfway through a sequence.
- * Filtering on the provider's own capability flag keeps the list honest.
+ * Second, the catalogue is 400+ entries and not all of them can be asked for
+ * JSON at all, so offering those means selling a choice that fails halfway
+ * through a sequence.
+ *
+ * The filter is `response_format`, matching what the generator actually sends:
+ * response_format: { type: 'json_object' }. It is deliberately NOT
+ * `structured_outputs`, which is the flag for full json_schema support. Nothing
+ * here sends a schema, so filtering on it hid 21 perfectly usable models and
+ * narrowed the catalogue for no reason — the opposite of the point of adding a
+ * provider that fronts every lab at once.
  */
 async function openrouterModels(apiKey: string): Promise<string[]> {
   const auth = await fetch(`${OPENROUTER_BASE}/key`, { headers: { Authorization: `Bearer ${apiKey}` } });
@@ -162,7 +168,7 @@ async function openrouterModels(apiKey: string): Promise<string[]> {
 
   return (data?.data ?? [])
     .filter((m: { supported_parameters?: string[] }) =>
-      (m.supported_parameters ?? []).includes('structured_outputs'))
+      (m.supported_parameters ?? []).includes('response_format'))
     .map((m: { id: string }) => m.id)
     // A leading '~' marks a floating alias whose target changes underneath you.
     // Fine for experimenting, wrong for a saved setting someone relies on.
