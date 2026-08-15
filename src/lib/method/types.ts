@@ -68,7 +68,35 @@ export interface StructureStep {
   maxChars?: number;
   /** Rules that apply to this step only. */
   constraints: string[];
+  /**
+   * The subject line this step needs, where the channel has one.
+   *
+   * Set only on steps that OPEN a thread. A subject named inside a step's own
+   * constraints gets written into the body or dropped entirely, which is what
+   * happened here: cold email shipped with no subject line anywhere. Follow-ups
+   * deliberately leave this unset because the doctrine sends them as genuine
+   * replies on the opening thread, and giving them a fresh subject invites the
+   * fabricated 'Re:' that the banned patterns exist to catch.
+   */
+  subject?: SubjectSpec;
 }
+
+/** The subject line for a step that opens a thread. Graded like any other step. */
+export interface SubjectSpec {
+  purpose: string;
+  maxChars?: number;
+  constraints: string[];
+}
+
+/**
+ * The output key carrying a step's subject line.
+ *
+ * One definition, imported by the prompt builder, the validator and the UI, so
+ * the key the model is asked for is provably the key that gets graded and the
+ * key that gets rendered. Three hand-written copies of `key + 'Subject'` is the
+ * drift that makes a field validate as permanently empty.
+ */
+export const subjectKey = (stepKey: string): string => `${stepKey}Subject`;
 
 export interface MethodPack {
   id: ChannelId;

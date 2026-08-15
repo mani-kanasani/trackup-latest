@@ -8,6 +8,7 @@
 import { getPack } from './packs';
 import { composeSystemPrompt } from './compose';
 import { validateOutput, type GeneratedOutput } from './validate';
+import { subjectKey } from './types';
 import type { ChannelId, MethodPack, ValidationResult } from './types';
 import { loadUserContext, contextToPrompt } from '../userContext';
 import { loadPrompts } from '../prompts';
@@ -78,13 +79,25 @@ export interface OutputStep {
 }
 
 export const outputSteps = (pack: MethodPack): OutputStep[] =>
-  pack.structure.map(({ key, label, purpose, maxChars, constraints }) => ({
-    key,
-    label,
-    purpose,
-    maxChars,
-    constraints,
-  }));
+  pack.structure.flatMap(({ key, label, purpose, maxChars, constraints, subject }) => {
+    const body: OutputStep = { key, label, purpose, maxChars, constraints };
+    if (!subject) return [body];
+    // The subject is requested as its own key, immediately before the body it
+    // belongs to. Asking for it inside the body's constraints produced a
+    // sequence with no subject line at all: the model either folded it into the
+    // first line or silently skipped it, and because nothing ever asked for the
+    // key, nothing ever reported it missing.
+    return [
+      {
+        key: subjectKey(key),
+        label: `${label} — subject line`,
+        purpose: subject.purpose,
+        maxChars: subject.maxChars,
+        constraints: subject.constraints,
+      },
+      body,
+    ];
+  });
 
 export interface ChannelPrompt {
   pack: MethodPack;

@@ -66,9 +66,24 @@ async function requireUser(req: Request): Promise<string | null> {
  * marker is an old deployment, and the app now says so instead of leaving the
  * user to interpret a blank result.
  */
-const CONTRACT = 2;
+const CONTRACT = 3;
 
-type Provider = 'gemini' | 'openai' | 'anthropic';
+type Provider = 'gemini' | 'openai' | 'anthropic' | 'openrouter';
+
+/** OpenRouter speaks the OpenAI wire format, so only the base URL differs. */
+const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
+
+/**
+ * Optional attribution headers. OpenRouter uses them for its public model
+ * rankings and shows the title in the user's own activity log, which is how
+ * someone tells an Ember generation apart from everything else on the key.
+ */
+const openRouterHeaders = (apiKey: string) => ({
+  Authorization: `Bearer ${apiKey}`,
+  'Content-Type': 'application/json',
+  'HTTP-Referer': 'https://github.com/mani-kanasani/trackup-latest',
+  'X-Title': 'Ember',
+});
 
 /**
  * Every response carries the deployed version, including errors.
@@ -121,6 +136,40 @@ async function geminiModels(apiKey: string): Promise<string[]> {
     .sort();
 }
 
+/**
+ * OpenRouter's catalogue, narrowed to models that can actually do this job.
+ *
+ * Two things are different here from every other provider.
+ *
+ * First, /models is PUBLIC. It answers 200 with the full catalogue for a key
+ * that is expired, revoked or simply wrong, so unlike the others this call
+ * proves nothing about the key on its own — hence the explicit /key check
+ * before it. Without that, a bad key populates a healthy-looking dropdown and
+ * the failure surfaces later as a broken generation.
+ *
+ * Second, the catalogue is 400+ entries and roughly a fifth of them cannot
+ * honour a JSON schema. The generator asks for structured output, so offering
+ * those models means selling a choice that fails halfway through a sequence.
+ * Filtering on the provider's own capability flag keeps the list honest.
+ */
+async function openrouterModels(apiKey: string): Promise<string[]> {
+  const auth = await fetch(`${OPENROUTER_BASE}/key`, { headers: { Authorization: `Bearer ${apiKey}` } });
+  if (!auth.ok) throw new Error(`OpenRouter: ${await readProviderError(auth)}`);
+
+  const res = await fetch(`${OPENROUTER_BASE}/models`, { headers: openRouterHeaders(apiKey) });
+  if (!res.ok) throw new Error(`OpenRouter: ${res.status} ${await res.text()}`);
+  const data = await res.json();
+
+  return (data?.data ?? [])
+    .filter((m: { supported_parameters?: string[] }) =>
+      (m.supported_parameters ?? []).includes('structured_outputs'))
+    .map((m: { id: string }) => m.id)
+    // A leading '~' marks a floating alias whose target changes underneath you.
+    // Fine for experimenting, wrong for a saved setting someone relies on.
+    .filter((id: string) => typeof id === 'string' && id && !id.startsWith('~'))
+    .sort();
+}
+
 
 /**
  * The smallest real generation the provider will accept.
@@ -151,15 +200,27 @@ async function probeModel(provider: Provider, apiKey: string, model: string): Pr
 
   const baseUrl = provider === 'openai'
     ? 'https://api.openai.com/v1'
+    : provider === 'openrouter'
+    ? OPENROUTER_BASE
     : 'https://generativelanguage.googleapis.com/v1beta/openai';
+
+  // OpenAI took max_completion_tokens and deprecated max_tokens; OpenRouter
+  // documents max_tokens and normalises it across every upstream lab it fronts.
+  // The cap is 64 there rather than 16 because OpenRouter serves reasoning
+  // models whose thinking is billed against this same budget, and a cap spent
+  // before any visible text reads as a dead model rather than a small cap.
+  const cap = provider === 'openrouter'
+    ? { max_tokens: 64 }
+    // 16 rather than 8 because on a reasoning model the cap covers reasoning
+    // tokens too, and 8 can be spent before any visible text exists.
+    : { max_completion_tokens: 16 };
+
   const res = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    // Only max_completion_tokens. max_tokens is deprecated and rejected outright
-    // by o-series models, so sending both reported a perfectly good key as
-    // broken. 16 rather than 8 because on a reasoning model the cap covers
-    // reasoning tokens too, and 8 can be spent before any visible text exists.
-    body: JSON.stringify({ model, max_completion_tokens: 16, messages: [{ role: 'user', content: prompt }] }),
+    headers: provider === 'openrouter'
+      ? openRouterHeaders(apiKey)
+      : { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, ...cap, messages: [{ role: 'user', content: prompt }] }),
   });
   if (!res.ok) throw new Error(await readProviderError(res));
   const data = await res.json();
@@ -193,7 +254,7 @@ Deno.serve(async (req: Request) => {
     };
     const key = (apiKey ?? '').trim();
     if (!key) return json({ error: 'An API key is required.' }, 400, cors);
-    if (provider !== 'openai' && provider !== 'anthropic' && provider !== 'gemini') {
+    if (provider !== 'openai' && provider !== 'anthropic' && provider !== 'gemini' && provider !== 'openrouter') {
       return json({ error: 'A valid provider is required.' }, 400, cors);
     }
 
@@ -207,6 +268,7 @@ Deno.serve(async (req: Request) => {
     let models: string[];
     if (provider === 'openai') models = await openaiModels(key);
     else if (provider === 'anthropic') models = await anthropicModels(key);
+    else if (provider === 'openrouter') models = await openrouterModels(key);
     else models = await geminiModels(key);
 
     return json({ models }, 200, cors);

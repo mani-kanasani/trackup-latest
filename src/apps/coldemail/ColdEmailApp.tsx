@@ -23,6 +23,7 @@ import { loadAIConfig } from '../../lib/aiConfig';
 import { loadUserContext, senderAbout } from '../../lib/userContext';
 import { buildChannelPrompt, checkAgainstMethod } from '../../lib/method/forChannel';
 import { getPack } from '../../lib/method/packs';
+import { subjectKey } from '../../lib/method/types';
 import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
 import { AppBar } from '../../components/Layout/AppBar';
@@ -272,7 +273,16 @@ const ProspectDetail: React.FC<{
     }
   };
 
-  const Step: React.FC<{ id: string; title: string; text: string; track?: boolean; timing?: string }> = ({ id, title, text, track = true, timing }) => (
+  const Step: React.FC<{
+    id: string;
+    title: string;
+    text: string;
+    track?: boolean;
+    timing?: string;
+    /** Present only on the step that opens the thread; follow-ups reply on it. */
+    subject?: string;
+    subjectId?: string;
+  }> = ({ id, title, text, track = true, timing, subject, subjectId }) => (
     <div className="card-modern p-4">
       <div className="flex items-center justify-between mb-2">
         <h4 className="font-semibold text-sm text-gray-900 dark:text-white flex items-center">
@@ -298,6 +308,28 @@ const ProspectDetail: React.FC<{
           )}
         </div>
       </div>
+      {/* Its own field, because that is how it gets used: the subject goes in a
+          separate box in every mail client, so it needs a separate copy button
+          rather than being something to pick back out of the body. */}
+      {subjectId && (
+        <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100 dark:border-gray-800">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 flex-none">Subject</span>
+          <input
+            defaultValue={subject ?? ''}
+            key={`${subjectId}:${subject ?? ''}`}
+            onBlur={(e) => saveStep(subjectId, e.target.value)}
+            placeholder="No subject came back. Regenerate."
+            className="flex-1 min-w-0 text-sm font-medium text-gray-900 dark:text-white bg-transparent border border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-ember-400 rounded-lg px-2 py-1 focus:outline-none"
+          />
+          <button
+            onClick={() => copy(subject ?? '', subjectId)}
+            className="flex-none text-xs font-medium text-ember-600 hover:text-ember-700 inline-flex items-center"
+          >
+            {copied === subjectId ? <Check className="w-3.5 h-3.5 mr-1" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
+            {copied === subjectId ? 'Copied' : 'Copy'}
+          </button>
+        </div>
+      )}
       <textarea
         defaultValue={text}
         key={`${id}:${text}`}
@@ -445,6 +477,8 @@ const ProspectDetail: React.FC<{
                   text={sequence[s.key]}
                   track={TRACKED_GROUPS.has(group)}
                   timing={typeof s.day === 'number' ? `day ${s.day}` : undefined}
+                  subject={s.subject ? sequence[subjectKey(s.key)] : undefined}
+                  subjectId={s.subject ? subjectKey(s.key) : undefined}
                 />
               ))}
             </React.Fragment>

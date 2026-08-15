@@ -5,7 +5,7 @@ An AI outreach suite — one login, multiple apps, all driven by a shared method
 - **TrackUp** — generate & track Upwork proposals (cover letter, workflow diagram, shareable PDF, video script).
 - **LinkedIn DM Generator** — turn leads into personalized connection requests + a branching DM flow.
 
-Bring your own AI key (Google Gemini free tier, OpenAI, or Anthropic).
+Bring your own AI key (Google Gemini free tier, OpenRouter, OpenAI, or Anthropic).
 
 > **Want to run your own copy?** Follow **[SETUP.md](SETUP.md)** — a ~15-minute,
 > copy-paste self-hosting guide written for non-technical users.
@@ -31,9 +31,17 @@ Provider**. Supported providers:
 
 | Provider | Default model | Cost | Get a key |
 |---|---|---|---|
-| Google Gemini | `gemini-2.5-flash` | **Free tier** (no card) | https://aistudio.google.com/app/apikey |
+| Google Gemini | `gemini-3.7-flash` | **Free tier** (no card) | https://aistudio.google.com/app/apikey |
+| OpenRouter | `moonshotai/kimi-k2-0905` | Paid, ~1/5 of Claude Sonnet | https://openrouter.ai/keys |
 | OpenAI | `gpt-4o-mini` | Paid | https://platform.openai.com/api-keys |
-| Anthropic | `claude-haiku-4-5` | Paid | https://console.anthropic.com/settings/keys |
+| Anthropic | `claude-sonnet-5` | Paid | https://console.anthropic.com/settings/keys |
+
+**OpenRouter** is one key for 400+ models from every major lab — Kimi, DeepSeek,
+GLM, Qwen, plus the OpenAI and Anthropic ones. It sits between the free Gemini
+tier and the expensive options: Kimi K2 runs about $0.60 in / $2.50 out per
+million tokens against Claude Sonnet's $3 / $15, with no daily cap. The model
+dropdown lists only models that can honour a JSON schema, because the generator
+asks for structured output and the rest fail mid-sequence.
 
 The key is stored in the browser's `localStorage` and sent to the Edge Function
 only at generation time — it is never persisted in the database.

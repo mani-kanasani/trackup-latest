@@ -10,6 +10,10 @@
 
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
+// Optional. OpenRouter's catalogue is public, so the preset check runs with or
+// without a key; only the generation tests need one.
+const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 
 // A realistic subset of the LinkedIn pack: enough keys to exercise the schema,
 // short enough to be cheap.
@@ -172,6 +176,69 @@ async function testGemini(model) {
   }
 }
 
+async function testOpenRouter(model) {
+  line(`\n--- OpenRouter / ${model} ---`);
+  const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${OPENROUTER_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://github.com/mani-kanasani/trackup-latest',
+      'X-Title': 'Ember',
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: SYSTEM },
+        { role: 'user', content: PROMPT },
+      ],
+      response_format: { type: 'json_object' },
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    bad(`request rejected (${res.status})`);
+    line(`        ${body.slice(0, 400)}`);
+    failures++;
+    return;
+  }
+
+  const data = await res.json();
+  ok(`request accepted (${res.status})`);
+  // OpenRouter reports which upstream actually served the request, and that is
+  // worth seeing: a model can be routed to a different provider than expected.
+  if (data?.provider) line(`        served by: ${data.provider}`);
+
+  const text = data?.choices?.[0]?.message?.content ?? '';
+  if (!text) {
+    bad('no content returned');
+    failures++;
+    return;
+  }
+
+  let cleaned = text.trim();
+  if (cleaned.startsWith('```')) cleaned = cleaned.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+
+  let parsed;
+  try {
+    parsed = JSON.parse(cleaned);
+    ok('response is valid JSON');
+  } catch {
+    bad('response was not valid JSON');
+    line(`        starts: ${cleaned.slice(0, 160)}`);
+    failures++;
+    return;
+  }
+  const missing = KEYS.filter((k) => !String(parsed[k] ?? '').trim());
+  if (missing.length) {
+    bad(`missing keys: ${missing.join(', ')}`);
+    failures++;
+  } else {
+    ok(`all ${KEYS.length} requested keys present and non-empty`);
+  }
+}
+
 async function testModelList() {
   line('\n--- Model lists (what the app offers must exist) ---');
 
@@ -204,6 +271,31 @@ async function testModelList() {
     bad(`Gemini model list failed (${g.status})`);
     failures++;
   }
+
+  // No key needed: this catalogue is public. That is exactly why the app checks
+  // the key separately against /key before trusting a populated dropdown.
+  const o = await fetch(`${OPENROUTER_BASE}/models`);
+  if (o.ok) {
+    const all = (await o.json()).data ?? [];
+    const usable = all
+      .filter((m) => (m.supported_parameters ?? []).includes('structured_outputs'))
+      .map((m) => m.id);
+    ok(`OpenRouter lists ${all.length} models, ${usable.length} of them able to honour a JSON schema`);
+    for (const preset of OPENROUTER_PRESETS) {
+      const live = usable.includes(preset);
+      (live ? ok : bad)(`preset ${preset} ${live ? 'exists and supports structured output' : 'NOT USABLE (missing, or cannot do structured output)'}`);
+      if (!live) failures++;
+    }
+  } else {
+    bad(`OpenRouter model list failed (${o.status})`);
+    failures++;
+  }
+
+  if (OPENROUTER_KEY) {
+    const k = await fetch(`${OPENROUTER_BASE}/key`, { headers: { Authorization: `Bearer ${OPENROUTER_KEY}` } });
+    (k.ok ? ok : bad)(`OpenRouter key ${k.ok ? 'authenticates' : `rejected (${k.status})`}`);
+    if (!k.ok) failures++;
+  }
 }
 
 if (!ANTHROPIC_KEY || !GEMINI_KEY) {
@@ -225,10 +317,23 @@ const GEMINI_PRESETS = [
   'gemini-2.5-flash',
   'gemini-2.5-pro',
 ];
+// Must stay in step with PROVIDER_META.openrouter.modelOptions in src/lib/aiConfig.ts.
+const OPENROUTER_PRESETS = [
+  'moonshotai/kimi-k2-0905',
+  'moonshotai/kimi-k3',
+  'deepseek/deepseek-v4-flash-0731',
+  'z-ai/glm-5.2',
+  'openai/gpt-oss-20b:free',
+];
 
 await testModelList();
 for (const m of ANTHROPIC_PRESETS) await testAnthropic(m);
 for (const m of GEMINI_PRESETS) await testGemini(m);
+if (OPENROUTER_KEY) {
+  for (const m of OPENROUTER_PRESETS) await testOpenRouter(m);
+} else {
+  line('\n--- OpenRouter generation tests skipped: set OPENROUTER_API_KEY to run them ---');
+}
 
 line(failures ? `\n${failures} FAILURES\n` : '\nEverything passed. The contracts are correct; deploy with confidence.\n');
 process.exit(failures ? 1 : 0);

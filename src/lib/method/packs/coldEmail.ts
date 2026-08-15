@@ -306,7 +306,7 @@ export const coldEmailPack: MethodPack = {
     day: 0,
     maxChars: 450,
     constraints: [
-      "Subject line under three words, lowercase, plain: either a fragment of the observation or a bare label naming who they are or what this is about",
+      "The subject line is a separate field, so do not repeat it or write 'Subject:' anywhere in the body",
       "First line is one specific, true observation about them, verifiable in ninety seconds",
       "Value proposition in first person, in the shape 'I help [narrow niche] [specific outcome]'",
       "One substantiating fact, or an honest alternative where you have no client result yet",
@@ -317,6 +317,18 @@ export const coldEmailPack: MethodPack = {
       "More instances of 'you' than of 'I'",
       "Plain English a fifteen-year-old could follow"
     ],
+    subject: {
+      "purpose": "Get the email opened without spending a single word of credibility, then get out of the way.",
+      "maxChars": 40,
+      "constraints": [
+        "Under three words",
+        "Lowercase, with no punctuation tricks, no emoji and no title case",
+        "Either a fragment of the observation in the first line, or a bare label naming who they are or what this is about",
+        "Never a question, never a claim, never a subject that could be sent to anybody else",
+        "Never fake a reply or a forward: no 'Re:' and no 'Fwd:'",
+        "Write it once and stop optimising it"
+      ]
+    },
   },
   {
     key: "angleShift",

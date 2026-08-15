@@ -6,7 +6,7 @@
 
 import { readMigrating } from './storage';
 
-export type AIProvider = 'gemini' | 'openai' | 'anthropic';
+export type AIProvider = 'gemini' | 'openai' | 'anthropic' | 'openrouter';
 
 export interface AIConfig {
   provider: AIProvider;
@@ -60,13 +60,45 @@ export const PROVIDER_META: Record<AIProvider, ProviderMeta> = {
     free: false,
     hint: 'Paid usage. Strong writing quality (Claude Haiku/Sonnet). Key starts with "sk-ant-".',
   },
+  openrouter: {
+    label: 'OpenRouter (Kimi, DeepSeek, GLM, 400+ models)',
+    // Kimi K2 at roughly $0.60 in / $2.50 out per million tokens against Claude
+    // Sonnet's $3 / $15: the same job for a fraction of the spend, which is the
+    // reason people ask for this provider by name.
+    defaultModel: 'moonshotai/kimi-k2-0905',
+    // A spread across price points rather than a leaderboard. Every one of these
+    // was checked against the live /models feed for structured-output support,
+    // because the generator asks for JSON and a model that cannot promise it
+    // fails halfway through a sequence instead of at the point of choosing.
+    modelOptions: [
+      'moonshotai/kimi-k2-0905',
+      'moonshotai/kimi-k3',
+      'deepseek/deepseek-v4-flash-0731',
+      'z-ai/glm-5.2',
+      'openai/gpt-oss-20b:free',
+    ],
+    keyLabel: 'OpenRouter API key',
+    keyUrl: 'https://openrouter.ai/keys',
+    free: false,
+    hint:
+      'One key, 400+ models from every major lab. Kimi K2 costs roughly a fifth of Claude Sonnet ' +
+      'and has no daily cap, so it sits between the free Gemini tier and the expensive options. ' +
+      'Load credit once and switch models freely. Key starts with "sk-or-".',
+  },
 };
 
 const STORAGE_KEY = 'ember.aiConfig';
 const LEGACY_STORAGE_KEY = 'trackup.aiConfig';
 
+/**
+ * Derived from PROVIDER_META rather than restating the union.
+ *
+ * The hand-written list silently rejected any provider added to the type and the
+ * metadata but not to this third place, and the symptom is a saved config that
+ * loads as null — the user's key "disappears" on refresh with no error anywhere.
+ */
 export const isProvider = (value: unknown): value is AIProvider =>
-  value === 'gemini' || value === 'openai' || value === 'anthropic';
+  typeof value === 'string' && Object.prototype.hasOwnProperty.call(PROVIDER_META, value);
 
 export const loadAIConfig = (): AIConfig | null => {
   try {

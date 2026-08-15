@@ -7,6 +7,7 @@ import { getPack, ALL_PACKS } from '../src/lib/method/packs/index';
 import { composeSystemPrompt, describePack } from '../src/lib/method/compose';
 import { outputSteps } from '../src/lib/method/forChannel';
 import { validateOutput } from '../src/lib/method/validate';
+import { subjectKey } from '../src/lib/method/types';
 import { qualify } from '../src/lib/qualify/score';
 import { renderQualification } from '../src/lib/qualify/render';
 import { RUNGS, TIERS } from '../src/lib/qualify/doctrine';
@@ -28,11 +29,22 @@ for (const p of ALL_PACKS) {
   // The contract the generator is asked for must be the contract the validator
   // grades. When these drifted, every step came back "empty. Regenerate." on top
   // of copy that was fine, and the warning list was pure noise.
+  //
+  // Compared as SETS, not counts. This used to assume one output key per
+  // structure step, which stopped being true the moment a step could carry its
+  // own subject line: the count check then failed on a pack that was correct,
+  // while still being unable to notice a requested key that nothing grades —
+  // the actual bug it exists to catch.
   const requested = outputSteps(p).map((s) => s.key);
+  const validated = p.structure.flatMap((s) => (s.subject ? [s.key, subjectKey(s.key)] : [s.key]));
+  const missing = requested.filter((k) => !validated.includes(k));
+  const ungraded = validated.filter((k) => !requested.includes(k));
   check(
     `${p.id}: requested keys === validated keys`,
-    requested.length === keys.length && requested.every((k) => keys.includes(k)),
-    `${requested.length} requested, ${keys.length} in pack`,
+    missing.length === 0 && ungraded.length === 0,
+    missing.length || ungraded.length
+      ? `requested but never graded: [${missing}]; graded but never requested: [${ungraded}]`
+      : `${requested.length} keys`,
   );
 
   // A response carrying every requested key must pass. If it cannot, the app
@@ -104,9 +116,17 @@ check(
 
 // ---- the validator catches what the doctrine forbids
 const stepKeys = pack.structure.map((s) => s.key);
+// Built from the CONTRACT rather than from pack.structure, so a key the
+// generator is asked for cannot quietly go untested. Subjects get their own
+// value because they are graded against a much tighter ceiling than a body.
+const subjectKeys = new Set(
+  pack.structure.filter((s) => s.subject).map((s) => subjectKey(s.key)),
+);
 const clean: Record<string, string> = {};
-for (const k of stepKeys) {
-  clean[k] = 'Your team page lists four estimators and nobody on business development. When you want a particular kind of client, does one arrive through the network, or do you go find them?';
+for (const { key } of outputSteps(pack)) {
+  clean[key] = subjectKeys.has(key)
+    ? 'four estimators'
+    : 'Your team page lists four estimators and nobody on business development. When you want a particular kind of client, does one arrive through the network, or do you go find them?';
 }
 const cleanResult = validateOutput(pack, clean);
 check('clean output passes', cleanResult.ok, `${cleanResult.hardCount} hard, ${cleanResult.softCount} soft`);
@@ -131,6 +151,63 @@ check(
 const empty = { ...clean };
 empty[stepKeys[0]] = '';
 check('empty step caught', !validateOutput(pack, empty).ok);
+
+// ---- subject lines
+//
+// Cold email shipped with no subject line anywhere: the rule lived inside the
+// opening email's own constraints, so the model folded it into the body or
+// dropped it, and nothing ever asked for the key so nothing ever reported it
+// missing. These checks pin all three halves of the fix — asked for, graded,
+// and confined to the step that actually opens a thread.
+const SUBJECT_KEY = subjectKey('openingEmail');
+check(
+  'cold email asks for a subject line',
+  outputSteps(pack).some((s) => s.key === SUBJECT_KEY),
+);
+check(
+  'the subject is requested before the body it belongs to',
+  outputSteps(pack).findIndex((s) => s.key === SUBJECT_KEY) <
+    outputSteps(pack).findIndex((s) => s.key === 'openingEmail'),
+);
+
+const noSubject = { ...clean };
+noSubject[SUBJECT_KEY] = '';
+check(
+  'a missing subject is a hard failure',
+  validateOutput(pack, noSubject).violations.some((v) => v.stepKey === SUBJECT_KEY && v.level === 'hard'),
+);
+
+// The fabricated-Re and "quick question" patterns were written to match a BARE
+// subject with no "subject:" prefix, which only pays off if the field is
+// actually graded. Before this, it was the one field nothing checked.
+const fakeThread = { ...clean };
+fakeThread[SUBJECT_KEY] = 'Re: our chat';
+check(
+  'a faked reply in the subject is caught',
+  validateOutput(pack, fakeThread).violations.some(
+    (v) => v.stepKey === SUBJECT_KEY && v.patternId === 'fabricated-re-subject',
+  ),
+);
+
+const longSubject = { ...clean };
+longSubject[SUBJECT_KEY] = 'a subject line far longer than the ceiling this field is held to';
+check(
+  'an overlong subject is nudged',
+  validateOutput(pack, longSubject).violations.some((v) => v.stepKey === SUBJECT_KEY && v.level === 'soft'),
+);
+
+// Follow-ups reply on the opening thread, so giving them their own subject is
+// how you end up generating the fabricated 'Re:' the doctrine bans.
+check(
+  'only the thread-opening email carries a subject',
+  pack.structure.filter((s) => s.subject).map((s) => s.key).join(',') === 'openingEmail',
+);
+for (const other of ALL_PACKS.filter((p) => p.id !== 'coldEmail')) {
+  check(
+    `${other.id}: no subject lines`,
+    other.structure.every((s) => !s.subject),
+  );
+}
 
 console.log(`\n${describePack(pack).split('\n').slice(-1)[0]}`);
 console.log(failures ? `\n${failures} FAILURES` : '\nall checks passed');

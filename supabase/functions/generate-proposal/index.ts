@@ -42,9 +42,22 @@ const corsFor = (req: Request) => {
  * marker is an old deployment, and the app now says so instead of leaving the
  * user to interpret a blank result.
  */
-const CONTRACT = 2;
+const CONTRACT = 3;
 
-type Provider = 'gemini' | 'openai' | 'anthropic';
+type Provider = 'gemini' | 'openai' | 'anthropic' | 'openrouter';
+
+/** OpenRouter speaks the OpenAI wire format, so only the base URL differs. */
+const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
+
+/**
+ * Optional attribution headers. OpenRouter uses them for its public model
+ * rankings and shows the title in the user's own activity log, which is how
+ * someone tells an Ember generation apart from everything else on the key.
+ */
+const OPENROUTER_HEADERS = {
+  'HTTP-Referer': 'https://github.com/mani-kanasani/trackup-latest',
+  'X-Title': 'Ember',
+};
 
 /**
  * Ask Anthropic for JSON without prefilling the assistant turn.
@@ -243,6 +256,7 @@ async function callOpenAICompatible(
   system: string,
   userPrompt: string,
   useJsonMode: boolean,
+  extraHeaders: Record<string, string> = {},
 ): Promise<string> {
   // Two things a newer model can reject: response_format, and temperature at
   // all. Both are dropped on retry rather than assumed unsupported, so an older
@@ -261,7 +275,7 @@ async function callOpenAICompatible(
     if (jsonMode) body.response_format = { type: 'json_object' };
     return fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', ...extraHeaders },
       body: JSON.stringify(body),
     });
   };
@@ -344,6 +358,19 @@ async function generateContent(input: Required<Pick<GenerateInput, 'provider' | 
       input.system,
       userPrompt,
       true,
+    );
+  } else if (input.provider === 'openrouter') {
+    // An explicit branch, not a fallthrough. Letting an unmatched provider land
+    // on the OpenAI base URL would send an OpenRouter key to OpenAI and report
+    // the result as an authentication problem with the user's key.
+    raw = await callOpenAICompatible(
+      OPENROUTER_BASE,
+      input.apiKey,
+      input.model,
+      input.system,
+      userPrompt,
+      true,
+      OPENROUTER_HEADERS,
     );
   } else {
     raw = await callOpenAICompatible(
@@ -566,7 +593,7 @@ Deno.serve(async (req: Request) => {
     if (!jobTitle || !jobSummary) {
       return json({ error: 'job_title and job_summary are required.' }, 400, cors);
     }
-    if (provider !== 'gemini' && provider !== 'openai' && provider !== 'anthropic') {
+    if (provider !== 'gemini' && provider !== 'openai' && provider !== 'anthropic' && provider !== 'openrouter') {
       return json({ error: 'A valid provider (gemini, openai, anthropic) is required.' }, 400, cors);
     }
     if (!apiKey) {

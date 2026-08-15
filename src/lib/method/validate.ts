@@ -4,6 +4,7 @@
 // in a cold email" will still occasionally put a link in a cold email. This is
 // the layer that catches it, so the user sees the violation instead of sending it.
 
+import { subjectKey } from './types';
 import type { MethodPack, StructureStep, ValidationResult, Violation } from './types';
 
 /** Output keyed by structure step: { opener: "...", value: "..." }. */
@@ -64,6 +65,31 @@ export const validateOutput = (pack: MethodPack, output: GeneratedOutput): Valid
     }
     violations.push(...checkBanned(pack, step.key, text));
     violations.push(...checkLength(step, text));
+
+    // Subjects are graded too, and against the same banned patterns.
+    //
+    // Two of those patterns exist specifically for this field — the fabricated
+    // 'Re:' and "quick question" — and both were written to match a bare
+    // subject with no "subject:" prefix. Skipping the key here would leave the
+    // one field they were designed for as the only one nothing checks.
+    if (!step.subject) continue;
+    const sKey = subjectKey(step.key);
+    const subject = (output[sKey] ?? '').trim();
+    if (!subject) {
+      violations.push({
+        stepKey: sKey,
+        level: 'hard',
+        message: `${step.label} came back with no subject line. Regenerate.`,
+      });
+      continue;
+    }
+    violations.push(...checkBanned(pack, sKey, subject));
+    violations.push(
+      ...checkLength(
+        { ...step, key: sKey, label: `${step.label} subject`, maxChars: step.subject.maxChars },
+        subject,
+      ),
+    );
   }
 
   const hardCount = violations.filter((v) => v.level === 'hard').length;

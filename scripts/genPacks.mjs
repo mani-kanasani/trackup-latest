@@ -48,7 +48,9 @@ const renderStep = (s) => `  {
     purpose: ${q(s.purpose)},${s.day === undefined ? '' : `\n    day: ${s.day},`}${
   s.maxChars === undefined ? '' : `\n    maxChars: ${s.maxChars},`
 }
-    constraints: ${src(s.constraints, 4)},
+    constraints: ${src(s.constraints, 4)},${
+  s.subject === undefined ? '' : `\n    subject: ${src(s.subject, 4)},`
+}
   },`;
 
 const fileFor = (p) => `// AUTO-GENERATED from packs.source.json by scripts/genPacks.mjs. Do not edit by hand.
