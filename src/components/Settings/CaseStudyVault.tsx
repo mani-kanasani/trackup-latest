@@ -5,6 +5,7 @@ import {
 import { useCaseStudies } from '../../lib/proof';
 import type { CaseStudy, CaseNaming } from '../../lib/proof/types';
 import { ProofInterview } from './ProofInterview';
+import { extractTextFromFile, kindOf } from '../../lib/vertical/fileText';
 
 const EMPTY: Partial<CaseStudy> = {
   title: '',
@@ -44,6 +45,15 @@ export const CaseStudyVault: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  // Text read out of the attached document.
+  //
+  // The column existed from the beginning and nothing ever wrote to it, so an
+  // uploaded case study was an opaque blob: stored, never readable again
+  // without downloading it. It is deliberately NOT sent to any generator. The
+  // proof block is built from the structured fields precisely so the model gets
+  // one matched proof rather than a whole document.
+  const [fileText, setFileText] = useState<string | null>(null);
+  const [fileNote, setFileNote] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   // The empty state opens straight into the interview. Someone who has
   // concluded they have no proof will not click a button that assumes they do.
@@ -52,6 +62,8 @@ export const CaseStudyVault: React.FC = () => {
   const startNew = () => {
     setDraft(EMPTY);
     setFile(null);
+    setFileText(null);
+    setFileNote('');
     setError('');
     setEditing('new');
   };
@@ -59,6 +71,8 @@ export const CaseStudyVault: React.FC = () => {
   const startEdit = (c: CaseStudy) => {
     setDraft(c);
     setFile(null);
+    setFileText(null);
+    setFileNote('');
     setError('');
     setEditing(c.id);
   };
@@ -67,6 +81,8 @@ export const CaseStudyVault: React.FC = () => {
     setEditing(null);
     setDraft(EMPTY);
     setFile(null);
+    setFileText(null);
+    setFileNote('');
     setError('');
   };
 
@@ -94,6 +110,7 @@ export const CaseStudyVault: React.FC = () => {
         patch.file_path = path ?? null;
         patch.file_name = file.name;
         patch.file_size = file.size;
+        patch.extracted_text = fileText;
       }
 
       const res =
@@ -151,6 +168,8 @@ export const CaseStudyVault: React.FC = () => {
                 onFound={(seed) => {
                   setDraft({ ...EMPTY, ...seed });
                   setFile(null);
+    setFileText(null);
+    setFileNote('');
                   setError('');
                   setEditing('new');
                   setInterviewing(false);
@@ -418,9 +437,35 @@ export const CaseStudyVault: React.FC = () => {
               >
                 <input
                   type="file"
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                  onChange={async (e) => {
+                    const picked = e.target.files?.[0] ?? null;
+                    setFile(picked);
+                    setFileText(null);
+                    setFileNote('');
+                    if (!picked) return;
+                    if (!kindOf(picked)) {
+                      // Still uploadable, just not readable. Storing it is
+                      // useful even when the text cannot be pulled out.
+                      setFileNote(`${picked.name} will be stored, but its text cannot be read. PDF, .docx and plain text can.`);
+                      return;
+                    }
+                    try {
+                      const out = await extractTextFromFile(picked);
+                      setFileText(out.text || null);
+                      setFileNote(
+                        out.text
+                          ? `Read ${out.text.length.toLocaleString()} characters. Saved with the case study so you can read it here later. It is not sent to the AI: the fields above are.`
+                          : (out.warning ?? 'No text could be read from that file.'),
+                      );
+                    } catch (err) {
+                      setFileNote(err instanceof Error ? err.message : 'Could not read that file.');
+                    }
+                  }}
                   className="block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 dark:file:bg-gray-800 file:text-sm"
                 />
+                {fileNote && (
+                  <p className="mt-2 text-xs text-blue-700 dark:text-blue-300">{fileNote}</p>
+                )}
               </Field>
 
               {error && (

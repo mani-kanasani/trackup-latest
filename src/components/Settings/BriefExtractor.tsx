@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Wand2, Loader2, Check, X, AlertTriangle, FolderOpen } from 'lucide-react';
+import { Wand2, Loader2, Check, X, AlertTriangle, FolderOpen, Paperclip } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { loadAIConfig } from '../../lib/aiConfig';
 import { isStaleDeployment, outOfDateMessage } from '../../lib/deployment';
+import { extractTextFromFile } from '../../lib/vertical/fileText';
 import {
   reviewExtraction,
   EXTRACTION_SYSTEM,
@@ -28,6 +29,36 @@ export const BriefExtractor: React.FC<{
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [reviewed, setReviewed] = useState<ReviewedBrief | null>(null);
+  const [reading, setReading] = useState(false);
+  const [fileNote, setFileNote] = useState('');
+
+  /**
+   * Reads the file into the box rather than straight into the extractor.
+   *
+   * PDF extraction reorders tables. Extracting the blueprint this was built
+   * against split the failure-scenario rows from their solutions, and a model
+   * handed that silently would pair the wrong problem with the wrong fix. The
+   * text is put in front of the person first, every time.
+   */
+  const onFile = async (file: File | null) => {
+    if (!file) return;
+    setReading(true);
+    setError('');
+    setFileNote('');
+    try {
+      const out = await extractTextFromFile(file);
+      setDoc(out.text);
+      const pages = out.pages ? `${out.pages} page${out.pages === 1 ? '' : 's'}, ` : '';
+      setFileNote(
+        `Read ${file.name}: ${pages}${out.text.length.toLocaleString()} characters.` +
+          (out.warning ? ` ${out.warning}` : ' Check it below before building.'),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not read that file.');
+    } finally {
+      setReading(false);
+    }
+  };
 
   const build = async () => {
     const config = loadAIConfig();
@@ -87,6 +118,34 @@ export const BriefExtractor: React.FC<{
         Paste the document and this fills the fields below once, using your own AI key. It runs a single
         time, not on every generation, so the outreach prompt stays small.
       </p>
+
+      <div className="flex flex-wrap items-center gap-3 mb-3">
+        <label className="inline-flex items-center px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:border-ember-400">
+          {reading ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Paperclip className="w-4 h-4 mr-2" />
+          )}
+          {reading ? 'Reading...' : 'Upload a file'}
+          <input
+            type="file"
+            className="hidden"
+            accept=".pdf,.docx,.txt,.md,.markdown,.csv,application/pdf,text/plain"
+            onChange={(e) => {
+              onFile(e.target.files?.[0] ?? null);
+              // Cleared so picking the same file twice still fires a change.
+              e.target.value = '';
+            }}
+          />
+        </label>
+        <span className="text-xs text-gray-400">PDF, Word .docx, or plain text. Or paste below.</span>
+      </div>
+
+      {fileNote && (
+        <div className="mb-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/15 text-xs text-blue-800 dark:text-blue-300">
+          {fileNote}
+        </div>
+      )}
 
       <textarea
         rows={5}
