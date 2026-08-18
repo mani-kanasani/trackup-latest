@@ -20,7 +20,8 @@
     "analytics:test": "esbuild scripts/smokeAnalytics.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/analytics.mjs --log-level=error && node node_modules/.cache/analytics.mjs",
     "which-version": "node scripts/whichVersion.mjs",
     "providers:test": "node scripts/liveProviderTest.mjs",
-    "vertical:test": "esbuild scripts/smokeVertical.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/vertical.mjs --log-level=error && node node_modules/.cache/vertical.mjs"
+    "vertical:test": "esbuild scripts/smokeVertical.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/vertical.mjs --log-level=error && node node_modules/.cache/vertical.mjs",
+    "deliverables:export": "esbuild scripts/exportDeliverables.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/export.mjs --log-level=error && node node_modules/.cache/export.mjs \"../Boardroom Clients\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
