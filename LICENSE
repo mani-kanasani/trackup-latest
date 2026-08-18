@@ -91,15 +91,29 @@ anything you do with it.
 ## 6. Outreach is regulated. That is on you.
 
 This software helps you send commercial messages to other people. Doing that is
-governed by law and by the terms of the platforms you send through, including
-but not limited to CASL, PIPEDA, British Columbia's Personal Information
-Protection Act, CAN-SPAM, GDPR, UK GDPR, PECR, US state privacy laws, and the
-terms of service of LinkedIn, Upwork, and any email provider you use.
+governed by law and by the terms of the platforms you send through.
 
-CASL is worth singling out. It is among the strictest of these, it applies to
-messages sent from Canada as well as to messages sent to Canadians, and unlike
-CAN-SPAM it generally requires consent before the first message rather than an
-opt-out after it. If you are sending from Canada, read it before you send.
+**Two things decide what applies to you, and neither of them is where I am.**
+The first is where you are sending from. The second is where each recipient is.
+Both bind you, and on a list spanning several countries the strictest regime
+that touches any recipient is the one you have to satisfy for that send.
+
+The regimes that most often apply, none of which is a default, include CAN-SPAM
+in the United States and its state privacy laws, GDPR and PECR across the
+European Union, UK GDPR, CASL and PIPEDA in Canada, the Australian Spam Act and
+Privacy Act, India's DPDP Act, and their equivalents elsewhere. They differ on
+the point that matters most: some let you send first and require a working
+opt-out, and others require consent or a lawful basis *before* the first
+message. Compliant practice under one can be a breach under another, so a
+sequence that is fine for a US list is not automatically fine for the same
+sequence sent to Europe.
+
+The platforms add their own rules on top, and those apply everywhere regardless
+of local law: LinkedIn, Upwork, and whatever email provider you send through.
+
+Work out which rules apply to you and to the people you are contacting, before
+you send. That research is yours to do. This software does not know where you
+are, does not know where your list is, and does not check.
 
 You are solely responsible for what you send, who you send it to, how you
 obtained their details, whether you are permitted to contact them, and for
@@ -154,10 +168,16 @@ Vancouver, have exclusive jurisdiction over any such dispute, and you consent to
 the personal jurisdiction of those courts and waive any objection that they are
 an inconvenient forum.
 
-This holds wherever you are. If you are outside British Columbia, you may have
-rights under your local law that cannot be waived by agreement, including
-consumer protection rights; nothing here takes those away, and where local law
-must override this section it does, with the rest of this licence left standing.
+Most people using this are not in British Columbia, and that is expected. The
+choice above is simply the licensor's home jurisdiction, which is where a
+dispute about the licence itself would be heard. It is not a statement about
+which laws govern *your* outreach, which is section 6 and depends entirely on
+where you and your recipients are.
+
+If you are outside British Columbia you may have rights under your local law
+that cannot be signed away, consumer protection rights among them. Nothing here
+takes those away. Where your local law must override this section, it does, and
+the rest of this licence stands.
 
 **Before filing anything, talk to me.** Email mani@growthcreators.ai with what
 happened and give it thirty days. Most of what could go wrong here is a

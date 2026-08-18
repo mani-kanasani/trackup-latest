@@ -142,9 +142,15 @@ software.
 
 It generates text with AI, which means it will sometimes be confidently wrong,
 including invented figures and invented sources. Everything it produces is a
-draft for you to check before it reaches another person. Outreach is also
-regulated, and what you send is your responsibility. There is no warranty and
-no liability, and it is governed by the law of British Columbia. Use it at your
-own risk.
+draft for you to check before it reaches another person.
+
+Outreach is regulated, and which rules apply to you depends on where you send
+from and where each recipient is, not on where the licensor is. Some regimes let
+you send first with a working opt-out; others want consent before the first
+message. Work out which ones cover your list before you send.
+
+There is no warranty and no liability. The licence itself is governed by the law
+of British Columbia, which is the licensor's home jurisdiction and says nothing
+about which rules govern your outreach. Use it at your own risk.
 
 Full terms: **[LICENSE](LICENSE)**.
