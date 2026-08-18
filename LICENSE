@@ -1,10 +1,16 @@
 # Ember Personal Use Licence
 
-Copyright (c) 2026 Mani Kanasani. All rights reserved.
+Copyright (c) 2026 AI Growth Partners, Inc., doing business as Vertical AI
+Systems, a British Columbia corporation. All rights reserved.
 
 This is not open source software. It is provided to one named individual for
 their own use, on the terms below. If you did not receive it directly from Mani
 Kanasani, you do not have a licence to use it.
+
+In this licence, **"Mani Kanasani"** means AI Growth Partners, Inc. (doing
+business as Vertical AI Systems) and Mani Kanasani personally, together and
+individually. Every right reserved, every disclaimer given and every limit of
+liability set out below applies to both.
 
 ---
 
@@ -86,8 +92,14 @@ anything you do with it.
 
 This software helps you send commercial messages to other people. Doing that is
 governed by law and by the terms of the platforms you send through, including
-but not limited to CAN-SPAM, GDPR, UK GDPR, PECR, CASL, state privacy laws, and
-the terms of service of LinkedIn, Upwork, and any email provider you use.
+but not limited to CASL, PIPEDA, British Columbia's Personal Information
+Protection Act, CAN-SPAM, GDPR, UK GDPR, PECR, US state privacy laws, and the
+terms of service of LinkedIn, Upwork, and any email provider you use.
+
+CASL is worth singling out. It is among the strictest of these, it applies to
+messages sent from Canada as well as to messages sent to Canadians, and unlike
+CAN-SPAM it generally requires consent before the first message rather than an
+opt-out after it. If you are sending from Canada, read it before you send.
 
 You are solely responsible for what you send, who you send it to, how you
 obtained their details, whether you are permitted to contact them, and for
@@ -132,31 +144,29 @@ survive termination.
 ## 10. Governing law and jurisdiction
 
 This licence, and any dispute arising out of it or out of your use of the
-software, is governed by the laws of the **State of Delaware, United States of
-America**, without regard to its conflict of law rules. The United Nations
-Convention on Contracts for the International Sale of Goods does not apply.
+software, is governed by the laws of the **Province of British Columbia** and
+the federal laws of Canada applicable in it, without regard to conflict of law
+rules. The United Nations Convention on Contracts for the International Sale of
+Goods does not apply.
 
-> If AI Growth Creators Inc. is registered in a different state, change the two
-> words above to that state. Nothing else in this section needs to move.
-
-You and Mani Kanasani agree that the state and federal courts located in
-Delaware have exclusive jurisdiction over any such dispute, and you consent to
+You and Mani Kanasani agree that the courts of British Columbia, sitting at
+Vancouver, have exclusive jurisdiction over any such dispute, and you consent to
 the personal jurisdiction of those courts and waive any objection that they are
 an inconvenient forum.
 
-This holds wherever you are. If you are outside the United States, you may have
-rights under your local law that cannot be waived by agreement; nothing here
-takes those away, and where local law conflicts with this section, local law
-wins to the extent it must and the rest of this licence stays in force.
+This holds wherever you are. If you are outside British Columbia, you may have
+rights under your local law that cannot be waived by agreement, including
+consumer protection rights; nothing here takes those away, and where local law
+must override this section it does, with the rest of this licence left standing.
 
 **Before filing anything, talk to me.** Email mani@growthcreators.ai with what
 happened and give it thirty days. Most of what could go wrong here is a
 misunderstanding about scope, and a conversation settles it faster and cheaper
 than either of us going near a court.
 
-Either of us may still bring a claim in small claims court, and either of us may
-seek an injunction anywhere to stop unauthorised copying or redistribution
-without waiting out the thirty days.
+Either of us may still bring a claim in a small claims court or tribunal, and
+either of us may seek an injunction in any court that will hear it to stop
+unauthorised copying or redistribution, without waiting out the thirty days.
 
 ## 11. General
 
@@ -169,4 +179,4 @@ varied in writing by Mani Kanasani.
 
 *Written for clarity by someone who is not a lawyer. It says what it means and
 it is enforceable in shape, but if a serious sum or a serious dispute ever turns
-on it, have a solicitor read it once.*
+on it, have a BC lawyer read it once.*

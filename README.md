@@ -133,16 +133,18 @@ supabase functions serve generate-proposal --env-file supabase/functions/.env
 
 ## Licence
 
-Not open source. This is provided to one named individual for their own use:
-run your own outreach, self-hosted, on your own keys. You may not resell it,
-redistribute it, offer it as a service, or hand it on as though it came from
-Mani Kanasani. If someone else wants a copy, send them to him rather than
-sending them the software.
+Not open source. Copyright AI Growth Partners, Inc., doing business as Vertical
+AI Systems. Provided to one named individual for their own use: run your own
+outreach, self-hosted, on your own keys. You may not resell it, redistribute it,
+offer it as a service, or hand it on as though it came from Mani Kanasani. If
+someone else wants a copy, send them to him rather than sending them the
+software.
 
 It generates text with AI, which means it will sometimes be confidently wrong,
 including invented figures and invented sources. Everything it produces is a
 draft for you to check before it reaches another person. Outreach is also
 regulated, and what you send is your responsibility. There is no warranty and
-no liability. Use it at your own risk.
+no liability, and it is governed by the law of British Columbia. Use it at your
+own risk.
 
 Full terms: **[LICENSE](LICENSE)**.
