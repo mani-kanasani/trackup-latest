@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Compass, Plus, Trash2, Loader2, Quote, AlertTriangle, Check } from 'lucide-react';
 import { useVerticalBrief } from '../../lib/vertical/useVerticalBrief';
 import { renderBrief } from '../../lib/vertical/render';
+import { BriefExtractor } from './BriefExtractor';
+import type { ReviewedBrief } from '../../lib/vertical/extract';
 import {
   FAILURE_CATEGORIES,
   type FailureCategory,
@@ -43,12 +45,35 @@ export const VerticalBriefPanel: React.FC = () => {
   const [draft, setDraft] = useState<Partial<VerticalBrief> | null>(null);
   const [evDraft, setEvDraft] = useState<Partial<IndustryEvidence> | null>(null);
   const [busy, setBusy] = useState(false);
+  // Evidence waiting on the vertical being saved. Rows need a brief_id, so a
+  // first-time extraction has nowhere to put them until the brief exists.
+  const [pendingEvidence, setPendingEvidence] = useState<ReviewedBrief['evidence']>([]);
   const [error, setError] = useState('');
 
   const current = draft ?? brief ?? null;
 
   const set = (patch: Partial<VerticalBrief>) =>
     setDraft({ ...(draft ?? brief ?? { failure_scenarios: [] }), ...patch });
+
+  const applyExtraction = (r: ReviewedBrief, document: string) => {
+    set({
+      vertical: r.vertical ?? current?.vertical ?? '',
+      buyer_role: r.buyer_role ?? current?.buyer_role ?? '',
+      function_language: r.function_language ?? current?.function_language ?? '',
+      prototype_note: r.prototype_note ?? current?.prototype_note ?? '',
+      offer_shapes: r.offer_shapes ?? current?.offer_shapes ?? '',
+      failure_scenarios: r.failure_scenarios?.length
+        ? r.failure_scenarios
+        : current?.failure_scenarios ?? [],
+      // Kept so the brief can be rebuilt later without asking for the paste
+      // again. Never sent to a generator: it is the 17,000 characters the
+      // brief exists to replace.
+      source_text: document,
+    });
+    // Only the rows that survived reconciliation. The rejected ones stay on
+    // screen as an explanation, and never reach the database.
+    setPendingEvidence(r.evidence.filter((e) => e.ok));
+  };
 
   const save = async () => {
     if (!draft) return;
@@ -58,12 +83,31 @@ export const VerticalBriefPanel: React.FC = () => {
     }
     setBusy(true);
     const { error: e } = await saveBrief(draft);
-    setBusy(false);
-    if (e) setError(e);
-    else {
-      setDraft(null);
-      setError('');
+    if (e) {
+      setBusy(false);
+      setError(e);
+      return;
     }
+    // Extracted rows are written only after the brief exists, because they are
+    // keyed to it. Anything that fails here is reported rather than swallowed,
+    // so nobody ends up with a vertical whose evidence silently vanished.
+    const failed: string[] = [];
+    for (const row of pendingEvidence) {
+      const { error: evErr } = await addEvidence({
+        claim: row.claim,
+        metric: row.metric ?? null,
+        source_name: row.source_name as string,
+        source_year: row.source_year ?? null,
+        applies_to: row.applies_to ?? null,
+        scope: row.scope ?? 'vertical',
+        confirmed: false,
+      });
+      if (evErr) failed.push(row.claim);
+    }
+    setPendingEvidence([]);
+    setBusy(false);
+    setDraft(null);
+    setError(failed.length ? `Saved, but ${failed.length} citation(s) could not be stored: ${failed.join('; ')}` : '');
   };
 
   const scenarios = current?.failure_scenarios ?? [];
@@ -115,6 +159,8 @@ export const VerticalBriefPanel: React.FC = () => {
           {error}
         </div>
       )}
+
+      <BriefExtractor onApply={applyExtraction} />
 
       <div className="grid sm:grid-cols-2 gap-4">
         <Field label="The vertical" hint="Say it the way you would on a call.">

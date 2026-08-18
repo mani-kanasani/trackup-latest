@@ -8,7 +8,16 @@
 //
 // So every function stamps its contract version and the client checks it.
 
-export const EXPECTED_CONTRACT = 2;
+/*
+  Bumped to 3 when OpenRouter landed.
+
+  This was left at 2 while the functions moved to 3, which is the failure this
+  file exists to prevent, only inverted: the check is `version < EXPECTED`, so
+  someone still running v2 functions was told everything was fine and then hit a
+  confusing provider error the moment they picked OpenRouter. The number here
+  and the CONTRACT in every function have to move together.
+*/
+export const EXPECTED_CONTRACT = 3;
 
 /** What version a response claims to be, or null when it carries no marker. */
 export const contractOf = (payload: unknown): number | null => {
@@ -32,14 +41,14 @@ export const outOfDateMessage = (payload: unknown): string => {
     ? 'The function that answered carries no version at all, so it is running code from before this check existed.'
     : `The function that answered reports version ${got}; this app needs ${EXPECTED_CONTRACT}.`;
   return (
-    `${seen} Redeploy generate-outreach and generate-proposal from THIS build. ` +
+    `${seen} Redeploy all four functions from THIS build. ` +
     'Settings shows the exact source to paste, and Test this key will tell you which version is live once you have. ' +
     'If you copied the source from a deployed site, make sure that site has rebuilt from the latest commit first.'
   );
 };
 
 export const OUT_OF_DATE =
-  'Your Supabase edge functions are an older version than this app expects. Redeploy all three, then try again.';
+  'Your Supabase edge functions are an older version than this app expects. Redeploy all four, then try again.';
 
 /** True when the response came from a deployment older than this build. */
 export const isStaleDeployment = (payload: unknown): boolean => {
@@ -90,7 +99,7 @@ export interface FunctionVersion {
 export const probeFunctionVersions = async (
   invoke: (name: string) => Promise<{ data: unknown; error: unknown }>,
 ): Promise<FunctionVersion[]> => {
-  const names = ['generate-proposal', 'generate-outreach', 'list-models'];
+  const names = ['generate-proposal', 'generate-outreach', 'list-models', 'extract-brief'];
   const out: FunctionVersion[] = [];
   for (const name of names) {
     try {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import functionSource from '../../../supabase/functions/generate-proposal/index.ts?raw';
 import outreachSource from '../../../supabase/functions/generate-outreach/index.ts?raw';
 import listModelsSource from '../../../supabase/functions/list-models/index.ts?raw';
+import extractBriefSource from '../../../supabase/functions/extract-brief/index.ts?raw';
 import {
   Database,
   ExternalLink,
@@ -269,7 +270,7 @@ export const SupabaseSetup: React.FC = () => {
                     Supabase rejects the call before the function runs, so the
                     failure looks like a broken function rather than a setting. */}
                 <div className="text-sm bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-xl p-3">
-                  <span className="font-semibold">Required, on all three:</span> after deploying each function, open its
+                  <span className="font-semibold">Required, on all four:</span> after deploying each function, open its
                   settings and turn <span className="font-semibold">OFF “Verify JWT”</span>. Leave it on and Supabase
                   rejects the request before your function ever runs, so generation fails with an error that looks like
                   the function is broken. Nothing is left unprotected: each function checks the signed-in user itself.
@@ -284,6 +285,8 @@ export const SupabaseSetup: React.FC = () => {
                 <CopyBlock id="fn2" text={outreachSource} label="Copy generate-outreach" />
                 <p className="text-sm font-mono text-gray-700 dark:text-gray-300 pt-1">list-models</p>
                 <CopyBlock id="fn3" text={listModelsSource} label="Copy list-models" />
+                <p className="text-sm font-mono text-gray-700 dark:text-gray-300 pt-1">extract-brief</p>
+                <CopyBlock id="fn4" text={extractBriefSource} label="Copy extract-brief" />
                 <a href="https://supabase.com/dashboard/project/_/functions" target="_blank" rel="noopener noreferrer" className={linkClass}>
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Open Edge Functions

@@ -19,7 +19,7 @@ import type { Violation } from '../method/types';
  * and miss the other, which is worse than not checking at all: it would teach
  * people the check works.
  */
-const normalise = (s: string): string =>
+export const normalise = (s: string): string =>
   s
     .toLowerCase()
     .replace(/(\d),(?=\d{3}\b)/g, '$1')

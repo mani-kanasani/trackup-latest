@@ -164,9 +164,9 @@ export const Settings: React.FC = () => {
       const live = contractOf(data);
       const backend =
         live === null
-          ? ' Your edge functions are running code older than this app expects, so generation will fail until you redeploy all three from this build.'
+          ? ' Your edge functions are running code older than this app expects, so generation will fail until you redeploy all four from this build.'
           : live < EXPECTED_CONTRACT
-            ? ` Your edge functions report version ${live}; this app needs ${EXPECTED_CONTRACT}. Redeploy all three.`
+            ? ` Your edge functions report version ${live}; this app needs ${EXPECTED_CONTRACT}. Redeploy all four.`
             : ` Backend version ${live}, up to date.`;
       setTestResult({
         ok: ranTest && live !== null && live >= EXPECTED_CONTRACT,
@@ -296,7 +296,7 @@ export const Settings: React.FC = () => {
               <p className="font-semibold text-gray-800 dark:text-gray-200 mb-1">
                 Deployed function versions (this app needs {EXPECTED_CONTRACT})
               </p>
-              {/* The project being read, spelled out. When all three functions
+              {/* The project being read, spelled out. When all four functions
                   report stale after a redeploy that definitely happened, the
                   usual cause is that the deploy landed in a different project
                   from the one the app is pointed at, and nothing on screen said

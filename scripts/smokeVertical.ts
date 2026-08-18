@@ -6,6 +6,7 @@ import { checkAttribution, figuresIn, isAttributed } from '../src/lib/vertical/a
 import { renderBrief } from '../src/lib/vertical/render';
 import { buildChannelPrompt } from '../src/lib/method/forChannel';
 import type { IndustryEvidence, LoadedBrief, VerticalBrief } from '../src/lib/vertical/types';
+import { reviewExtraction, EXTRACTION_SYSTEM } from '../src/lib/vertical/extract';
 
 let failures = 0;
 const check = (name: string, cond: boolean, detail = '') => {
@@ -145,6 +146,65 @@ check(
   'no brief means no vertical section even in vertical mode',
   !buildChannelPrompt('coldEmail', { verticalMode: 'vertical' }).systemPrompt.includes("reader's category"),
 );
+
+
+// ---- the extractor is not trusted with attribution
+//
+// A model summarising a long document under instruction to produce citations is
+// exactly where a confident, invented source appears. Stored, it would leave the
+// attribution law enforcing a citation that does not exist, which is worse than
+// having no law at all, because the copy then looks checked.
+const DOC = [
+  'Personal injury law blueprint.',
+  'About 38% of personal injury leads arrive after hours, and a lead contacted within five',
+  'minutes is 21 times more likely to qualify, per the Hennessey Digital 2025 lead-response',
+  'study of 1,333 firms. The ABA 2025 TechReport finds 41% of firms name intake as their',
+  'number one bottleneck. We cut a client demand-letter cycle from 15 hours to 3.',
+].join(' ');
+
+const reviewed = reviewExtraction({
+  vertical: 'Personal injury law, US firms',
+  industry_evidence: [
+    { claim: 'Fast response wins', metric: '21 times more likely', source_name: 'Hennessey Digital' },
+    { claim: 'Intake is the bottleneck', metric: '41%', source_name: 'ABA TechReport', source_year: '2025' },
+    { claim: 'Firms see big gains', metric: '63% uplift', source_name: 'McKinsey' },
+    { claim: 'Response times matter a lot', metric: '99%', source_name: 'Hennessey Digital' },
+    { claim: 'Something everyone knows', metric: '55%' },
+  ],
+}, DOC);
+
+const byClaim = (c: string) => reviewed.evidence.find((e) => e.claim === c)!;
+check('a real source in the document is kept', byClaim('Fast response wins').ok);
+check(
+  'a source named slightly differently still matches',
+  byClaim('Intake is the bottleneck').ok,
+  'ABA TechReport against ABA 2025 TechReport',
+);
+check(
+  'an invented source is rejected',
+  !byClaim('Firms see big gains').ok && byClaim('Firms see big gains').reason === 'source-not-in-document',
+);
+check(
+  'a figure not in the document is rejected',
+  !byClaim('Response times matter a lot').ok &&
+    byClaim('Response times matter a lot').reason === 'figure-not-in-document',
+);
+check(
+  'a claim with no source at all is rejected',
+  !byClaim('Something everyone knows').ok && byClaim('Something everyone knows').reason === 'no-source',
+);
+check('only verified rows are counted', reviewed.keptCount === 2, 'kept 2 of 5');
+check('every rejection explains itself', reviewed.evidence.filter((e) => !e.ok).every((e) => !!e.note));
+check('kept rows default to vertical scope', byClaim('Fast response wins').scope === 'vertical');
+check('the brief fields survive review', reviewed.vertical === 'Personal injury law, US firms');
+check('rejects are returned for review, never dropped silently', reviewed.evidence.length === 5);
+
+check('the instruction forbids inventing a source', /NEVER invent a source/.test(EXTRACTION_SYSTEM));
+check(
+  'the instruction names all three buckets',
+  ['industry_evidence', 'first_party_claims', 'unsourced_claims'].every((k) => EXTRACTION_SYSTEM.includes(k)),
+);
+check('the instruction keeps pricing out of offer shapes', /Never include prices/.test(EXTRACTION_SYSTEM));
 
 console.log(`\nbrief adds ${on.systemPrompt.length - off.systemPrompt.length} chars to the prompt.`);
 console.log(failures ? `\n${failures} FAILURES\n` : '\nall checks passed\n');
