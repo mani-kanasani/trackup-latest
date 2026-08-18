@@ -67,7 +67,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log(`Fetched ${data.length} materials from database`);
 
-      const formattedMaterials = data.map((item: any) => ({
+      // The four fields this mapper actually touches. Postgres returns numerics
+      // as strings and timestamps as ISO strings, which is the whole reason the
+      // mapper exists; the rest of the row passes through untouched.
+      type MaterialRow = Omit<
+        JobMaterial,
+        'proposed_amount' | 'actual_amount' | 'created_at' | 'updated_at'
+      > & {
+        proposed_amount?: string | number | null;
+        actual_amount?: string | number | null;
+        created_at: string;
+        updated_at: string;
+      };
+
+      const formattedMaterials = data.map((item: MaterialRow) => ({
         ...item,
         proposed_amount: item.proposed_amount ? Number(item.proposed_amount) : undefined,
         actual_amount: item.actual_amount ? Number(item.actual_amount) : undefined,
@@ -197,13 +210,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           start: today,
           end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1)
         };
-      case 'week':
+      case 'week': {
+        // Braced: a bare `case` shares one scope with its siblings, so this
+        // const is visible (and in its temporal dead zone) inside every other
+        // branch of the switch.
         const weekStart = new Date(today);
         weekStart.setDate(today.getDate() - today.getDay());
         return {
           start: weekStart,
           end: new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000 - 1)
         };
+      }
       case 'month':
         return {
           start: new Date(now.getFullYear(), now.getMonth(), 1),

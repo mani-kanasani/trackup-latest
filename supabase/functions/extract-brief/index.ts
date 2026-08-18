@@ -202,7 +202,17 @@ Deno.serve(async (req: Request) => {
         cors,
       );
     }
-    const keys = input.keys?.length ? input.keys : [];
+    // Guarded like `system`. Without keys the prompt asks for an empty object
+    // and the model returns one, which reads as "the extractor found nothing in
+    // my document" rather than as a client that failed to send its contract.
+    const keys = input.keys ?? [];
+    if (!keys.length) {
+      return json(
+        { error: 'No output keys were supplied. Update the app so it sends the brief contract.' },
+        400,
+        cors,
+      );
+    }
 
     const prompt =
       `Read the document below and return a single JSON object with exactly these keys:\n` +

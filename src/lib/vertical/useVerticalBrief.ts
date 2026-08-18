@@ -45,7 +45,10 @@ export const useVerticalBrief = () => {
     }
 
     setLoadError(null);
-    const row = (data as VerticalBrief | null) ?? null;
+    const raw = (data as VerticalBrief | null) ?? null;
+    const row = raw
+      ? { ...raw, failure_scenarios: Array.isArray(raw.failure_scenarios) ? raw.failure_scenarios : [] }
+      : null;
     setBrief(row);
 
     if (!row) {
@@ -130,8 +133,21 @@ export const useVerticalBrief = () => {
     return {};
   };
 
-  /** Exactly what the generators want, or null when there is nothing to send. */
-  const loaded: LoadedBrief | null = brief ? { brief, evidence } : null;
+  /**
+   * Exactly what the generators want, or null when there is nothing safe to send.
+   *
+   * Null on ANY load error, including one where the brief itself arrived and
+   * only its evidence failed. That partial state is the dangerous one: the
+   * generation would carry the vertical section while the evidence list was
+   * empty, so the attribution check would have nothing to enforce against and a
+   * borrowed figure could go out uncited and pass clean. The UI already says a
+   * failed load falls back to generic; this makes that true rather than a claim.
+   *
+   * Also null when the vertical is blank. A row can exist with an empty string,
+   * and injecting a section headed by nothing helps no one.
+   */
+  const loaded: LoadedBrief | null =
+    brief && !loadError && brief.vertical?.trim() ? { brief, evidence } : null;
 
   return {
     brief,

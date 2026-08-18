@@ -51,9 +51,26 @@ export const Apply: React.FC = () => {
   const [sentEvidence, setSentEvidence] = useState<IndustryEvidence[]>([]);
   // Derived, not latched. Same reason as the LinkedIn app: a check that fires
   // once and disappears has nothing to say about the letter you actually send.
+  /*
+    Attribution has to keep working after a reload.
+
+    sentEvidence is state, and this component remounts per selection, so on
+    reopening a prospect it is empty and the attribution rule silently has
+    nothing to check while every other rule still runs. That is the "fires once
+    and vanishes" failure the derived check was written to avoid, reintroduced
+    for the one rule whose whole job is catching an uncited borrowed number.
+    Falling back to the current evidence re-grades stored copy.
+  */
+  // Memoised: a fresh array literal on every render would change the
+  // dependency of the check below every time, so the memo would recompute
+  // the whole validation pass on each keystroke.
+  const evidenceToGrade = useMemo(
+    () => (sentEvidence.length ? sentEvidence : brief?.evidence ?? []),
+    [sentEvidence, brief],
+  );
   const check = useMemo(
-    () => (generatedData?.steps ? checkAgainstMethod('upwork', generatedData.steps, sentEvidence) : null),
-    [generatedData, sentEvidence],
+    () => (generatedData?.steps ? checkAgainstMethod('upwork', generatedData.steps, evidenceToGrade) : null),
+    [generatedData, evidenceToGrade],
   );
   const describeViolation = (v: NonNullable<typeof check>['violations'][number]) =>
     `${v.message}${v.excerpt ? `, "${v.excerpt}"` : ''}`;

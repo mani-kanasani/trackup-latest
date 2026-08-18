@@ -4,6 +4,7 @@ import { KPICard } from '../components/UI/KPICard';
 import { CircularProgress } from '../components/UI/CircularProgress';
 import { DateFilter } from '../components/UI/DateFilter';
 import { StatusBadge } from '../components/UI/StatusBadge';
+import type { JobStatus } from '../types';
 import { useData } from '../contexts/DataContext';
 import { DateFilter as DateFilterType, DateRange } from '../types';
 import { EmberMark } from '../components/UI/EmberMark';
@@ -111,7 +112,7 @@ export const Dashboard: React.FC = () => {
           <div className="flex flex-wrap gap-3 mb-8">
             {Object.entries(statusCounts).map(([status, count]) => (
               <div key={status} className="flex items-center space-x-2 animate-fade-in">
-                <StatusBadge status={status as any} />
+                <StatusBadge status={status as JobStatus} />
                 <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                   ({count})
                 </span>

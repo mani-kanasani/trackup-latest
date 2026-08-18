@@ -163,9 +163,26 @@ const ProspectDetail: React.FC<{
 
   // Derived, never latched. Same reasoning as the other two apps: a check that
   // fires once and vanishes says nothing about the copy actually sent.
+  /*
+    Attribution has to keep working after a reload.
+
+    sentEvidence is state, and this component remounts per selection, so on
+    reopening a prospect it is empty and the attribution rule silently has
+    nothing to check while every other rule still runs. That is the "fires once
+    and vanishes" failure the derived check was written to avoid, reintroduced
+    for the one rule whose whole job is catching an uncited borrowed number.
+    Falling back to the current evidence re-grades stored copy.
+  */
+  // Memoised: a fresh array literal on every render would change the
+  // dependency of the check below every time, so the memo would recompute
+  // the whole validation pass on each keystroke.
+  const evidenceToGrade = useMemo(
+    () => (sentEvidence.length ? sentEvidence : brief?.evidence ?? []),
+    [sentEvidence, brief],
+  );
   const check = useMemo(
-    () => (sequence ? checkAgainstMethod('coldEmail', sequence, sentEvidence) : null),
-    [sequence, sentEvidence],
+    () => (sequence ? checkAgainstMethod('coldEmail', sequence, evidenceToGrade) : null),
+    [sequence, evidenceToGrade],
   );
   const describe = (v: ValidationResult['violations'][number]) =>
     `${v.message}${v.excerpt ? `, "${v.excerpt}"` : ''}`;

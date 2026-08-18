@@ -88,7 +88,22 @@ export const BriefExtractor: React.FC<{
           keys: [...EXTRACTION_KEYS],
         },
       });
-      if (fnError) throw fnError;
+      if (fnError) {
+        // supabase-js turns any non-2xx into a FunctionsHttpError whose message
+        // is the useless "Edge Function returned a non-2xx status code", and
+        // puts the real body behind `context`. Every actionable message the
+        // function produces ("that is too short", "choose a model first") lives
+        // in that body, so throwing the error as-is loses all of them.
+        const ctx = (fnError as { context?: Response }).context;
+        let detail: string | null = null;
+        if (ctx?.json) {
+          const body = await ctx.json().catch(() => null);
+          if (body && typeof body === 'object' && typeof (body as { error?: unknown }).error === 'string') {
+            detail = (body as { error: string }).error;
+          }
+        }
+        throw new Error(detail ?? (fnError as Error).message);
+      }
       if (isStaleDeployment(data)) throw new Error(outOfDateMessage(data));
 
       const payload = (data as { brief?: ExtractedBrief; error?: string } | null) ?? null;
