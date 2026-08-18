@@ -13,6 +13,7 @@ import { supabase } from '../lib/supabase';
 import { contractOf, EXPECTED_CONTRACT, probeFunctionVersions, type FunctionVersion } from '../lib/deployment';
 import { ModelSelect } from '../components/UI/ModelSelect';
 import { CaseStudyVault } from '../components/Settings/CaseStudyVault';
+import { VerticalBriefPanel } from '../components/Settings/VerticalBriefPanel';
 
 /**
  * What is actually sent, so "there is no prompt" is answerable by reading it.
@@ -425,6 +426,8 @@ export const Settings: React.FC = () => {
       </div>
 
       <CaseStudyVault />
+
+      <VerticalBriefPanel />
 
       {/* System prompts */}
       <div className="card-modern p-8 animate-rise">

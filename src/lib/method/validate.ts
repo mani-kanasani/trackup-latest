@@ -5,6 +5,8 @@
 // the layer that catches it, so the user sees the violation instead of sending it.
 
 import { subjectKey } from './types';
+import { checkAttribution } from '../vertical/attribution';
+import type { IndustryEvidence } from '../vertical/types';
 import type { MethodPack, StructureStep, ValidationResult, Violation } from './types';
 
 /** Output keyed by structure step: { opener: "...", value: "..." }. */
@@ -50,7 +52,24 @@ const checkLength = (step: StructureStep, text: string): Violation[] => {
   ];
 };
 
-export const validateOutput = (pack: MethodPack, output: GeneratedOutput): ValidationResult => {
+/** Extra material the output must be graded against, beyond the pack itself. */
+export interface ValidateOptions {
+  /**
+   * The industry evidence sent with this prompt.
+   *
+   * Passed in rather than read from storage so the validator grades what was
+   * ACTUALLY sent. Grading against whatever the vault holds now would flag copy
+   * generated before a row was added, and miss copy generated before one was
+   * deleted.
+   */
+  evidence?: IndustryEvidence[];
+}
+
+export const validateOutput = (
+  pack: MethodPack,
+  output: GeneratedOutput,
+  options: ValidateOptions = {},
+): ValidationResult => {
   const violations: Violation[] = [];
 
   for (const step of pack.structure) {
@@ -65,6 +84,7 @@ export const validateOutput = (pack: MethodPack, output: GeneratedOutput): Valid
     }
     violations.push(...checkBanned(pack, step.key, text));
     violations.push(...checkLength(step, text));
+    violations.push(...checkAttribution(step.key, text, options.evidence ?? []));
 
     // Subjects are graded too, and against the same banned patterns.
     //
@@ -84,6 +104,7 @@ export const validateOutput = (pack: MethodPack, output: GeneratedOutput): Valid
       continue;
     }
     violations.push(...checkBanned(pack, sKey, subject));
+    violations.push(...checkAttribution(sKey, subject, options.evidence ?? []));
     violations.push(
       ...checkLength(
         { ...step, key: sKey, label: `${step.label} subject`, maxChars: step.subject.maxChars },

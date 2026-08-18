@@ -24,6 +24,10 @@ import { loadUserContext, senderAbout } from '../../lib/userContext';
 import { buildChannelPrompt, checkAgainstMethod } from '../../lib/method/forChannel';
 import { getPack } from '../../lib/method/packs';
 import { subjectKey } from '../../lib/method/types';
+import { useVerticalBrief } from '../../lib/vertical/useVerticalBrief';
+import type { IndustryEvidence } from '../../lib/vertical/types';
+import { useVerticalMode } from '../../lib/vertical/useVerticalMode';
+import { VerticalToggle } from '../../components/UI/VerticalToggle';
 import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
 import { AppBar } from '../../components/Layout/AppBar';
@@ -147,14 +151,21 @@ const ProspectDetail: React.FC<{
   const [proofUsed, setProofUsed] = useState<string | null>(null);
   const [noProof, setNoProof] = useState(false);
 
+  const { loaded: brief, loading: briefLoading, loadError: briefError } = useVerticalBrief();
+  const { mode, setMode } = useVerticalMode('coldEmail');
+  // The evidence actually sent with the last generation, so the validator
+  // grades attribution against what the model was given rather than against
+  // whatever the vault holds now.
+  const [sentEvidence, setSentEvidence] = useState<IndustryEvidence[]>([]);
+
   const sequence = prospect.sequence ?? localSeq;
   const sentSteps = useMemo(() => readSentSteps(prospect.sent_steps), [prospect.sent_steps]);
 
   // Derived, never latched. Same reasoning as the other two apps: a check that
   // fires once and vanishes says nothing about the copy actually sent.
   const check = useMemo(
-    () => (sequence ? checkAgainstMethod('coldEmail', sequence) : null),
-    [sequence],
+    () => (sequence ? checkAgainstMethod('coldEmail', sequence, sentEvidence) : null),
+    [sequence, sentEvidence],
   );
   const describe = (v: ValidationResult['violations'][number]) =>
     `${v.message}${v.excerpt ? `, "${v.excerpt}"` : ''}`;
@@ -205,7 +216,10 @@ const ProspectDetail: React.FC<{
           .filter(Boolean).join(' · '),
       },
       qualification: verdict,
+      brief,
+      verticalMode: mode,
     });
+    setSentEvidence(method.evidence);
     setProofUsed(method.chosen ? method.chosen.caseStudy.title : null);
     setNoProof(method.proofEmpty);
 
@@ -252,7 +266,7 @@ const ProspectDetail: React.FC<{
         tier: verdict.tier,
         rung: verdict.rung,
         verdict: verdict.verdict,
-        violation_ids: checkAgainstMethod('coldEmail', seqData as Record<string, string>)
+        violation_ids: checkAgainstMethod('coldEmail', seqData as Record<string, string>, method.evidence)
           .violations.map((v) => v.patternId ?? v.lawId ?? 'empty-step'),
       };
 
@@ -369,6 +383,15 @@ const ProspectDetail: React.FC<{
               {STATUS_ORDER.filter(isProspectTerminal).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
             </optgroup>
           </select>
+          <div className="w-full sm:w-auto sm:ml-auto">
+            <VerticalToggle
+              mode={mode}
+              onChange={setMode}
+              vertical={brief?.brief.vertical}
+              loading={briefLoading}
+              unavailable={Boolean(briefError)}
+            />
+          </div>
           <button
             onClick={handleGenerate}
             disabled={generating || prospect.opted_out || (declined && !override)}

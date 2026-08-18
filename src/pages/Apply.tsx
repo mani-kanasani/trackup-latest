@@ -6,6 +6,10 @@ import { supabase } from '../lib/supabase';
 import { loadAIConfig } from '../lib/aiConfig';
 import { loadUserContext, senderAbout } from '../lib/userContext';
 import { buildChannelPrompt, checkAgainstMethod } from '../lib/method/forChannel';
+import { useVerticalBrief } from '../lib/vertical/useVerticalBrief';
+import { useVerticalMode } from '../lib/vertical/useVerticalMode';
+import type { IndustryEvidence } from '../lib/vertical/types';
+import { VerticalToggle } from '../components/UI/VerticalToggle';
 import { useCaseStudies } from '../lib/proof';
 import { QualifyPanel } from '../components/Qualify/QualifyPanel';
 import { qualify, isBlocked } from '../lib/qualify/score';
@@ -39,11 +43,17 @@ export const Apply: React.FC = () => {
   const [override, setOverride] = useState(false);
   const verdict = useMemo(() => qualify(qual ?? {}), [qual]);
   const declined = isBlocked(verdict);
+  const { loaded: brief, loading: briefLoading, loadError: briefError } = useVerticalBrief();
+  // Upwork defaults to generic: most jobs are not vertical work. The control is
+  // still here because a vertical Upwork job is a real case, and a switch that
+  // exists on two apps out of three reads as a missing feature.
+  const { mode, setMode } = useVerticalMode('upwork');
+  const [sentEvidence, setSentEvidence] = useState<IndustryEvidence[]>([]);
   // Derived, not latched. Same reason as the LinkedIn app: a check that fires
   // once and disappears has nothing to say about the letter you actually send.
   const check = useMemo(
-    () => (generatedData?.steps ? checkAgainstMethod('upwork', generatedData.steps) : null),
-    [generatedData],
+    () => (generatedData?.steps ? checkAgainstMethod('upwork', generatedData.steps, sentEvidence) : null),
+    [generatedData, sentEvidence],
   );
   const describeViolation = (v: NonNullable<typeof check>['violations'][number]) =>
     `${v.message}${v.excerpt ? `, "${v.excerpt}"` : ''}`;
@@ -85,7 +95,10 @@ export const Apply: React.FC = () => {
       vaultUnavailable: Boolean(vaultError),
       target: { notes: `${jobTitle}\n\n${jobSummary}` },
       qualification: verdict,
+      brief,
+      verticalMode: mode,
     });
+    setSentEvidence(method.evidence);
     setProofUsed(method.chosen ? method.chosen.caseStudy.title : null);
     setNoProof(method.proofEmpty);
 
@@ -331,6 +344,14 @@ export const Apply: React.FC = () => {
               {error}
             </div>
           )}
+
+          <VerticalToggle
+            mode={mode}
+            onChange={setMode}
+            vertical={brief?.brief.vertical}
+            loading={briefLoading}
+            unavailable={Boolean(briefError)}
+          />
 
           <button
             onClick={handleGenerate}

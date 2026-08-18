@@ -12,6 +12,10 @@ import { supabase } from '../../lib/supabase';
 import { loadAIConfig } from '../../lib/aiConfig';
 import { loadUserContext, senderAbout } from '../../lib/userContext';
 import { buildChannelPrompt, checkAgainstMethod } from '../../lib/method/forChannel';
+import { useVerticalBrief } from '../../lib/vertical/useVerticalBrief';
+import { useVerticalMode } from '../../lib/vertical/useVerticalMode';
+import type { IndustryEvidence } from '../../lib/vertical/types';
+import { VerticalToggle } from '../../components/UI/VerticalToggle';
 import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
 import { AppBar } from '../../components/Layout/AppBar';
@@ -233,6 +237,10 @@ const LeadDetail: React.FC<{
   // Holds a generation that could not be persisted, so it survives on screen.
   const [localFlow, setLocalFlow] = useState<OutreachFlow | null>(null);
   const [proofUsed, setProofUsed] = useState<string | null>(null);
+  const { loaded: brief, loading: briefLoading, loadError: briefError } = useVerticalBrief();
+  const { mode, setMode } = useVerticalMode('linkedin');
+  // Graded against what was actually sent, not against the vault as it stands now.
+  const [sentEvidence, setSentEvidence] = useState<IndustryEvidence[]>([]);
   const lastGeneration = lead.generation_meta?.[lead.generation_meta.length - 1] ?? null;
   const [noProof, setNoProof] = useState(false);
   const flow = useMemo(() => migrateFlow(lead.outreach ?? localFlow), [lead.outreach, localFlow]);
@@ -258,8 +266,8 @@ const LeadDetail: React.FC<{
   );
 
   const check = useMemo(
-    () => (flow && !flowIsEmpty ? checkAgainstMethod('linkedin', flow) : null),
-    [flow, flowIsEmpty],
+    () => (flow && !flowIsEmpty ? checkAgainstMethod('linkedin', flow, sentEvidence) : null),
+    [flow, flowIsEmpty, sentEvidence],
   );
   const describeViolation = (v: ValidationResult['violations'][number]) =>
     `${v.message}${v.excerpt ? `, "${v.excerpt}"` : ''}`;
@@ -361,7 +369,10 @@ const LeadDetail: React.FC<{
       // The screen's verdict travels into the prompt: it decides what job the
       // message has to do, and caps what the copy may claim to know about them.
       qualification: verdict,
+      brief,
+      verticalMode: mode,
     });
+    setSentEvidence(method.evidence);
     setProofUsed(method.chosen ? method.chosen.caseStudy.title : null);
     setNoProof(method.proofEmpty);
     try {
@@ -421,7 +432,7 @@ const LeadDetail: React.FC<{
         verdict: verdict.verdict,
         // Ids only. The excerpts are the user's own copy and have no business
         // being duplicated into a log.
-        violation_ids: checkAgainstMethod('linkedin', flowData as Record<string, string>)
+        violation_ids: checkAgainstMethod('linkedin', flowData as Record<string, string>, method.evidence)
           .violations.map((v) => v.patternId ?? v.lawId ?? 'empty-step'),
       };
 
@@ -525,6 +536,15 @@ const LeadDetail: React.FC<{
               {STATUS_ORDER.filter(isTerminal).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
             </optgroup>
           </select>
+          <div className="w-full sm:w-auto sm:ml-auto">
+            <VerticalToggle
+              mode={mode}
+              onChange={setMode}
+              vertical={brief?.brief.vertical}
+              loading={briefLoading}
+              unavailable={Boolean(briefError)}
+            />
+          </div>
           <button
             onClick={handleGenerate}
             disabled={generating || (declined && !override)}

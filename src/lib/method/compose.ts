@@ -18,6 +18,16 @@ export interface ComposeInput {
   qualification?: string;
   /** Who the user is: background, positioning, offer. */
   context?: string;
+  /**
+   * The vertical brief, already rendered: how this category loses money, and
+   * the published research about it.
+   *
+   * Sits BEFORE proof and never merges with it. Everything here belongs to
+   * somebody else; everything in proof belongs to the sender. Two adjacent
+   * sections carrying opposite instructions is the whole safety mechanism, so
+   * they must not later be combined into one "context" blob.
+   */
+  vertical?: string;
   /** Selected case studies, already rendered to text. */
   proof?: string;
   /** The user's own additions to the persona. Never replaces the laws. */
@@ -30,6 +40,7 @@ export const composeSystemPrompt = ({
   pack,
   qualification,
   context,
+  vertical,
   proof,
   userPrompt,
 }: ComposeInput): string => {
@@ -79,9 +90,19 @@ export const composeSystemPrompt = ({
     );
   }
 
+  if (vertical?.trim()) {
+    sections.push(
+      `## The reader's category. Written by other people, not by the sender.
+` +
+        `Use this to sound like someone who works in this vertical every day. Nothing in this ` +
+        `section is the sender's own result, and presenting any of it as theirs is a hard failure.
+${vertical.trim()}`,
+    );
+  }
+
   if (proof?.trim()) {
     sections.push(
-      `## The sender's verified proof. Use at most ONE per message, matched to the reader's world.\n` +
+      `## The sender's verified proof. This IS theirs, unlike the section above. Use at most ONE per message, matched to the reader's world.\n` +
         `Never use a number that does not appear below, and never round one up.\n${proof.trim()}`,
     );
   }

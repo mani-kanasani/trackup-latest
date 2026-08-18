@@ -6,6 +6,9 @@
 // is gathered here so no page has to remember the composition order.
 
 import { getPack } from './packs';
+import { renderBrief } from '../vertical/render';
+import { DEFAULT_MODE } from '../vertical/types';
+import type { IndustryEvidence, LoadedBrief, VerticalMode } from '../vertical/types';
 import { composeSystemPrompt } from './compose';
 import { validateOutput, type GeneratedOutput } from './validate';
 import { subjectKey } from './types';
@@ -59,6 +62,19 @@ export interface BuildOptions {
    * empty vault gets, because a half-adopted feature must not break the app.
    */
   qualification?: QualificationResult;
+  /**
+   * The member's vertical brief. Omitted, or with mode 'generic', the prompt
+   * carries no vertical section at all and behaves exactly as before.
+   */
+  brief?: LoadedBrief | null;
+  /**
+   * Whether this generation should use the brief.
+   *
+   * Deliberately explicit rather than inferred from `brief` being present. A
+   * caller that simply forgot to pass the mode gets the channel default, not a
+   * silent switch of behaviour, and the person can see which one is in force.
+   */
+  verticalMode?: VerticalMode;
 }
 
 /**
@@ -116,6 +132,12 @@ export interface ChannelPrompt {
   alternatives: ScoredCase[];
   /** True when the screen declined this lead, so the caller can refuse to send. */
   declined: boolean;
+  /** Which mode was actually used, so the UI can state it rather than imply it. */
+  verticalMode: VerticalMode;
+  /** True when a brief was rendered into the prompt. */
+  usingBrief: boolean;
+  /** Evidence sent with this prompt. Pass it back to the validator. */
+  evidence: IndustryEvidence[];
 }
 
 export const buildChannelPrompt = (
@@ -154,9 +176,15 @@ export const buildChannelPrompt = (
   const userPrompt = loadPrompts()[PROMPT_SLOT[channel]].trim();
   const qualification = options.qualification ? renderQualification(options.qualification) : '';
 
+  // Generic is the safe default when nothing was chosen: a member who has not
+  // built a brief, or who did not opt in, gets the doctrine unchanged.
+  const mode: VerticalMode = options.verticalMode ?? DEFAULT_MODE[channel] ?? 'generic';
+  const usingBrief = mode === 'vertical' && !!options.brief;
+  const vertical = usingBrief ? renderBrief(options.brief as LoadedBrief) : '';
+
   return {
     pack,
-    systemPrompt: composeSystemPrompt({ pack, qualification, context: about, proof, userPrompt }),
+    systemPrompt: composeSystemPrompt({ pack, qualification, context: about, vertical, proof, userPrompt }),
     steps: outputSteps(pack),
     contextEmpty: !contextToPrompt(ctx).trim(),
     proofEmpty: !proof && !options.vaultUnavailable,
@@ -164,11 +192,19 @@ export const buildChannelPrompt = (
     chosen,
     alternatives,
     declined: options.qualification?.verdict === 'decline',
+    verticalMode: mode,
+    /** True only when a brief was actually rendered into the prompt. */
+    usingBrief,
+    /** The evidence in play, so the validator can police attribution on it. */
+    evidence: usingBrief ? (options.brief as LoadedBrief).evidence.filter((e) => e.active) : [],
   };
 };
 
 /** Check a generator's response against the same doctrine that produced it. */
-export const checkAgainstMethod = (channel: ChannelId, output: GeneratedOutput): ValidationResult =>
-  validateOutput(getPack(channel), output);
+export const checkAgainstMethod = (
+  channel: ChannelId,
+  output: GeneratedOutput,
+  evidence: IndustryEvidence[] = [],
+): ValidationResult => validateOutput(getPack(channel), output, { evidence });
 
 export type { ValidationResult };
