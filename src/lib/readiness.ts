@@ -29,7 +29,10 @@ export interface Check {
 }
 
 /** Created by the migrations, in the order a person would notice them missing. */
-const REQUIRED_TABLES = ['users', 'jobs', 'leads', 'case_studies', 'prospects'] as const;
+const REQUIRED_TABLES = [
+  'users', 'jobs', 'leads', 'case_studies', 'prospects',
+  'vertical_briefs', 'industry_evidence',
+] as const;
 
 /**
  * One column from each of the later migrations.
@@ -49,10 +52,16 @@ const REQUIRED_COLUMNS: { table: string; column: string; feature: string }[] = [
   { table: 'leads', column: 'generation_meta', feature: 'knowing which proof and tier produced a message' },
   { table: 'leads', column: 'deal_value', feature: 'closing a lead and reporting a rate' },
   { table: 'prospects', column: 'opted_out', feature: 'honouring cold email opt-outs' },
+  // NOT NULL in the schema, which is what stops a borrowed figure being stored
+  // with nobody to attribute it to. Worth naming: without it the attribution
+  // check has nothing to enforce against and copy passes clean while uncited.
+  { table: 'industry_evidence', column: 'source_name', feature: 'the borrowed-figure attribution check' },
 ];
 
 /** Deployed by `npm run setup`, or pasted from the wizard. */
-const REQUIRED_FUNCTIONS = ['generate-proposal', 'generate-outreach', 'list-models'] as const;
+const REQUIRED_FUNCTIONS = [
+  'generate-proposal', 'generate-outreach', 'list-models', 'extract-brief',
+] as const;
 
 const TIMEOUT_MS = 12_000;
 
