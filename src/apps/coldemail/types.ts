@@ -56,6 +56,8 @@ export interface Prospect {
 
   status: ProspectStatus;
   status_changed_at?: string | null;
+  replied_at?: string | null;
+  call_booked_at?: string | null;
   close_reason?: string | null;
   deal_value?: number | null;
 

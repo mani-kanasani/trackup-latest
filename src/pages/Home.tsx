@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, LogOut, Settings as SettingsIcon, Moon, Sun, BarChart3 } from 'lucide-react';
 import { EmberMark } from '../components/UI/EmberMark';
+import { DailyReceipt } from '../components/Receipt/DailyReceipt';
 import { APPS, AppId } from '../apps/registry';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -88,6 +89,13 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
           <p className="text-lg text-gray-600 dark:text-gray-400 mt-3 max-w-xl">
             Three channels, one method. Pick where today's work is going.
           </p>
+        </div>
+
+        {/* The receipt sits above the channels on purpose: reporting the day is
+            a daily act, and burying it behind a channel makes it a thing you
+            do only when you already went looking. */}
+        <div className="mb-8">
+          <DailyReceipt />
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

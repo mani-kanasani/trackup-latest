@@ -147,6 +147,11 @@ export interface Lead {
   /** Set when won. The figure any funnel rate is worth anything against. */
   deal_value?: number | null;
   status_changed_at?: string | null;
+  /* Each milestone keeps its own date. status_changed_at holds only the most
+     recent transition, so a lead that replied Monday and booked Tuesday would
+     otherwise lose Monday entirely. */
+  replied_at?: string | null;
+  call_booked_at?: string | null;
   created_at: string;
   updated_at: string;
 }

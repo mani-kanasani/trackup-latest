@@ -16,6 +16,12 @@ export interface JobMaterial {
   mermaid_code: string;
   video_script: string;
   status: JobStatus;
+  /* Set once, by trigger, the first time the job leaves the drafted state.
+     status alone says a proposal went out, not which day, which is the one
+     thing a daily receipt has to know. */
+  applied_at?: string | null;
+  replied_at?: string | null;
+  call_booked_at?: string | null;
   job_level?: JobLevel;
   compensation_type?: CompensationType;
   proposed_amount?: number;
