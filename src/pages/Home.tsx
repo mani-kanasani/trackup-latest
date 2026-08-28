@@ -3,6 +3,7 @@ import { ArrowRight, LogOut, Settings as SettingsIcon, Moon, Sun, BarChart3 } fr
 import { EmberMark } from '../components/UI/EmberMark';
 import { DailyReceipt } from '../components/Receipt/DailyReceipt';
 import { UnmarkedDrafts } from '../components/Activity/UnmarkedDrafts';
+import { TodayQueue } from '../components/Queue/TodayQueue';
 import { useOutreachRows } from '../lib/activity/useOutreachRows';
 import { APPS, AppId } from '../apps/registry';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,7 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 
 interface HomeProps {
-  onOpenApp: (id: AppId) => void;
+  onOpenApp: (id: AppId, focusId?: string) => void;
   onOpenSettings: () => void;
   onOpenAnalytics: () => void;
 }
@@ -96,12 +97,14 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
           </p>
         </div>
 
-        {/* Both sit above the channels on purpose. Reporting the day is a daily
-            act, and burying it behind a channel makes it a thing you do only
-            when you already went looking. The question comes first because an
-            unanswered draft from yesterday is a missing number in the receipt
-            underneath it. */}
+        {/* The order is the argument. The queue is what today is, so it goes
+            first. The drafts prompt only appears when there is something
+            unanswered, and it comes before the receipt because an unmarked
+            draft from yesterday is a missing number in it. Reporting the day
+            is itself a daily act, so it sits above the channels rather than
+            behind one. */}
         <div className="mb-8 space-y-6">
+          <TodayQueue rows={rows} onOpen={onOpenApp} />
           <UnmarkedDrafts rows={rows} />
           <DailyReceipt rows={rows} />
         </div>

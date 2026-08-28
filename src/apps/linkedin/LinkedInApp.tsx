@@ -69,9 +69,14 @@ const TRACKED_GROUPS = new Set(['The sequence']);
  */
 const FIRST_STEP_KEY: string | null = scheduledSteps(LINKEDIN_PACK)[0]?.key ?? null;
 
-export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
+export const LinkedInApp: React.FC<{ onExit: () => void; initialLeadId?: string }> = ({
+  onExit,
+  initialLeadId,
+}) => {
   const { leads, loading, addLead, importLeads, updateLead, deleteLead } = useLeads();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Initial state, not an effect: today's queue names the lead, and a later
+  // effect would fight the member the moment they clicked a different one.
+  const [selectedId, setSelectedId] = useState<string | null>(initialLeadId ?? null);
   const [showAdd, setShowAdd] = useState(false);
   const [starterSeed, setStarterSeed] = useState<string | undefined>(undefined);
   const [showImport, setShowImport] = useState(false);

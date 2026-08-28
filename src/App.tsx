@@ -27,6 +27,15 @@ const PlatformSettings: React.FC<{ onExit: () => void }> = ({ onExit }) => (
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
   const [activeApp, setActiveApp] = useState<AppId | null>(null);
+  /*
+    Which row to select once the channel opens, so today's queue is one
+    click from the message rather than one click and then a hunt through a
+    list. Cleared on exit: reopening a channel by hand should land where the
+    member last was, not back on whatever the queue pointed at this morning.
+  */
+  const [focusId, setFocusId] = useState<string | undefined>(undefined);
+  const openApp = (id: AppId, focus?: string) => { setFocusId(focus); setActiveApp(id); };
+  const closeApp = () => { setFocusId(undefined); setActiveApp(null); };
   const [showSettings, setShowSettings] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
@@ -49,18 +58,19 @@ const AppContent: React.FC = () => {
     return <Analytics onExit={() => setShowAnalytics(false)} />;
   }
   if (activeApp === 'trackup') {
-    return <TrackUpApp onExit={() => setActiveApp(null)} />;
+    // Reached from the queue's own Upwork link, which means writing one.
+    return <TrackUpApp onExit={closeApp} initialPage={focusId ? 'apply' : undefined} />;
   }
   if (activeApp === 'linkedin') {
-    return <LinkedInApp onExit={() => setActiveApp(null)} />;
+    return <LinkedInApp onExit={closeApp} initialLeadId={focusId} />;
   }
 
   if (activeApp === 'coldemail') {
-    return <ColdEmailApp onExit={() => setActiveApp(null)} />;
+    return <ColdEmailApp onExit={closeApp} initialProspectId={focusId} />;
   }
   return (
     <Home
-      onOpenApp={setActiveApp}
+      onOpenApp={openApp}
       onOpenSettings={() => setShowSettings(true)}
       onOpenAnalytics={() => setShowAnalytics(true)}
     />

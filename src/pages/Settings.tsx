@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Moon, Sun, Sparkles, Key, ExternalLink, Check, Database, RefreshCw, Loader2, UserRound, Wand2, Zap, AlertCircle } from 'lucide-react';
+import { Moon, Sun, Sparkles, Key, ExternalLink, Check, Database, RefreshCw, Loader2, UserRound, Wand2, Zap, AlertCircle, Target } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { EmberMark } from '../components/UI/EmberMark';
 import { AIProvider, PROVIDER_META, loadAIConfig, saveAIConfig } from '../lib/aiConfig';
 import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
 import { loadUserContext, saveUserContext, UserContext } from '../lib/userContext';
+import { loadDailyTarget, saveDailyTarget } from '../lib/dailyTarget';
 import { CustomPrompts, DEFAULT_PROMPTS, PROMPT_META, PromptKey, loadPrompts, savePrompts } from '../lib/prompts';
 import { getPack } from '../lib/method/packs';
 import { composeSystemPrompt } from '../lib/method/compose';
@@ -51,6 +52,9 @@ export const Settings: React.FC = () => {
   const [context, setContext] = useState<UserContext>({ about: '', wins: '', testimonials: '' });
   const [contextSaved, setContextSaved] = useState(false);
 
+  const [target, setTarget] = useState('');
+  const [targetSaved, setTargetSaved] = useState(false);
+
   const [prompts, setPrompts] = useState<CustomPrompts>({ proposal: '', outreach: '' });
   const [promptsSaved, setPromptsSaved] = useState(false);
 
@@ -62,6 +66,8 @@ export const Settings: React.FC = () => {
       setApiKey(existing.apiKey);
     }
     setContext(loadUserContext());
+    const dt = loadDailyTarget();
+    setTarget(dt === null ? '' : String(dt));
     const sp = loadPrompts();
     // Load exactly what the user wrote. Falling back to the defaults here is
     // what turned an example into a saved assertion about their business.
@@ -368,6 +374,46 @@ export const Settings: React.FC = () => {
               {testing ? 'Testing…' : 'Test this key'}
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* The committed number */}
+      <div className="card-modern p-8 animate-rise">
+        <div className="flex items-center space-x-3 mb-2">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-ember-400 to-ember-600 flex items-center justify-center shadow-lg shadow-ember-500/25">
+            <Target className="w-4 h-4 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Your daily number</h3>
+        </div>
+        <p className="text-base text-gray-600 dark:text-gray-400 mb-6">
+          How many messages a day you committed to. Ember cannot read it from anywhere else and never
+          sends it anywhere — it is here so the queue on the home screen can show you how far through
+          today you are. Leave it empty and the queue still works, just without the bar.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="number"
+            min="1"
+            value={target}
+            onChange={(e) => { setTarget(e.target.value); setTargetSaved(false); }}
+            placeholder="10"
+            className="input-modern !w-32"
+            aria-label="Messages a day"
+          />
+          <button
+            onClick={() => {
+              const n = Number(target);
+              saveDailyTarget(target.trim() === '' || !Number.isFinite(n) ? null : n);
+              const saved = loadDailyTarget();
+              setTarget(saved === null ? '' : String(saved));
+              setTargetSaved(true);
+              setTimeout(() => setTargetSaved(false), 2000);
+            }}
+            className="btn-primary flex items-center"
+          >
+            {targetSaved ? <Check className="w-4 h-4 mr-2" /> : <Target className="w-4 h-4 mr-2" />}
+            {targetSaved ? 'Saved' : 'Save number'}
+          </button>
         </div>
       </div>
 

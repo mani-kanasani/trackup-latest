@@ -67,7 +67,24 @@ export const cadenceFor = (
   pack: MethodPack,
   sent: SentSteps,
   now: Date,
-): LeadCadence => {
+): LeadCadence => ({ lead, ...cadenceForRow(lead, isTerminal(lead.status), pack, sent, now) });
+
+/**
+ * The same schedule, for anything with a status and a set of sent steps.
+ *
+ * Cold email needs every line of this and had none of it, because the original
+ * was written against `Lead`. Nothing in the maths is LinkedIn-specific: the
+ * spacing comes from the pack and the anchor comes from the first recorded send.
+ * The one thing that genuinely differs between channels is which statuses are
+ * terminal, so that arrives as an answer rather than being looked up here.
+ */
+export const cadenceForRow = (
+  row: { status: string },
+  terminal: boolean,
+  pack: MethodPack,
+  sent: SentSteps,
+  now: Date,
+): Omit<LeadCadence, 'lead'> => {
   const steps = scheduledSteps(pack);
   const anchorIso = firstSentAt(sent);
   const anchor = anchorIso ? new Date(anchorIso) : null;
@@ -92,9 +109,9 @@ export const cadenceFor = (
   });
 
   let haltedBecause: string | null = null;
-  if (isTerminal(lead.status)) {
-    haltedBecause = `Closed as ${lead.status.replace('_', ' ')}.`;
-  } else if (lead.status === 'replied' || lead.status === 'meeting') {
+  if (terminal) {
+    haltedBecause = `Closed as ${row.status.replace('_', ' ')}.`;
+  } else if (row.status === 'replied' || row.status === 'meeting') {
     // A reply halts the sequence in every pack. Continuing to send scheduled
     // touches at someone who has answered is the single rudest thing an outreach
     // tool can do on its operator's behalf.
@@ -105,7 +122,6 @@ export const cadenceFor = (
   const next = haltedBecause ? null : firstUnsent;
 
   return {
-    lead,
     steps: due,
     next,
     daysOverdue: next?.daysUntilDue != null ? Math.max(0, -next.daysUntilDue) : 0,
@@ -114,7 +130,7 @@ export const cadenceFor = (
 };
 
 /** True when this lead wants action today. */
-export const isDue = (c: LeadCadence): boolean =>
+export const isDue = (c: Pick<LeadCadence, 'haltedBecause' | 'next'>): boolean =>
   !c.haltedBecause && c.next != null && (c.next.daysUntilDue == null || c.next.daysUntilDue <= 0);
 
 /**

@@ -8,8 +8,11 @@ import { Apply } from '../../pages/Apply';
 import { Track } from '../../pages/Track';
 import { Settings } from '../../pages/Settings';
 
-export const TrackUpApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
-  const [currentPage, setCurrentPage] = useState('dashboard');
+export const TrackUpApp: React.FC<{ onExit: () => void; initialPage?: string }> = ({
+  onExit,
+  initialPage,
+}) => {
+  const [currentPage, setCurrentPage] = useState(initialPage ?? 'dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const renderPage = () => {

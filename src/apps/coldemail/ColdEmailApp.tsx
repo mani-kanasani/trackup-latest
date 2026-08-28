@@ -71,9 +71,14 @@ const TRACKED_GROUPS = new Set(['The sequence']);
  */
 const FIRST_STEP_KEY: string | null = scheduledSteps(PACK)[0]?.key ?? null;
 
-export const ColdEmailApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
+export const ColdEmailApp: React.FC<{ onExit: () => void; initialProspectId?: string }> = ({
+  onExit,
+  initialProspectId,
+}) => {
   const { prospects, loading, addProspect, updateProspect, deleteProspect } = useProspects();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // See LinkedInApp: the queue names the row, and it is a starting point
+  // rather than something that reasserts itself on every render.
+  const [selectedId, setSelectedId] = useState<string | null>(initialProspectId ?? null);
   const [showAdd, setShowAdd] = useState(false);
   const selected = prospects.find((p) => p.id === selectedId) ?? null;
 
