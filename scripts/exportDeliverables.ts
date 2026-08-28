@@ -11,7 +11,7 @@
 
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
-import { ALL_PACKS, getPack } from '../src/lib/method/packs/index';
+import { ALL_PACKS } from '../src/lib/method/packs/index';
 import { buildChannelPrompt, outputSteps } from '../src/lib/method/forChannel';
 import { INTERVIEW, FALLBACK, SPECIFICITY, CAPTURE_FIELDS } from '../src/lib/proof/interview';
 import { PILLARS, PILLAR_THRESHOLD, BONUS, QUADRANTS, RUNGS, TIERS } from '../src/lib/qualify/doctrine';

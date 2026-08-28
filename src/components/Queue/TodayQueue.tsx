@@ -8,8 +8,14 @@ import type { AppId } from '../../apps/registry';
 
 interface TodayQueueProps {
   rows: OutreachRows;
-  /** Opens the channel with that row already selected, so a click is one click. */
-  onOpen: (app: AppId, focusId?: string) => void;
+  /**
+   * Opens the channel on that row, and on the step that is due.
+   *
+   * Both halves matter. Selecting the lead is what makes it one click; naming
+   * the step is what makes the click land on the message to write rather than
+   * at the top of the sequence.
+   */
+  onOpen: (app: AppId, focusId?: string, stepKey?: string) => void;
 }
 
 const TIER_STYLE: Record<string, string> = {
@@ -20,7 +26,7 @@ const TIER_STYLE: Record<string, string> = {
 
 const Row: React.FC<{ item: QueueItem; onOpen: TodayQueueProps['onOpen'] }> = ({ item, onOpen }) => (
   <button
-    onClick={() => onOpen(item.app, item.id)}
+    onClick={() => onOpen(item.app, item.id, item.stepKey)}
     className="w-full text-left flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 px-4 py-3 hover:border-ember-300 dark:hover:border-ember-700 transition-colors group"
   >
     <div className="min-w-0 flex-1">

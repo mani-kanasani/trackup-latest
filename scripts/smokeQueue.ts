@@ -155,6 +155,26 @@ check(
   queueSize(build({ leads: [started(0)] })) === 0,
 );
 
+// The brief's own example, spelled out. Touch two goes out, and three days
+// later — the pack spacing between touch two and touch three — the next one is
+// due, at the right number, naming the step to write.
+const anchorDay = LI_STEPS[0].day ?? 0;
+const thirdDue = build({
+  leads: [
+    lead({
+      status: 'connected',
+      sent_steps: {
+        [LI_STEPS[0].key]: daysAgo((LI_STEPS[2].day ?? 4) - anchorDay).toISOString(),
+        [LI_STEPS[1].key]: daysAgo((LI_STEPS[2].day ?? 4) - (LI_STEPS[1].day ?? 1)).toISOString(),
+      },
+    }),
+  ],
+}).followUps;
+check('the third touch comes due on the day the pack says', thirdDue.length === 1, String(thirdDue.length));
+check('at touch three', thirdDue[0]?.touch === 3, String(thirdDue[0]?.touch));
+check('and carries the step key, so the click can land on it', thirdDue[0]?.stepKey === LI_STEPS[2].key, String(thirdDue[0]?.stepKey));
+check('a waiting lead has no step to land on yet', build({ leads: [lead({})] }).waiting[0].stepKey === undefined);
+
 const ceGap = (CE_STEPS[1].day ?? 1) - (CE_STEPS[0].day ?? 0);
 const ceDue = build({
   prospects: [prospect({ status: 'sent', sent_steps: { [CE_STEPS[0].key]: daysAgo(ceGap).toISOString() } })],

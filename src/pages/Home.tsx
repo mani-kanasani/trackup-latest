@@ -12,7 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 
 interface HomeProps {
-  onOpenApp: (id: AppId, focusId?: string) => void;
+  onOpenApp: (id: AppId, focusId?: string, stepKey?: string) => void;
   onOpenSettings: () => void;
   onOpenAnalytics: () => void;
 }

@@ -11,7 +11,7 @@
 // may never come. And an opt-out is permanent and suppresses the address
 // everywhere, which a status field cannot express.
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Mail, Plus, Sparkles, Copy, Check, Trash2, Loader2, X, Ban,
 } from 'lucide-react';
@@ -33,7 +33,7 @@ import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
 import { AppBar } from '../../components/Layout/AppBar';
 import { ReplyLog } from '../../components/Activity/ReplyLog';
 import { advanceTo, statusAfterSend } from '../../lib/activity/milestones';
-import { scheduledSteps } from '../../lib/cadence';
+import { cadenceForRow, isDue, scheduledSteps } from '../../lib/cadence';
 import { qualify, isBlocked } from '../../lib/qualify/score';
 import { isStaleDeployment, stripContract, outOfDateMessage } from '../../lib/deployment';
 import type { QualificationInput } from '../../lib/qualify/types';
@@ -71,18 +71,50 @@ const TRACKED_GROUPS = new Set(['The sequence']);
  */
 const FIRST_STEP_KEY: string | null = scheduledSteps(PACK)[0]?.key ?? null;
 
-export const ColdEmailApp: React.FC<{ onExit: () => void; initialProspectId?: string }> = ({
-  onExit,
-  initialProspectId,
-}) => {
+export const ColdEmailApp: React.FC<{
+  onExit: () => void;
+  initialProspectId?: string;
+  initialStepKey?: string;
+}> = ({ onExit, initialProspectId, initialStepKey }) => {
   const { prospects, loading, addProspect, updateProspect, deleteProspect } = useProspects();
   // See LinkedInApp: the queue names the row, and it is a starting point
   // rather than something that reasserts itself on every render.
   const [selectedId, setSelectedId] = useState<string | null>(initialProspectId ?? null);
+  const [focusStep, setFocusStep] = useState<string | undefined>(initialStepKey);
+  const [showDue, setShowDue] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const selected = prospects.find((p) => p.id === selectedId) ?? null;
 
   const suppressed = prospects.filter((p) => p.opted_out).length;
+
+  /*
+    Who to email today.
+
+    The pack has carried a day on every step since it was written, and the
+    schedule that reads it was built against `Lead`, so this channel had the
+    spacing and no way to see it. Beginners send once and stop; nothing here
+    could tell them the second touch was three days late.
+
+    Opted-out addresses are filtered before anything is computed. Nothing that
+    can never be sent belongs in a list of what to send.
+  */
+  const due = useMemo(() => {
+    const now = new Date();
+    return prospects
+      .filter((p) => !p.opted_out)
+      .map((p) => ({
+        prospect: p,
+        cadence: cadenceForRow(p, isProspectTerminal(p.status), PACK, readSentSteps(p.sent_steps), now),
+      }))
+      .filter((x) => isDue(x.cadence))
+      // Oldest first. The thing rotting longest is the thing to do now, and a
+      // touch that slips past its day must not quietly leave the list.
+      .sort(
+        (a, b) =>
+          b.cadence.daysOverdue - a.cadence.daysOverdue ||
+          a.prospect.name.localeCompare(b.prospect.name),
+      );
+  }, [prospects]);
 
   return (
     <div className="min-h-screen flex flex-col app-canvas accent-ember">
@@ -94,6 +126,38 @@ export const ColdEmailApp: React.FC<{ onExit: () => void; initialProspectId?: st
 
       <div className="flex-1 max-w-6xl w-full mx-auto px-6 py-6 grid lg:grid-cols-[320px_1fr] gap-6 overflow-hidden">
         <div className="overflow-y-auto pr-1">
+          {due.length > 0 && showDue && (
+            <div className="mb-4 rounded-xl border border-ember-200 dark:border-ember-800 bg-ember-50/60 dark:bg-ember-900/20 p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xs font-bold uppercase tracking-wide text-ember-700 dark:text-ember-300">
+                  Due now ({due.length})
+                </h2>
+                <button onClick={() => setShowDue(false)} className="text-xs text-gray-500 hover:text-gray-700">Hide</button>
+              </div>
+              <div className="space-y-1.5">
+                {due.slice(0, 8).map(({ prospect: p, cadence }) => (
+                  <button
+                    key={p.id}
+                    onClick={() => { setSelectedId(p.id); setFocusStep(cadence.next?.step.key); }}
+                    className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-white dark:hover:bg-gray-800"
+                  >
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{p.name}</span>
+                    <span className="block text-[11px] text-gray-500 dark:text-gray-400">
+                      {cadence.next?.step.label}
+                      {cadence.daysOverdue > 0
+                        ? ` · ${cadence.daysOverdue} day${cadence.daysOverdue === 1 ? '' : 's'} late`
+                        : cadence.next?.dueAt
+                          ? ' · due today'
+                          : ' · not started'}
+                    </span>
+                  </button>
+                ))}
+                {due.length > 8 && (
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 px-2">and {due.length - 8} more</p>
+                )}
+              </div>
+            </div>
+          )}
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
             Prospects ({prospects.length})
             {suppressed > 0 && <span className="normal-case font-normal"> · {suppressed} suppressed</span>}
@@ -109,7 +173,7 @@ export const ColdEmailApp: React.FC<{ onExit: () => void; initialProspectId?: st
               {prospects.map((p) => (
                 <button
                   key={p.id}
-                  onClick={() => setSelectedId(p.id)}
+                  onClick={() => { setSelectedId(p.id); setFocusStep(undefined); }}
                   className={`w-full text-left p-4 rounded-xl border transition-all ${
                     selectedId === p.id
                       ? 'border-ember-400 bg-ember-50 dark:bg-ember-900/20'
@@ -135,6 +199,7 @@ export const ColdEmailApp: React.FC<{ onExit: () => void; initialProspectId?: st
           {selected ? (
             <ProspectDetail
               key={selected.id}
+              focusStep={focusStep}
               prospect={selected}
               onUpdate={updateProspect}
               onDelete={async (id) => { await deleteProspect(id); setSelectedId(null); }}
@@ -157,10 +222,29 @@ export const ColdEmailApp: React.FC<{ onExit: () => void; initialProspectId?: st
 
 const ProspectDetail: React.FC<{
   prospect: Prospect;
+  /** The sequence position to open on, when arriving from a due list. */
+  focusStep?: string;
   onUpdate: (id: string, updates: Partial<Prospect>) => Promise<MutationResult>;
   onDelete: (id: string) => void;
-}> = ({ prospect, onUpdate, onDelete }) => {
+}> = ({ prospect, focusStep, onUpdate, onDelete }) => {
   const { cases, loadError: vaultError } = useCaseStudies();
+  /*
+    Land on the step that is due, not at the top of the sequence.
+
+    Found in the DOM rather than held in a ref, because the cards are rendered
+    by a component declared inside this one and so remount on every render — a
+    ref would be reattached constantly. The guard makes this happen once per
+    focused step: after the first successful scroll it never runs again, so
+    editing a step does not yank the page back to it.
+  */
+  const scrolledTo = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusStep || scrolledTo.current === focusStep) return;
+    const el = document.querySelector(`[data-step="${CSS.escape(focusStep)}"]`);
+    if (!el) return;
+    scrolledTo.current = focusStep;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
@@ -343,7 +427,10 @@ const ProspectDetail: React.FC<{
     subject?: string;
     subjectId?: string;
   }> = ({ id, title, text, track = true, timing, subject, subjectId }) => (
-    <div className="card-modern p-4">
+    <div
+      data-step={id}
+      className={`card-modern p-4 ${id === focusStep ? 'ring-2 ring-ember-400 dark:ring-ember-500' : ''}`}
+    >
       <div className="flex items-center justify-between mb-2">
         <h4 className="font-semibold text-sm text-gray-900 dark:text-white flex items-center">
           {title}

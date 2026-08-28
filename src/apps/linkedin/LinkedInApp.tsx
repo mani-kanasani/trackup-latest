@@ -69,14 +69,18 @@ const TRACKED_GROUPS = new Set(['The sequence']);
  */
 const FIRST_STEP_KEY: string | null = scheduledSteps(LINKEDIN_PACK)[0]?.key ?? null;
 
-export const LinkedInApp: React.FC<{ onExit: () => void; initialLeadId?: string }> = ({
-  onExit,
-  initialLeadId,
-}) => {
+export const LinkedInApp: React.FC<{
+  onExit: () => void;
+  initialLeadId?: string;
+  initialStepKey?: string;
+}> = ({ onExit, initialLeadId, initialStepKey }) => {
   const { leads, loading, addLead, importLeads, updateLead, deleteLead } = useLeads();
   // Initial state, not an effect: today's queue names the lead, and a later
   // effect would fight the member the moment they clicked a different one.
   const [selectedId, setSelectedId] = useState<string | null>(initialLeadId ?? null);
+  // Which step in the sequence to land on. Set by the queue on the way in and
+  // by this app's own due list, so both routes arrive at the message to write.
+  const [focusStep, setFocusStep] = useState<string | undefined>(initialStepKey);
   const [showAdd, setShowAdd] = useState(false);
   const [starterSeed, setStarterSeed] = useState<string | undefined>(undefined);
   const [showImport, setShowImport] = useState(false);
@@ -149,7 +153,7 @@ export const LinkedInApp: React.FC<{ onExit: () => void; initialLeadId?: string 
                 {due.slice(0, 8).map((c) => (
                   <button
                     key={c.lead.id}
-                    onClick={() => setSelectedId(c.lead.id)}
+                    onClick={() => { setSelectedId(c.lead.id); setFocusStep(c.next?.step.key); }}
                     className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-white dark:hover:bg-gray-800"
                   >
                     <span className="text-sm font-medium text-gray-900 dark:text-white">{c.lead.name}</span>
@@ -181,7 +185,7 @@ export const LinkedInApp: React.FC<{ onExit: () => void; initialLeadId?: string 
               {leads.map((lead) => (
                 <button
                   key={lead.id}
-                  onClick={() => setSelectedId(lead.id)}
+                  onClick={() => { setSelectedId(lead.id); setFocusStep(undefined); }}
                   className={`w-full text-left p-4 rounded-xl border transition-all ${
                     selectedId === lead.id
                       ? 'border-linkedin-400 bg-linkedin-50 dark:bg-linkedin-900/20'
@@ -212,6 +216,7 @@ export const LinkedInApp: React.FC<{ onExit: () => void; initialLeadId?: string 
           {selected ? (
             <LeadDetail
               key={selected.id}
+              focusStep={focusStep}
               lead={selected}
               onUpdate={updateLead}
               onDelete={async (id) => { await deleteLead(id); setSelectedId(null); }}
@@ -255,12 +260,31 @@ export const LinkedInApp: React.FC<{ onExit: () => void; initialLeadId?: string 
 
 const LeadDetail: React.FC<{
   lead: Lead;
+  /** The sequence position to open on, when arriving from a due list. */
+  focusStep?: string;
   // Returns the failure so the caller can surface it. A `void` signature here is
   // what let a failed save silently eat a freshly generated flow.
   onUpdate: (id: string, updates: Partial<Lead>) => Promise<MutationResult>;
   onDelete: (id: string) => void;
-}> = ({ lead, onUpdate, onDelete }) => {
+}> = ({ lead, focusStep, onUpdate, onDelete }) => {
   const { cases, loadError: vaultError } = useCaseStudies();
+  /*
+    Land on the step that is due, not at the top of the flow.
+
+    Found in the DOM rather than held in a ref, because the cards are rendered
+    by a component declared inside this one and so remount on every render — a
+    ref would be reattached constantly. The guard makes this happen once per
+    focused step: after the first successful scroll it never runs again, so
+    editing a step does not yank the page back to it.
+  */
+  const scrolledTo = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusStep || scrolledTo.current === focusStep) return;
+    const el = document.querySelector(`[data-step="${CSS.escape(focusStep)}"]`);
+    if (!el) return;
+    scrolledTo.current = focusStep;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
@@ -529,7 +553,14 @@ const LeadDetail: React.FC<{
   };
 
   const Step: React.FC<{ id: string; title: string; text: string; track?: boolean; timing?: string; tone?: 'positive' | 'objection' }> = ({ id, title, text, track = true, timing, tone }) => (
-    <div className={`card-modern p-4 ${tone === 'positive' ? 'border-l-4 border-l-green-400' : tone === 'objection' ? 'border-l-4 border-l-amber-400' : ''}`}>
+    <div
+      data-step={id}
+      className={`card-modern p-4 ${tone === 'positive' ? 'border-l-4 border-l-green-400' : tone === 'objection' ? 'border-l-4 border-l-amber-400' : ''} ${
+        /* The one that was due, marked so the member can see which message the
+           queue sent them here to write. */
+        id === focusStep ? 'ring-2 ring-linkedin-400 dark:ring-linkedin-500' : ''
+      }`}
+    >
       <div className="flex items-center justify-between mb-2">
         <h4 className="font-semibold text-sm text-gray-900 dark:text-white flex items-center">
           {tone === 'positive' && <ThumbsUp className="w-4 h-4 mr-1.5 text-green-500" />}

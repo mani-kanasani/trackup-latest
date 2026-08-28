@@ -39,6 +39,15 @@ export interface QueueItem {
   touch?: number;
   /** The step to write. Follow-ups only. */
   stepLabel?: string;
+  /**
+   * The pack key of that step, so the channel can open on it.
+   *
+   * The label is for reading and the key is for landing. Without the key the
+   * row could say which touch is due and then drop the member at the top of a
+   * twelve-step flow to find it themselves, which is the difference between
+   * one click and one click plus a hunt.
+   */
+  stepKey?: string;
   /** Positive means late. Follow-ups only. */
   daysOverdue?: number;
 }
@@ -126,6 +135,7 @@ export const buildQueue = (
       reason: 'followUp',
       touch: index >= 0 ? index + 1 : undefined,
       stepLabel: cadence.next.step.label,
+      stepKey: cadence.next.step.key,
       daysOverdue: cadence.daysOverdue,
     });
   };

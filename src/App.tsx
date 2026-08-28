@@ -34,8 +34,13 @@ const AppContent: React.FC = () => {
     member last was, not back on whatever the queue pointed at this morning.
   */
   const [focusId, setFocusId] = useState<string | undefined>(undefined);
-  const openApp = (id: AppId, focus?: string) => { setFocusId(focus); setActiveApp(id); };
-  const closeApp = () => { setFocusId(undefined); setActiveApp(null); };
+  const [focusStep, setFocusStep] = useState<string | undefined>(undefined);
+  const openApp = (id: AppId, focus?: string, step?: string) => {
+    setFocusId(focus);
+    setFocusStep(step);
+    setActiveApp(id);
+  };
+  const closeApp = () => { setFocusId(undefined); setFocusStep(undefined); setActiveApp(null); };
   const [showSettings, setShowSettings] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
@@ -62,11 +67,11 @@ const AppContent: React.FC = () => {
     return <TrackUpApp onExit={closeApp} initialPage={focusId ? 'apply' : undefined} />;
   }
   if (activeApp === 'linkedin') {
-    return <LinkedInApp onExit={closeApp} initialLeadId={focusId} />;
+    return <LinkedInApp onExit={closeApp} initialLeadId={focusId} initialStepKey={focusStep} />;
   }
 
   if (activeApp === 'coldemail') {
-    return <ColdEmailApp onExit={closeApp} initialProspectId={focusId} />;
+    return <ColdEmailApp onExit={closeApp} initialProspectId={focusId} initialStepKey={focusStep} />;
   }
   return (
     <Home
