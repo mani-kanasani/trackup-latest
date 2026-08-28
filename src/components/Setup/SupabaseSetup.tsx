@@ -7,7 +7,6 @@ import {
   Database,
   ExternalLink,
   Check,
-  AlertCircle,
   Loader2,
   ShieldCheck,
   Copy,
@@ -27,19 +26,13 @@ import {
   canConnect,
   type Check as ReadinessCheck,
 } from '../../lib/readiness';
+import { ALL_SQL } from '../../lib/setup/migrations';
+import { ReadinessReport } from './ReadinessReport';
 
 // Pulled straight from the repo so the SQL + function shown to the user always
-// match what's actually committed.
-const migrationModules = import.meta.glob('../../../supabase/migrations/*.sql', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-}) as Record<string, string>;
-
-const setupSql = Object.keys(migrationModules)
-  .sort()
-  .map((key) => migrationModules[key])
-  .join('\n\n');
+// match what's actually committed. Shared with the preflight, which hands back
+// individual files when only some of them are missing.
+const setupSql = ALL_SQL;
 
 const STEPS = ['Create database', 'Set up backend', 'Connect'];
 
@@ -301,13 +294,38 @@ export const SupabaseSetup: React.FC = () => {
                 </span>
               </div>
 
-              <div className="flex justify-between pt-2">
-                <button onClick={() => setStep(1)} className="btn-secondary flex items-center">
+              {/* Checkable from here, not only from the last step.
+
+                  Someone pasting SQL wants to know whether THAT worked, and the
+                  answer used to live two screens away behind a credentials form.
+                  So they moved on, hit a failure later, and had no way to tell
+                  which of the two steps was wrong. */}
+              {checks && (
+                <div className="pt-2">
+                  <ReadinessReport checks={checks} />
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+                <button onClick={() => setStep(1)} className="btn-secondary flex items-center justify-center">
                   <ArrowLeft className="w-4 h-4 mr-2" /> Back
                 </button>
-                <button onClick={() => setStep(3)} className="btn-primary flex items-center">
-                  Done, connect it <ArrowRight className="w-4 h-4 ml-2" />
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Only a real check once there are credentials to check with.
+                      Before that it says what it will actually do rather than
+                      promising a check and delivering a form. */}
+                  <button
+                    onClick={canSubmit ? handleTest : () => setStep(3)}
+                    disabled={testing}
+                    className="btn-secondary flex items-center justify-center disabled:opacity-50"
+                  >
+                    {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                    {testing ? 'Checking...' : canSubmit ? 'Check what I have done' : 'Add my keys, then check'}
+                  </button>
+                  <button onClick={() => setStep(3)} className="btn-primary flex items-center justify-center">
+                    Done, connect it <ArrowRight className="w-4 h-4 ml-2" />
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -376,31 +394,7 @@ export const SupabaseSetup: React.FC = () => {
 
               {checks && (
                 <div className="space-y-2">
-                  {checks.map((c) => (
-                    <div
-                      key={c.id}
-                      className={`text-sm p-4 rounded-xl border ${
-                        c.status === 'ok'
-                          ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                          : c.status === 'warn'
-                            ? 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700'
-                            : 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
-                      }`}
-                    >
-                      <div className="flex items-start">
-                        {c.status === 'ok' ? (
-                          <Check className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                        ) : (
-                          <AlertCircle className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                        )}
-                        <div className="min-w-0">
-                          <p className="font-semibold">{c.label}</p>
-                          <p>{c.detail}</p>
-                          {c.fix && <p className="mt-1 opacity-90">{c.fix}</p>}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  <ReadinessReport checks={checks} />
                   {forceSave && (
                     <p className="text-sm text-amber-700 dark:text-amber-400 px-1">
                       Ember will open, but the parts above will not work until they are fixed. Press

@@ -7,6 +7,7 @@ import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
 import { loadUserContext, saveUserContext, UserContext } from '../lib/userContext';
 import { loadDailyTarget, saveDailyTarget } from '../lib/dailyTarget';
 import { CompletenessMeter } from '../components/Setup/CompletenessMeter';
+import { BackendCheck } from '../components/Setup/BackendCheck';
 import { CustomPrompts, DEFAULT_PROMPTS, PROMPT_META, PromptKey, loadPrompts, savePrompts } from '../lib/prompts';
 import { getPack } from '../lib/method/packs';
 import { composeSystemPrompt } from '../lib/method/compose';
@@ -433,6 +434,11 @@ export const Settings: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Was only ever available inside the setup wizard, which nobody sees
+          twice. Every migration shipped after a member installed was
+          therefore invisible to them. */}
+      <BackendCheck />
 
       {/* Your context */}
       <div id="setup-context" className="card-modern p-8 animate-rise scroll-mt-6">
