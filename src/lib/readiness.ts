@@ -56,6 +56,19 @@ const REQUIRED_COLUMNS: { table: string; column: string; feature: string }[] = [
   // with nobody to attribute it to. Worth naming: without it the attribution
   // check has nothing to enforce against and copy passes clean while uncited.
   { table: 'industry_evidence', column: 'source_name', feature: 'the borrowed-figure attribution check' },
+  /*
+    The receipt's numbers, and the reason an EXISTING install has to re-run the
+    SQL rather than assume it is finished.
+
+    Without applied_at the Upwork count is silently zero on every receipt: the
+    query succeeds, the column is absent, and the member files a day that says
+    they sent nothing on a channel they worked all morning. A wrong number that
+    looks right is worse than a missing screen, so this is checked rather than
+    left to be discovered.
+  */
+  { table: 'jobs', column: 'applied_at', feature: "the daily receipt's Upwork count" },
+  { table: 'leads', column: 'replied_at', feature: 'reply dates that survive a later status change' },
+  { table: 'prospects', column: 'call_booked_at', feature: 'call dates on the daily receipt' },
 ];
 
 /** Deployed by `npm run setup`, or pasted from the wizard. */

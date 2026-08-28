@@ -245,11 +245,11 @@ export const SupabaseSetup: React.FC = () => {
               <div className="space-y-3 pt-2">
                 <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
                   <span className="w-6 h-6 rounded-full bg-ember-100 dark:bg-ember-900/40 text-ember-600 dark:text-ember-400 text-sm font-bold flex items-center justify-center mr-2">2</span>
-                  Deploy the three functions
+                  Deploy the four functions
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   In <span className="font-semibold">Edge Functions → Deploy a new function → Via editor</span>, create{' '}
-                  <span className="font-semibold">three</span> functions. For each one: set the name <span className="font-semibold">exactly</span>{' '}
+                  <span className="font-semibold">four</span> functions. For each one: set the name <span className="font-semibold">exactly</span>{' '}
                   as shown (the dashboard suggests a random name like{' '}
                   <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">swift-handler</code>, change it),
                   then click <span className="font-semibold">Deploy</span>.

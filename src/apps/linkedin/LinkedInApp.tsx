@@ -20,6 +20,7 @@ import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
 import { AppBar } from '../../components/Layout/AppBar';
 import { ImportLeadsModal } from './ImportLeadsModal';
+import { StarterList } from '../../components/Setup/StarterList';
 import { qualify, isBlocked } from '../../lib/qualify/score';
 import { isStaleDeployment, stripContract, outOfDateMessage } from '../../lib/deployment';
 import type { QualificationInput } from '../../lib/qualify/types';
@@ -61,6 +62,7 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const { leads, loading, addLead, importLeads, updateLead, deleteLead } = useLeads();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [starterSeed, setStarterSeed] = useState<string | undefined>(undefined);
   const [showImport, setShowImport] = useState(false);
   const [showDue, setShowDue] = useState(true);
   const selected = leads.find((l) => l.id === selectedId) ?? null;
@@ -199,12 +201,23 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
               onDelete={async (id) => { await deleteLead(id); setSelectedId(null); }}
             />
           ) : (
-            <div className="h-full flex items-center justify-center text-center text-gray-400 card-modern p-10">
-              <div>
-                <Linkedin className="w-10 h-10 mx-auto mb-3 text-linkedin-300" />
-                <p>Select a lead to generate and manage their outreach flow.</p>
+            leads.length === 0 ? (
+              /* A member with no list cannot hit any number however motivated,
+                 and this empty pane is exactly where that stall happens. */
+              <StarterList
+                onUseTemplate={(csv) => {
+                  setStarterSeed(csv);
+                  setShowImport(true);
+                }}
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center text-center text-gray-400 card-modern p-10">
+                <div>
+                  <Linkedin className="w-10 h-10 mx-auto mb-3 text-linkedin-300" />
+                  <p>Select a lead to generate and manage their outreach flow.</p>
+                </div>
               </div>
-            </div>
+            )
           )}
         </div>
       </div>
@@ -213,7 +226,8 @@ export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
       {showImport && (
         <ImportLeadsModal
           existingUrls={leads.map((l) => l.linkedin_url)}
-          onClose={() => setShowImport(false)}
+          seed={starterSeed}
+          onClose={() => { setShowImport(false); setStarterSeed(undefined); }}
           onImport={importLeads}
         />
       )}

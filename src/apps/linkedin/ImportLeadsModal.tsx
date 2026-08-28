@@ -18,8 +18,10 @@ export const ImportLeadsModal: React.FC<{
   existingUrls: string[];
   onClose: () => void;
   onImport: (leads: Partial<Lead>[]) => Promise<{ inserted: number; error?: string }>;
-}> = ({ existingUrls, onClose, onImport }) => {
-  const [text, setText] = useState('');
+  /** Pre-fills the paste box, so the starter template opens ready to import. */
+  seed?: string;
+}> = ({ existingUrls, onClose, onImport, seed }) => {
+  const [text, setText] = useState(seed ?? '');
   const [stage, setStage] = useState<'paste' | 'map'>('paste');
   const [mapping, setMapping] = useState<Partial<Record<ImportField, number>>>({});
   const [sheet, setSheet] = useState<ParsedSheet | null>(null);
