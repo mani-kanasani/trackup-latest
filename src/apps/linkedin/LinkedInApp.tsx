@@ -6,7 +6,7 @@ import {
 import { useLeads, type MutationResult } from './useLeads';
 import { Lead, LeadStatus, OutreachFlow, GenerationMeta, migrateFlow, readSentSteps, isTerminal } from './types';
 import { getPack } from '../../lib/method/packs';
-import { cadenceFor, dueQueue, pendingInvitationDays, STALE_INVITATION_DAYS } from '../../lib/cadence';
+import { cadenceFor, dueQueue, pendingInvitationDays, scheduledSteps, STALE_INVITATION_DAYS } from '../../lib/cadence';
 import { funnelFor, closedCount, revenueFrom, MIN_SAMPLE } from '../../lib/funnel';
 import { supabase } from '../../lib/supabase';
 import { loadAIConfig } from '../../lib/aiConfig';
@@ -21,6 +21,8 @@ import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
 import { AppBar } from '../../components/Layout/AppBar';
 import { ImportLeadsModal } from './ImportLeadsModal';
 import { StarterList } from '../../components/Setup/StarterList';
+import { ReplyLog } from '../../components/Activity/ReplyLog';
+import { advanceTo, statusAfterSend } from '../../lib/activity/milestones';
 import { qualify, isBlocked } from '../../lib/qualify/score';
 import { isStaleDeployment, stripContract, outOfDateMessage } from '../../lib/deployment';
 import type { QualificationInput } from '../../lib/qualify/types';
@@ -57,6 +59,15 @@ const GROUPED_STEPS = LINKEDIN_PACK.structure.reduce<{ group: string; steps: typ
 
 /** Only the outbound steps are things you send on a schedule and tick off. */
 const TRACKED_GROUPS = new Set(['The sequence']);
+
+/**
+ * The connection request, taken from the pack rather than named here.
+ *
+ * Marking it sent means an invitation went out; marking anything after it means
+ * a direct message did, which the sequence only sends to a connection. A pack
+ * that reorders its opening step must not silently mis-stage every lead.
+ */
+const FIRST_STEP_KEY: string | null = scheduledSteps(LINKEDIN_PACK)[0]?.key ?? null;
 
 export const LinkedInApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const { leads, loading, addLead, importLeads, updateLead, deleteLead } = useLeads();
@@ -361,9 +372,26 @@ const LeadDetail: React.FC<{
     const next = { ...sentSteps };
     // Stamped at the moment the user ticks it. This is the only record of WHEN
     // anything went out, and the whole cadence is derived from it.
-    if (key in next) delete next[key];
-    else next[key] = new Date().toISOString();
-    const res = await onUpdate(lead.id, { sent_steps: next });
+    const marking = !(key in next);
+    if (marking) next[key] = new Date().toISOString();
+    else delete next[key];
+
+    const patch: Partial<Lead> = { sent_steps: next };
+    /*
+      The stage moves with the send, so one click is the whole record.
+
+      Before this, ticking four steps left the lead reading "New", and the
+      funnel — which counts nothing but status — told an operator who had sent
+      forty invitations that they had sent none. Forwards only, and only from
+      an earlier stage: unticking never demotes anything, and a lead the member
+      has already moved on by hand is left where they put it.
+    */
+    if (marking) {
+      const advanced = advanceTo('lead', lead.status, statusAfterSend('lead', key, FIRST_STEP_KEY));
+      if (advanced) patch.status = advanced as LeadStatus;
+    }
+
+    const res = await onUpdate(lead.id, patch);
     if (res.error) setError(`Could not save that change: ${res.error}`);
   };
 
@@ -558,6 +586,18 @@ const LeadDetail: React.FC<{
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
+        {/* What came back, one click from the lead. The dropdown below still
+            exists for every other stage, but the three answers that actually
+            happen should not cost a menu. */}
+        <div className="mt-4">
+          <ReplyLog
+            kind="lead"
+            row={lead}
+            onLog={(patch) => onUpdate(lead.id, patch as Partial<Lead>)}
+            onError={setError}
+          />
+        </div>
+
         <div className="flex flex-wrap items-center gap-3 mt-4">
           <select value={lead.status} onChange={(e) => onUpdate(lead.id, { status: e.target.value as LeadStatus })} className="input-modern !py-2 !w-auto text-sm">
             <optgroup label="In flight">

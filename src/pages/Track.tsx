@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, X, ExternalLink, FileText, Video, BarChart3, Copy, Briefcase } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { StatusBadge } from '../components/UI/StatusBadge';
+import { ReplyLog } from '../components/Activity/ReplyLog';
 import { JobMaterial, JobStatus } from '../types';
 import { resolveProposalUrl } from '../lib/proposalLink';
 
@@ -22,6 +23,15 @@ export const Track: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<JobStatus | 'all'>('all');
   const [sortOrder, setSortOrder] = useState<'latest' | 'oldest'>('latest');
   const [selectedMaterial, setSelectedMaterial] = useState<JobMaterial | null>(null);
+  /*
+    The drawer holds a snapshot taken when the row was clicked, so anything
+    changed from inside it would show the old value until the drawer was
+    reopened. Reading the live row back out of the list keeps the badge and the
+    reply control honest about what was just recorded.
+  */
+  const openMaterial = selectedMaterial
+    ? materials.find((m) => m.id === selectedMaterial.id) ?? selectedMaterial
+    : null;
 
   const filteredAndSortedMaterials = useMemo(() => {
     let filtered = materials;
@@ -282,8 +292,19 @@ export const Track: React.FC = () => {
                 <h3 className="font-bold text-lg text-gray-900 dark:text-white">
                   {selectedMaterial.title}
                 </h3>
-                <div className="mt-3">
-                  <StatusBadge status={selectedMaterial.status} />
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <StatusBadge status={openMaterial?.status ?? selectedMaterial.status} />
+                  {/* One click, from the proposal itself. The dropdown in the
+                      table still covers every other stage; this covers the
+                      three that decide whether the numbers are real. */}
+                  <ReplyLog
+                    kind="job"
+                    row={openMaterial ?? selectedMaterial}
+                    onLog={async (patch) => {
+                      const res = await updateMaterial(selectedMaterial.id, patch as Partial<JobMaterial>);
+                      return res.success ? {} : { error: res.error };
+                    }}
+                  />
                 </div>
               </div>
             </div>

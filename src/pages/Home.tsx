@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ArrowRight, LogOut, Settings as SettingsIcon, Moon, Sun, BarChart3 } from 'lucide-react';
 import { EmberMark } from '../components/UI/EmberMark';
 import { DailyReceipt } from '../components/Receipt/DailyReceipt';
+import { UnmarkedDrafts } from '../components/Activity/UnmarkedDrafts';
+import { useOutreachRows } from '../lib/activity/useOutreachRows';
 import { APPS, AppId } from '../apps/registry';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -18,6 +20,9 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
   const { user, logout } = useAuth();
   const { materials } = useData();
   const { theme, toggleTheme } = useTheme();
+  // One read of leads and prospects, shared by the two cards below that both
+  // count and change them.
+  const rows = useOutreachRows();
   /**
    * One count per app, keyed by app id.
    *
@@ -91,11 +96,14 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
           </p>
         </div>
 
-        {/* The receipt sits above the channels on purpose: reporting the day is
-            a daily act, and burying it behind a channel makes it a thing you
-            do only when you already went looking. */}
-        <div className="mb-8">
-          <DailyReceipt />
+        {/* Both sit above the channels on purpose. Reporting the day is a daily
+            act, and burying it behind a channel makes it a thing you do only
+            when you already went looking. The question comes first because an
+            unanswered draft from yesterday is a missing number in the receipt
+            underneath it. */}
+        <div className="mb-8 space-y-6">
+          <UnmarkedDrafts rows={rows} />
+          <DailyReceipt rows={rows} />
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

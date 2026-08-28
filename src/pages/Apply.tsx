@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Send, ExternalLink, Copy, FileText, Video, BarChart3, DollarSign, Briefcase, AlertTriangle } from 'lucide-react';
+import { Send, ExternalLink, Copy, FileText, Video, BarChart3, DollarSign, Briefcase, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
-import { GenerateResponse, JobLevel, CompensationType } from '../types';
+import { GenerateResponse, JobLevel, CompensationType, JobStatus } from '../types';
 import { supabase } from '../lib/supabase';
 import { loadAIConfig } from '../lib/aiConfig';
 import { loadUserContext, senderAbout } from '../lib/userContext';
@@ -35,6 +35,8 @@ export const Apply: React.FC = () => {
   const [proposedAmount, setProposedAmount] = useState('');
   const [actualAmount, setActualAmount] = useState('');
   const [loading, setLoading] = useState(false);
+  /** Which save is in flight, so only the button that was pressed spins. */
+  const [savingAs, setSavingAs] = useState<JobStatus | null>(null);
   const [generatedData, setGeneratedData] = useState<GenerateResponse | null>(null);
   const [error, setError] = useState('');
 
@@ -177,10 +179,21 @@ export const Apply: React.FC = () => {
     }
   };
 
-  const handleSaveMaterials = async () => {
+  /**
+   * Save it, and say whether it went out.
+   *
+   * Everything used to save as a draft and nothing else, so recording that a
+   * proposal was actually submitted meant leaving this page for the tracker and
+   * finding the row. That is three interactions and a screen change at the exact
+   * moment the member is mid-send, which is why the Upwork numbers were the
+   * emptiest of the three channels. `applied` is stamped with a date by the
+   * database, so this is also the only thing that puts Upwork on the receipt.
+   */
+  const handleSaveMaterials = async (status: JobStatus = 'drafted') => {
     if (!generatedData) return;
 
     setLoading(true);
+    setSavingAs(status);
     setError('');
 
     const result = await addMaterial({
@@ -191,7 +204,7 @@ export const Apply: React.FC = () => {
       proposal_path: generatedData.proposal_path,
       mermaid_code: generatedData.mermaid_code,
       video_script: generatedData.video_script,
-      status: 'drafted',
+      status,
       job_level: jobLevel,
       compensation_type: compensationType,
       proposed_amount: proposedAmount ? parseFloat(proposedAmount) : undefined,
@@ -199,6 +212,7 @@ export const Apply: React.FC = () => {
     });
 
     setLoading(false);
+    setSavingAs(null);
 
     if (!result.success) {
       setError(result.error || 'Failed to save materials');
@@ -223,7 +237,10 @@ export const Apply: React.FC = () => {
     // Show success message
     const toast = document.createElement('div');
     toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg z-50 transition-opacity duration-200';
-    toast.textContent = 'Materials saved successfully!';
+    toast.textContent =
+      status === 'applied'
+        ? 'Saved and counted on today\u2019s numbers.'
+        : 'Saved as a draft. It counts once you mark it applied.';
     document.body.appendChild(toast);
     setTimeout(() => {
       toast.style.opacity = '0';
@@ -460,14 +477,29 @@ export const Apply: React.FC = () => {
               </div>
               Generated Materials
             </h2>
-            <button
-              onClick={handleSaveMaterials}
-              disabled={loading}
-              className="btn-secondary flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <FileText className="w-5 h-5 mr-2" />
-              {loading ? 'Saving...' : 'Save Materials'}
-            </button>
+            {/* Two saves, because there are two things that can have happened
+                and only one of them is worth counting. Marking it applied is
+                the primary action: it is what the member has usually just
+                done, and the numbers depend on it being the easy click. */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handleSaveMaterials('drafted')}
+                disabled={loading}
+                className="btn-secondary flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <FileText className="w-5 h-5 mr-2" />
+                {savingAs === 'drafted' ? 'Saving...' : 'Save as draft'}
+              </button>
+              <button
+                onClick={() => handleSaveMaterials('applied')}
+                disabled={loading}
+                title="Records it as submitted today, which is what puts it on your daily numbers."
+                className="btn-primary flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <CheckCircle className="w-5 h-5 mr-2" />
+                {savingAs === 'applied' ? 'Saving...' : 'Save and mark applied'}
+              </button>
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">

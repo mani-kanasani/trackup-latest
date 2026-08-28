@@ -22,7 +22,8 @@
     "providers:test": "node scripts/liveProviderTest.mjs",
     "vertical:test": "esbuild scripts/smokeVertical.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/vertical.mjs --log-level=error && node node_modules/.cache/vertical.mjs",
     "deliverables:export": "esbuild scripts/exportDeliverables.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/export.mjs --log-level=error && node node_modules/.cache/export.mjs \"../Boardroom Clients\"",
-    "receipt:test": "esbuild scripts/smokeReceipt.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/receipt.mjs --log-level=error && node node_modules/.cache/receipt.mjs"
+    "receipt:test": "esbuild scripts/smokeReceipt.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/receipt.mjs --log-level=error && node node_modules/.cache/receipt.mjs",
+    "activity:test": "esbuild scripts/smokeActivity.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/activity.mjs --log-level=error && node node_modules/.cache/activity.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

@@ -31,6 +31,9 @@ import { VerticalToggle } from '../../components/UI/VerticalToggle';
 import { useCaseStudies } from '../../lib/proof';
 import { QualifyPanel } from '../../components/Qualify/QualifyPanel';
 import { AppBar } from '../../components/Layout/AppBar';
+import { ReplyLog } from '../../components/Activity/ReplyLog';
+import { advanceTo, statusAfterSend } from '../../lib/activity/milestones';
+import { scheduledSteps } from '../../lib/cadence';
 import { qualify, isBlocked } from '../../lib/qualify/score';
 import { isStaleDeployment, stripContract, outOfDateMessage } from '../../lib/deployment';
 import type { QualificationInput } from '../../lib/qualify/types';
@@ -58,6 +61,15 @@ const GROUPED_STEPS = PACK.structure.reduce<{ group: string; steps: typeof PACK.
 );
 
 const TRACKED_GROUPS = new Set(['The sequence']);
+
+/**
+ * The first email in the sequence, from the pack rather than named here.
+ *
+ * Cold email needs it only to know that a first send has happened at all —
+ * every step goes to the same address, so the opener is the whole distinction
+ * between a prospect nobody has written to and one in flight.
+ */
+const FIRST_STEP_KEY: string | null = scheduledSteps(PACK)[0]?.key ?? null;
 
 export const ColdEmailApp: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const { prospects, loading, addProspect, updateProspect, deleteProspect } = useProspects();
@@ -200,9 +212,21 @@ const ProspectDetail: React.FC<{
 
   const toggleSent = async (key: string) => {
     const next = { ...sentSteps };
-    if (key in next) delete next[key];
-    else next[key] = new Date().toISOString();
-    const res = await onUpdate(prospect.id, { sent_steps: next });
+    const marking = !(key in next);
+    if (marking) next[key] = new Date().toISOString();
+    else delete next[key];
+
+    // The stage moves with the send, exactly as it does on LinkedIn, so
+    // ticking the opener is the whole record rather than half of it.
+    // Forwards only: unticking never demotes, and a prospect the member has
+    // moved on by hand stays where they put it.
+    const patch: Partial<Prospect> = { sent_steps: next };
+    if (marking) {
+      const advanced = advanceTo('prospect', prospect.status, statusAfterSend('prospect', key, FIRST_STEP_KEY));
+      if (advanced) patch.status = advanced as ProspectStatus;
+    }
+
+    const res = await onUpdate(prospect.id, patch);
     if (res.error) setError(`Could not save that change: ${res.error}`);
   };
 
@@ -386,6 +410,20 @@ const ProspectDetail: React.FC<{
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
+
+        {/* One click from the prospect. An opted-out address is not a lead
+            whose reply you are still waiting on, so the control is hidden
+            rather than shown and refused. */}
+        {!prospect.opted_out && (
+          <div className="mt-4">
+            <ReplyLog
+              kind="prospect"
+              row={prospect}
+              onLog={(patch) => onUpdate(prospect.id, patch as Partial<Prospect>)}
+              onError={setError}
+            />
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center gap-3 mt-4">
           <select

@@ -1,14 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, Check, Loader2, ShieldCheck, AlertCircle } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { countsForDate } from '../../lib/receipt/counts';
 import {
   buildReceipt, selectableDates, describeDate, localDateKey, EMPTY_COUNTS,
 } from '../../lib/receipt/format';
-import type { Lead } from '../../apps/linkedin/types';
-import type { Prospect } from '../../apps/coldemail/types';
+import type { OutreachRows } from '../../lib/activity/useOutreachRows';
 
 /**
  * The daily receipt: counts and a date, copied by hand into CONQUER.
@@ -18,14 +15,13 @@ import type { Prospect } from '../../apps/coldemail/types';
  * into a system their coach can see, and "trust us, it is only numbers" is worth
  * nothing next to a box they can read themselves.
  */
-export const DailyReceipt: React.FC = () => {
-  const { user } = useAuth();
+export const DailyReceipt: React.FC<{ rows: OutreachRows }> = ({ rows }) => {
   const { materials } = useData();
-
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [prospects, setProspects] = useState<Prospect[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  // The rows arrive as a prop rather than being fetched here, because the
+  // prompt above this card writes to the same leads and prospects. Two fetches
+  // would mean marking a message sent and watching the count beside it stay
+  // wrong until a reload.
+  const { leads, prospects, loading, loadError } = rows;
 
   const now = useMemo(() => new Date(), []);
   const dates = useMemo(() => selectableDates(now), [now]);
@@ -34,28 +30,6 @@ export const DailyReceipt: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
   const boxRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      if (!user) { setLoading(false); return; }
-      const [l, p] = await Promise.all([
-        supabase.from('leads').select('*').eq('user_id', user.id),
-        supabase.from('prospects').select('*').eq('user_id', user.id),
-      ]);
-      if (!active) return;
-      // A failed read must not silently become a day of zeros: a member would
-      // file a receipt saying they did nothing on a day they worked.
-      if (l.error || p.error) setLoadError((l.error ?? p.error)?.message ?? 'Could not read your activity.');
-      else {
-        setLoadError(null);
-        setLeads((l.data as Lead[]) ?? []);
-        setProspects((p.data as Prospect[]) ?? []);
-      }
-      setLoading(false);
-    })();
-    return () => { active = false; };
-  }, [user]);
 
   const counts = useMemo(
     () => (loadError ? EMPTY_COUNTS : countsForDate({ leads, prospects, jobs: materials }, dateKey)),
