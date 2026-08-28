@@ -268,23 +268,6 @@ const LeadDetail: React.FC<{
   onDelete: (id: string) => void;
 }> = ({ lead, focusStep, onUpdate, onDelete }) => {
   const { cases, loadError: vaultError } = useCaseStudies();
-  /*
-    Land on the step that is due, not at the top of the flow.
-
-    Found in the DOM rather than held in a ref, because the cards are rendered
-    by a component declared inside this one and so remount on every render — a
-    ref would be reattached constantly. The guard makes this happen once per
-    focused step: after the first successful scroll it never runs again, so
-    editing a step does not yank the page back to it.
-  */
-  const scrolledTo = useRef<string | null>(null);
-  useEffect(() => {
-    if (!focusStep || scrolledTo.current === focusStep) return;
-    const el = document.querySelector(`[data-step="${CSS.escape(focusStep)}"]`);
-    if (!el) return;
-    scrolledTo.current = focusStep;
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
@@ -324,6 +307,29 @@ const LeadDetail: React.FC<{
    * it is one problem with the generation — and none of them can ever be
    * cleared by editing. It gets its own state.
    */
+  /*
+    Land on the step that is due, not at the top of the flow.
+
+    Found in the DOM rather than held in a ref, because the cards are rendered
+    by a component declared inside this one and so remount on every render — a
+    ref would be reattached constantly.
+
+    Keyed on the flow as well as the step, because the card does not exist
+    until there is something to render and the effect has to run again once it
+    does. Without a dependency array at all this queried the DOM on every
+    single render, which for a lead with nothing generated yet is every
+    keystroke in the screen below, forever. The ref guard is what stops the
+    re-run: editing a step changes the flow and must not yank the page back.
+  */
+  const scrolledTo = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusStep || scrolledTo.current === focusStep) return;
+    const el = document.querySelector(`[data-step="${CSS.escape(focusStep)}"]`);
+    if (!el) return;
+    scrolledTo.current = focusStep;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [focusStep, flow]);
+
   const flowIsEmpty = useMemo(
     () => Boolean(flow) && LINKEDIN_PACK.structure.every((st) => !flow?.[st.key]?.trim()),
     [flow],

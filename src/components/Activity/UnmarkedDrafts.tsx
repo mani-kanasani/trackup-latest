@@ -8,11 +8,21 @@ import {
 import { advanceTo, statusAfterSend } from '../../lib/activity/milestones';
 import { describeDate } from '../../lib/receipt/format';
 import type { OutreachRows } from '../../lib/activity/useOutreachRows';
+import { useToday } from '../../lib/activity/useToday';
 import type { Lead } from '../../apps/linkedin/types';
 import type { Prospect } from '../../apps/coldemail/types';
 
 /** More than this and the card becomes a list to scroll rather than a question. */
 const SHOWN = 6;
+
+/**
+ * "written yesterday", but "written Tuesday 25 August".
+ *
+ * Only the relative words want lowercasing mid-sentence; a weekday and a
+ * month keep their capitals wherever they appear.
+ */
+const midSentence = (described: string): string =>
+  described === 'Today' || described === 'Yesterday' ? described.toLowerCase() : described;
 
 /**
  * The question the app has to ask, and only once.
@@ -30,7 +40,9 @@ export const UnmarkedDrafts: React.FC<{ rows: OutreachRows }> = ({ rows }) => {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  const now = useMemo(() => new Date(), []);
+  // Drafts written 'today' become drafts written yesterday at midnight, and
+  // this is the screen that has to notice.
+  const now = useToday();
   const drafts = useMemo(
     () =>
       rows.loadError
@@ -109,7 +121,7 @@ export const UnmarkedDrafts: React.FC<{ rows: OutreachRows }> = ({ rows }) => {
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">Did these go out?</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             You wrote {drafts.length} message{drafts.length === 1 ? '' : 's'}
-            {drafts.length === 1 ? ` ${dayLabel.toLowerCase()}` : ' before today'} and marked none of them
+            {drafts.length === 1 ? ` ${midSentence(dayLabel)}` : ' before today'} and marked none of them
             sent. Ember only counts what you say went out.
           </p>
         </div>
@@ -126,7 +138,7 @@ export const UnmarkedDrafts: React.FC<{ rows: OutreachRows }> = ({ rows }) => {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{draft.name}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {draft.channel} · written {describeDate(draftDateKey(draft), now).toLowerCase()}
+                  {draft.channel} · written {midSentence(describeDate(draftDateKey(draft), now))}
                 </p>
               </div>
               <button

@@ -5,6 +5,7 @@ import { buildQueue, queueSize, type QueueItem } from '../../lib/queue/today';
 import { loadDailyTarget, saveDailyTarget, DEFAULT_QUEUE_CAP } from '../../lib/dailyTarget';
 import type { OutreachRows } from '../../lib/activity/useOutreachRows';
 import type { AppId } from '../../apps/registry';
+import { useToday } from '../../lib/activity/useToday';
 
 interface TodayQueueProps {
   rows: OutreachRows;
@@ -76,7 +77,9 @@ export const TodayQueue: React.FC<TodayQueueProps> = ({ rows, onOpen }) => {
   const [target, setTarget] = useState<number | null>(() => loadDailyTarget());
   const [entry, setEntry] = useState('');
 
-  const now = useMemo(() => new Date(), []);
+  // Left open overnight, a queue built at yesterday's mount reports yesterday's
+  // progress against today's number.
+  const now = useToday();
   const queue = useMemo(
     () => buildQueue({ leads: rows.leads, prospects: rows.prospects, jobs: materials }, target, now),
     [rows.leads, rows.prospects, materials, target, now],
@@ -104,15 +107,17 @@ export const TodayQueue: React.FC<TodayQueueProps> = ({ rows, onOpen }) => {
           <div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Today</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {target === null
-                ? `${queue.done} sent so far today.`
-                : hit
-                  ? `${queue.done} of ${target} sent. That is today done.`
-                  : `${queue.done} of ${target} sent.`}
+              {rows.loadError
+                ? 'Your list could not be read, so this count is not the whole picture.'
+                : target === null
+                  ? `${queue.done} sent so far today.`
+                  : hit
+                    ? `${queue.done} of ${target} sent. That is today done.`
+                    : `${queue.done} of ${target} sent.`}
             </p>
           </div>
         </div>
-        {target !== null && (
+        {target !== null && !rows.loadError && (
           <div className="text-right">
             <div className="text-3xl font-black text-gray-900 dark:text-white tabular-nums leading-none">
               {Math.max(0, target - queue.done)}
@@ -124,7 +129,7 @@ export const TodayQueue: React.FC<TodayQueueProps> = ({ rows, onOpen }) => {
 
       {/* Only drawn when there is a number to draw it against. A bar with no
           denominator is decoration pretending to be information. */}
-      {target !== null && (
+      {target !== null && !rows.loadError && (
         <div className="mt-4 h-2 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${hit ? 'bg-green-500' : 'bg-gradient-to-r from-ember-400 to-ember-600'}`}

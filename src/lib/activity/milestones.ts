@@ -74,11 +74,15 @@ export const statusAfterSend = (
 
 export type Milestone = 'replied' | 'no_reply' | 'call_booked';
 
-/** The two columns a milestone can stamp. Every row kind carries both. */
+/** The columns a milestone can stamp. Every row kind carries the first two. */
 export interface Stamped {
   status: string;
   replied_at?: string | null;
   call_booked_at?: string | null;
+  /** Jobs only: when the proposal went out. */
+  applied_at?: string | null;
+  /** Jobs only: when it was drafted, which is the earliest it could have gone out. */
+  created_at?: string | Date | null;
 }
 
 const MILESTONE_STATUS: Record<RowKind, Record<Milestone, string>> = {
@@ -119,6 +123,20 @@ export const milestonePatch = (
   } else {
     const next = advanceTo(kind, row.status, target);
     if (next) patch.status = next;
+  }
+
+  /*
+    A reply on a proposal that was never marked applied.
+
+    The database stamps `applied_at` the moment a job leaves `drafted`, so
+    without this, saying "they replied" to an old proposal puts a send on
+    TODAY's receipt for something that went out on some unknown earlier day.
+    The draft date is the earliest defensible answer and the only one that
+    cannot inflate today — the same rule the forgotten-drafts prompt follows.
+  */
+  if (kind === 'job' && !row.applied_at && milestone !== 'no_reply') {
+    const drafted = row.created_at ? new Date(row.created_at) : null;
+    patch.applied_at = (drafted && !Number.isNaN(drafted.getTime()) ? drafted : at).toISOString();
   }
 
   if (milestone === 'replied' && !row.replied_at) patch.replied_at = iso;

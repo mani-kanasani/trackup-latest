@@ -19,6 +19,7 @@ import {
   unmarkedDrafts, draftDateKey, draftRef, firstStepKey, loadDismissed, rememberDismissed,
 } from '../src/lib/activity/drafts';
 import { countsForDate } from '../src/lib/receipt/counts';
+import { dayStart } from '../src/lib/activity/useToday';
 import { localDateKey, MAX_BACKDATE_DAYS } from '../src/lib/receipt/format';
 import type { Lead } from '../src/apps/linkedin/types';
 import type { Prospect } from '../src/apps/coldemail/types';
@@ -117,6 +118,36 @@ check(
   'a lead lost AFTER replying does not read as no reply',
   currentMilestone('lead', { status: 'lost', replied_at: MONDAY }) === 'replied',
 );
+
+/* ---- a job milestone must not invent today as its send date -------------- */
+//
+// The database stamps applied_at the moment a job leaves drafted. Logging a
+// reply on an old proposal would therefore put a send on TODAY's receipt for
+// something that went out on some unknown earlier day.
+
+const drafted = daysAgo(5);
+const oldJob = { status: 'drafted', created_at: drafted };
+const jobPatch = milestonePatch('job', oldJob, 'replied', at)!;
+check('a reply on an unmarked proposal dates the send to when it was drafted', jobPatch.applied_at === drafted.toISOString(), String(jobPatch.applied_at));
+check('  which is not today', localDateKey(new Date(jobPatch.applied_at as string)) !== localDateKey(NOW));
+check('  and the reply itself is dated now', jobPatch.replied_at === at.toISOString());
+check('an already-applied job keeps its send date', milestonePatch('job', { status: 'applied', applied_at: MONDAY, created_at: drafted }, 'replied', at)!.applied_at === undefined);
+check('a job with no draft date at all falls back to now rather than nothing', milestonePatch('job', { status: 'drafted' }, 'replied', at)!.applied_at === at.toISOString());
+check('closing an unanswered proposal does not invent a send', milestonePatch('job', oldJob, 'no_reply', at)!.applied_at === undefined);
+check('leads are untouched by any of this', milestonePatch('lead', { status: 'connected', created_at: drafted }, 'replied', at)!.applied_at === undefined);
+
+/* ---- the day key round-trips ---------------------------------------------- */
+//
+// `new Date('2026-08-28')` parses as UTC and lands on the 27th for everyone
+// west of Greenwich. dayStart is the inverse of localDateKey and has to stay so
+// through month ends and daylight-saving changes.
+
+for (const probe of [new Date(2026, 7, 28, 23, 30), new Date(2026, 0, 1, 0, 1), new Date(2026, 11, 31, 23, 59), new Date(2026, 2, 8, 2, 30), new Date(2026, 10, 1, 1, 30)]) {
+  const key = localDateKey(probe);
+  const back = dayStart(key);
+  check(`dayStart round-trips ${key}`, localDateKey(back) === key, localDateKey(back));
+  check('  and lands at local midnight', back.getHours() === 0 && back.getMinutes() === 0);
+}
 
 /* ---- what still counts as an unanswered draft ---------------------------- */
 

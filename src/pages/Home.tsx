@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ArrowRight, LogOut, Settings as SettingsIcon, Moon, Sun, BarChart3 } from 'lucide-react';
 import { EmberMark } from '../components/UI/EmberMark';
 import { DailyReceipt } from '../components/Receipt/DailyReceipt';
@@ -10,7 +10,6 @@ import { APPS, AppId } from '../apps/registry';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { supabase } from '../lib/supabase';
 
 interface HomeProps {
   onOpenApp: (id: AppId, focusId?: string, stepKey?: string) => void;
@@ -22,9 +21,18 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
   const { user, logout } = useAuth();
   const { materials } = useData();
   const { theme, toggleTheme } = useTheme();
-  // One read of leads and prospects, shared by the two cards below that both
-  // count and change them.
+  /*
+    One read of the leads and prospects, for everything on this screen.
+
+    The queue, the drafts prompt and the receipt all work from these rows, and
+    the channel cards below now count them rather than issuing their own
+    head-count query for the same two tables. Two reads of one table can
+    disagree while one is in flight, and the card saying 12 beside a queue built
+    from 9 is the kind of small wrongness that makes people stop trusting a
+    number they cannot check.
+  */
   const rows = useOutreachRows();
+
   /**
    * One count per app, keyed by app id.
    *
@@ -32,33 +40,16 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
    * through to, so the cold email card displayed the LinkedIn lead count: adding
    * a lead made it read 1, and opening it showed nothing. Keying the counts by
    * app means a fourth channel cannot inherit the same bug by omission.
+   *
+   * Null while loading or after a failed read: a shimmer is honest about not
+   * knowing, and a zero is a claim that they have nothing.
    */
-  const [counts, setCounts] = useState<Partial<Record<AppId, number>>>({});
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      if (!user) return;
-      const countOf = async (table: string) => {
-        const { count, error } = await supabase
-          .from(table)
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id);
-        // A failed read stays undefined rather than becoming 0: a shimmer is
-        // honest about not knowing, a zero is a claim that they have nothing.
-        return error ? undefined : count ?? 0;
-      };
-      const [leads, prospects] = await Promise.all([countOf('leads'), countOf('prospects')]);
-      if (active) setCounts({ linkedin: leads, coldemail: prospects });
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
-
   const statValue = (id: AppId): number | null => {
     if (id === 'trackup') return materials.length;
-    return counts[id] ?? null;
+    if (rows.loading || rows.loadError) return null;
+    if (id === 'linkedin') return rows.leads.length;
+    if (id === 'coldemail') return rows.prospects.length;
+    return null;
   };
 
   return (

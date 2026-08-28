@@ -53,6 +53,15 @@ export const Settings: React.FC = () => {
   const [context, setContext] = useState<UserContext>({ about: '', wins: '', testimonials: '' });
   const [contextSaved, setContextSaved] = useState(false);
 
+  /*
+    Bumped whenever something the meter reads is saved.
+
+    The meter reads localStorage inside a memo, so filling in the gap it just
+    named left it still showing the gap until the page was left and returned
+    to. Used as a `key`, so it remounts and re-reads.
+  */
+  const [setupVersion, setSetupVersion] = useState(0);
+
   const [target, setTarget] = useState('');
   const [targetSaved, setTargetSaved] = useState(false);
 
@@ -122,6 +131,7 @@ export const Settings: React.FC = () => {
 
   const handleSaveContext = () => {
     saveUserContext(context);
+    setSetupVersion((v) => v + 1);
     setContextSaved(true);
     setTimeout(() => setContextSaved(false), 2000);
   };
@@ -194,6 +204,7 @@ export const Settings: React.FC = () => {
       model: model.trim() || PROVIDER_META[provider].defaultModel,
       apiKey: apiKey.trim(),
     });
+    setSetupVersion((v) => v + 1);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -212,7 +223,7 @@ export const Settings: React.FC = () => {
       {/* What is missing, named, with a link to each field below. First on the
           page because it is the answer to the question that brings most people
           here: is this thing set up properly or not. */}
-      <CompletenessMeter />
+      <CompletenessMeter key={setupVersion} />
 
       {/* AI Provider */}
       <div id="setup-provider" className="card-modern p-8 animate-rise scroll-mt-6">

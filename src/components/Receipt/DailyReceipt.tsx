@@ -6,6 +6,7 @@ import {
   buildReceipt, selectableDates, describeDate, localDateKey, EMPTY_COUNTS,
 } from '../../lib/receipt/format';
 import type { OutreachRows } from '../../lib/activity/useOutreachRows';
+import { useToday } from '../../lib/activity/useToday';
 
 /**
  * The daily receipt: counts and a date, copied by hand into CONQUER.
@@ -23,7 +24,15 @@ export const DailyReceipt: React.FC<{ rows: OutreachRows }> = ({ rows }) => {
   // wrong until a reload.
   const { leads, prospects, loading, loadError } = rows;
 
-  const now = useMemo(() => new Date(), []);
+  /*
+    Re-checked rather than captured at mount.
+
+    The chosen date is deliberately NOT dragged along when the day turns over.
+    It is still in the list and it is still labelled truthfully — "Yesterday"
+    rather than "Today" — and silently changing the string sitting under a
+    copy button is worse than letting someone see which day they are filing.
+  */
+  const now = useToday();
   const dates = useMemo(() => selectableDates(now), [now]);
   const [dateKey, setDateKey] = useState(() => localDateKey(now));
 
