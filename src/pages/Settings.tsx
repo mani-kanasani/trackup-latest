@@ -6,6 +6,7 @@ import { AIProvider, PROVIDER_META, loadAIConfig, saveAIConfig } from '../lib/ai
 import { getSupabaseConfig, clearSupabaseConfig } from '../lib/supabaseConfig';
 import { loadUserContext, saveUserContext, UserContext } from '../lib/userContext';
 import { loadDailyTarget, saveDailyTarget } from '../lib/dailyTarget';
+import { CompletenessMeter } from '../components/Setup/CompletenessMeter';
 import { CustomPrompts, DEFAULT_PROMPTS, PROMPT_META, PromptKey, loadPrompts, savePrompts } from '../lib/prompts';
 import { getPack } from '../lib/method/packs';
 import { composeSystemPrompt } from '../lib/method/compose';
@@ -208,8 +209,13 @@ export const Settings: React.FC = () => {
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-8 animate-fade-in">
+      {/* What is missing, named, with a link to each field below. First on the
+          page because it is the answer to the question that brings most people
+          here: is this thing set up properly or not. */}
+      <CompletenessMeter />
+
       {/* AI Provider */}
-      <div className="card-modern p-8 animate-rise">
+      <div id="setup-provider" className="card-modern p-8 animate-rise scroll-mt-6">
         <div className="flex items-center space-x-3 mb-2">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25">
             <Sparkles className="w-4 h-4 text-white" />
@@ -418,7 +424,7 @@ export const Settings: React.FC = () => {
       </div>
 
       {/* Your context */}
-      <div className="card-modern p-8 animate-rise">
+      <div id="setup-context" className="card-modern p-8 animate-rise scroll-mt-6">
         <div className="flex items-center space-x-3 mb-2">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-upwork-400 to-upwork-600 flex items-center justify-center shadow-lg shadow-upwork-500/25">
             <UserRound className="w-4 h-4 text-white" />
@@ -471,9 +477,13 @@ export const Settings: React.FC = () => {
         </div>
       </div>
 
-      <CaseStudyVault />
+      <div id="setup-vault" className="scroll-mt-6">
+        <CaseStudyVault />
+      </div>
 
-      <VerticalBriefPanel />
+      <div id="setup-brief" className="scroll-mt-6">
+        <VerticalBriefPanel />
+      </div>
 
       {/* System prompts */}
       <div className="card-modern p-8 animate-rise">

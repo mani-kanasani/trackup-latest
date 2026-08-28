@@ -122,8 +122,19 @@ export interface ChannelPrompt {
   steps: OutputStep[];
   /** True when the user has supplied nothing about themselves. */
   contextEmpty: boolean;
-  /** True when no proof is available, which several laws depend on. */
+  /** True when no FIRST-PARTY proof is available, which several laws depend on. */
   proofEmpty: boolean;
+  /**
+   * True when there is genuinely nothing to write from.
+   *
+   * Distinct from `proofEmpty`, and the distinction is the whole point. A
+   * member with no client result but one sourced industry figure has proof
+   * empty and something to write from, and telling them they have nothing is
+   * both wrong and the exact nag we decided not to make. Warn on this one.
+   */
+  nothingToWriteFrom: boolean;
+  /** True when the copy leans on researched figures rather than the sender's own. */
+  industryOnly: boolean;
   /** True when proof might exist but could not be read. Never say "you have none". */
   proofUnknown: boolean;
   /** The case study chosen, so the UI can show and explain the pick. */
@@ -181,13 +192,21 @@ export const buildChannelPrompt = (
   const mode: VerticalMode = options.verticalMode ?? DEFAULT_MODE[channel] ?? 'generic';
   const usingBrief = mode === 'vertical' && !!options.brief;
   const vertical = usingBrief ? renderBrief(options.brief as LoadedBrief) : '';
+  // Lifted out of the return literal because three fields now depend on it.
+  const evidence = usingBrief ? (options.brief as LoadedBrief).evidence.filter((e) => e.active) : [];
+  const proofEmpty = !proof && !options.vaultUnavailable;
 
   return {
     pack,
     systemPrompt: composeSystemPrompt({ pack, qualification, context: about, vertical, proof, userPrompt }),
     steps: outputSteps(pack),
     contextEmpty: !contextToPrompt(ctx).trim(),
-    proofEmpty: !proof && !options.vaultUnavailable,
+    proofEmpty,
+    // A sourced industry figure is something to write from. The attribution
+    // law already forces its source into the same message, so a message
+    // built on one is honest without a case study behind it.
+    nothingToWriteFrom: proofEmpty && evidence.length === 0,
+    industryOnly: proofEmpty && evidence.length > 0,
     proofUnknown: Boolean(options.vaultUnavailable),
     chosen,
     alternatives,
@@ -196,7 +215,7 @@ export const buildChannelPrompt = (
     /** True only when a brief was actually rendered into the prompt. */
     usingBrief,
     /** The evidence in play, so the validator can police attribution on it. */
-    evidence: usingBrief ? (options.brief as LoadedBrief).evidence.filter((e) => e.active) : [],
+    evidence,
   };
 };
 

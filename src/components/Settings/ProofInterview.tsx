@@ -9,9 +9,10 @@
 // end having said no seven times is a real outcome with its own screen, and that
 // screen is the fallback rather than an apology.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight, Check, Lightbulb, X } from 'lucide-react';
 import { INTERVIEW, CAPTURE_FIELDS, SPECIFICITY, FALLBACK, draftFromAnswer } from '../../lib/proof/interview';
+import { markInterviewDone } from '../../lib/setup/interviewRun';
 import type { CaseStudy } from '../../lib/proof/types';
 
 export const ProofInterview: React.FC<{
@@ -25,6 +26,18 @@ export const ProofInterview: React.FC<{
 
   const done = index >= INTERVIEW.length;
   const q = done ? null : INTERVIEW[index];
+
+  /*
+    Recorded once the seventh question has been answered, whichever way.
+
+    Getting to the end having said no seven times is a real outcome, not a
+    failure, and the completeness meter has to stop suggesting this screen to
+    someone who has already given their answer. Marking it here rather than on
+    close means abandoning it halfway does not count.
+  */
+  useEffect(() => {
+    if (done) markInterviewDone();
+  }, [done]);
 
   const next = () => {
     setAnswer('');

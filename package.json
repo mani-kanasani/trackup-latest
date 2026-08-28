@@ -24,7 +24,8 @@
     "deliverables:export": "esbuild scripts/exportDeliverables.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/export.mjs --log-level=error && node node_modules/.cache/export.mjs \"../Boardroom Clients\"",
     "receipt:test": "esbuild scripts/smokeReceipt.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/receipt.mjs --log-level=error && node node_modules/.cache/receipt.mjs",
     "activity:test": "esbuild scripts/smokeActivity.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/activity.mjs --log-level=error && node node_modules/.cache/activity.mjs",
-    "queue:test": "esbuild scripts/smokeQueue.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/queue.mjs --log-level=error && node node_modules/.cache/queue.mjs"
+    "queue:test": "esbuild scripts/smokeQueue.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/queue.mjs --log-level=error && node node_modules/.cache/queue.mjs",
+    "setup:test": "esbuild scripts/smokeSetup.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/setup.mjs --log-level=error && node node_modules/.cache/setup.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

@@ -296,7 +296,17 @@ const LeadDetail: React.FC<{
   // Graded against what was actually sent, not against the vault as it stands now.
   const [sentEvidence, setSentEvidence] = useState<IndustryEvidence[]>([]);
   const lastGeneration = lead.generation_meta?.[lead.generation_meta.length - 1] ?? null;
+  /*
+    Two different things, and they used to be one.
+
+    `noProof` means there was nothing at all to write from. `industryOnly`
+    means there is no client result but there IS a sourced industry figure,
+    which is a legitimate starting state and not a gap — the attribution law
+    forces the source into the same message. Showing "you have no case
+    studies" to that member is both wrong and the nag we decided against.
+  */
   const [noProof, setNoProof] = useState(false);
+  const [industryOnly, setIndustryOnly] = useState(false);
   const flow = useMemo(() => migrateFlow(lead.outreach ?? localFlow), [lead.outreach, localFlow]);
   // Deliberately NOT state.
   //
@@ -443,6 +453,7 @@ const LeadDetail: React.FC<{
     setError('');
     setProofUsed(null);
     setNoProof(false);
+    setIndustryOnly(false);
     setGenerating(true);
     // Match a case study to THIS lead's world rather than sending the whole
     // vault. "One proof, matched to the reader" is a law in every pack.
@@ -462,7 +473,8 @@ const LeadDetail: React.FC<{
     });
     setSentEvidence(method.evidence);
     setProofUsed(method.chosen ? method.chosen.caseStudy.title : null);
-    setNoProof(method.proofEmpty);
+    setNoProof(method.nothingToWriteFrom);
+    setIndustryOnly(method.industryOnly);
     try {
       const { data, error: fnError } = await supabase.functions.invoke<OutreachFlow>('generate-outreach', {
         body: {
@@ -730,8 +742,15 @@ const LeadDetail: React.FC<{
 
         {noProof && !proofUsed && (
           <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-            No case studies yet, so this was written from your background alone and claims no results.
-            Add one in Settings and Ember will cite a matched, real outcome.
+            Nothing to write from yet, so this claims no results. One case study or one industry
+            figure with its source is enough — either is in Settings.
+          </p>
+        )}
+
+        {industryOnly && !proofUsed && (
+          <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+            No result of your own yet, so this leans on your industry research and credits the
+            source in the message itself.
           </p>
         )}
 

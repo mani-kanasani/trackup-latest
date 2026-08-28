@@ -250,7 +250,17 @@ const ProspectDetail: React.FC<{
   const [copied, setCopied] = useState<string | null>(null);
   const [localSeq, setLocalSeq] = useState<EmailSequence | null>(null);
   const [proofUsed, setProofUsed] = useState<string | null>(null);
+  /*
+    Two different things, and they used to be one.
+
+    `noProof` means there was nothing at all to write from. `industryOnly`
+    means there is no client result but there IS a sourced industry figure,
+    which is a legitimate starting state and not a gap — the attribution law
+    forces the source into the same message. Showing "you have no case
+    studies" to that member is both wrong and the nag we decided against.
+  */
   const [noProof, setNoProof] = useState(false);
+  const [industryOnly, setIndustryOnly] = useState(false);
 
   const { loaded: brief, loading: briefLoading, loadError: briefError } = useVerticalBrief();
   const { mode, setMode } = useVerticalMode('coldEmail');
@@ -334,7 +344,7 @@ const ProspectDetail: React.FC<{
       setError(`Your case studies could not be loaded, so this would be written as if you had none: ${vaultError}.`);
       return;
     }
-    setError(''); setProofUsed(null); setNoProof(false); setGenerating(true);
+    setError(''); setProofUsed(null); setNoProof(false); setIndustryOnly(false); setGenerating(true);
 
     const method = buildChannelPrompt('coldEmail', {
       cases,
@@ -351,7 +361,8 @@ const ProspectDetail: React.FC<{
     });
     setSentEvidence(method.evidence);
     setProofUsed(method.chosen ? method.chosen.caseStudy.title : null);
-    setNoProof(method.proofEmpty);
+    setNoProof(method.nothingToWriteFrom);
+    setIndustryOnly(method.industryOnly);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke<EmailSequence>('generate-outreach', {
@@ -589,7 +600,15 @@ const ProspectDetail: React.FC<{
 
         {noProof && !proofUsed && (
           <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-            No case studies yet, so this was written from your background alone and claims no results.
+            Nothing to write from yet, so this claims no results. One case study or one industry
+            figure with its source is enough — either is in Settings.
+          </p>
+        )}
+
+        {industryOnly && !proofUsed && (
+          <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+            No result of your own yet, so this leans on your industry research and credits the
+            source in the message itself.
           </p>
         )}
         {proofUsed && (

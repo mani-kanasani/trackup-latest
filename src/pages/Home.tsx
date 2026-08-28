@@ -4,6 +4,7 @@ import { EmberMark } from '../components/UI/EmberMark';
 import { DailyReceipt } from '../components/Receipt/DailyReceipt';
 import { UnmarkedDrafts } from '../components/Activity/UnmarkedDrafts';
 import { TodayQueue } from '../components/Queue/TodayQueue';
+import { CompletenessMeter } from '../components/Setup/CompletenessMeter';
 import { useOutreachRows } from '../lib/activity/useOutreachRows';
 import { APPS, AppId } from '../apps/registry';
 import { useAuth } from '../contexts/AuthContext';
@@ -105,6 +106,9 @@ export const Home: React.FC<HomeProps> = ({ onOpenApp, onOpenSettings, onOpenAna
             behind one. */}
         <div className="mb-8 space-y-6">
           <TodayQueue rows={rows} onOpen={onOpenApp} />
+          {/* Silent when the setup is complete. A green tick every morning is
+              one more thing to read on the screen meant for doing the work. */}
+          <CompletenessMeter compact onOpenSettings={onOpenSettings} />
           <UnmarkedDrafts rows={rows} />
           <DailyReceipt rows={rows} />
         </div>

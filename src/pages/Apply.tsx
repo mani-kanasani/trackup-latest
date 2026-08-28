@@ -79,7 +79,17 @@ export const Apply: React.FC = () => {
   const warnings = (check?.violations ?? []).filter((v) => v.level === 'hard').map(describeViolation);
   const softNotes = (check?.violations ?? []).filter((v) => v.level === 'soft').map(describeViolation);
   const [proofUsed, setProofUsed] = useState<string | null>(null);
+  /*
+    Two different things, and they used to be one.
+
+    `noProof` means there was nothing at all to write from. `industryOnly`
+    means there is no client result but there IS a sourced industry figure,
+    which is a legitimate starting state and not a gap — the attribution law
+    forces the source into the same message. Showing "you have no case
+    studies" to that member is both wrong and the nag we decided against.
+  */
   const [noProof, setNoProof] = useState(false);
+  const [industryOnly, setIndustryOnly] = useState(false);
 
   const handleGenerate = async () => {
     if (!jobTitle.trim() || !jobSummary.trim()) {
@@ -105,6 +115,7 @@ export const Apply: React.FC = () => {
     setError('');
     setProofUsed(null);
     setNoProof(false);
+    setIndustryOnly(false);
 
     // Match one case study to THIS job rather than sending the whole vault, and
     // carry the screen's verdict so the copy knows what job it has to do and
@@ -119,7 +130,8 @@ export const Apply: React.FC = () => {
     });
     setSentEvidence(method.evidence);
     setProofUsed(method.chosen ? method.chosen.caseStudy.title : null);
-    setNoProof(method.proofEmpty);
+    setNoProof(method.nothingToWriteFrom);
+    setIndustryOnly(method.industryOnly);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke<GenerateResponse>(
@@ -425,8 +437,15 @@ export const Apply: React.FC = () => {
 
           {noProof && !proofUsed && (
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              No case studies yet, so this will be written from your background alone and will claim no
-              results. Add one in Settings and Ember will cite a matched, real outcome.
+              Nothing to write from yet, so this will claim no results. One case study or one
+              industry figure with its source is enough — either is in Settings.
+            </p>
+          )}
+
+          {industryOnly && !proofUsed && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              No result of your own yet, so this leans on your industry research and credits the
+              source in the proposal itself.
             </p>
           )}
 
