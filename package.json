@@ -26,7 +26,8 @@
     "activity:test": "esbuild scripts/smokeActivity.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/activity.mjs --log-level=error && node node_modules/.cache/activity.mjs",
     "queue:test": "esbuild scripts/smokeQueue.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/queue.mjs --log-level=error && node node_modules/.cache/queue.mjs",
     "setup:test": "esbuild scripts/smokeSetup.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/setup.mjs --log-level=error && node node_modules/.cache/setup.mjs",
-    "readiness:test": "esbuild scripts/smokeReadiness.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/readiness.mjs --log-level=error --external:fs --external:path && node node_modules/.cache/readiness.mjs"
+    "readiness:test": "esbuild scripts/smokeReadiness.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/readiness.mjs --log-level=error --external:fs --external:path && node node_modules/.cache/readiness.mjs",
+    "violations:test": "esbuild scripts/smokeViolations.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/violations.mjs --log-level=error && node node_modules/.cache/violations.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

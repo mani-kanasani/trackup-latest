@@ -41,11 +41,23 @@ const checkBanned = (pack: MethodPack, stepKey: string, text: string): Violation
   return out;
 };
 
+/*
+  Every violation carries an id, because an id is the whole of what gets
+  recorded.
+
+  The apps log `patternId ?? lawId ?? 'empty-step'` and nothing else — the
+  excerpt is the member's own copy and does not belong in a log. Length and
+  structural failures had neither id, so all three fell through to the same
+  fallback: an over-long step, a missing subject line and a step that came
+  back empty were recorded as the same thing. Any count built from that says
+  "empty step" for a member whose real problem is that they write long.
+*/
 const checkLength = (step: StructureStep, text: string): Violation[] => {
   if (!step.maxChars || text.length <= step.maxChars) return [];
   return [
     {
       stepKey: step.key,
+      patternId: 'over-length',
       level: 'soft',
       message: `${step.label} is ${text.length} characters against a ${step.maxChars} ceiling. Shorter converts better; cut to the single idea this step is for.`,
     },
@@ -77,6 +89,7 @@ export const validateOutput = (
     if (!text) {
       violations.push({
         stepKey: step.key,
+        patternId: 'empty-step',
         level: 'hard',
         message: `${step.label} came back empty. Regenerate.`,
       });
@@ -98,6 +111,7 @@ export const validateOutput = (
     if (!subject) {
       violations.push({
         stepKey: sKey,
+        patternId: 'empty-subject',
         level: 'hard',
         message: `${step.label} came back with no subject line. Regenerate.`,
       });

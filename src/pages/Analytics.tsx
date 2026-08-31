@@ -9,15 +9,14 @@
 // four sends is not a reply rate, and a dashboard that prints one teaches people
 // to make decisions on noise.
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Send, MessageSquare, CalendarCheck, Trophy, AlertTriangle } from 'lucide-react';
 import { EmberMark } from '../components/UI/EmberMark';
 import { AppBar } from '../components/Layout/AppBar';
-import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
-import { supabase } from '../lib/supabase';
-import type { Lead } from '../apps/linkedin/types';
-import type { Prospect } from '../apps/coldemail/types';
+import { useOutreachRows } from '../lib/activity/useOutreachRows';
+import { useToday } from '../lib/activity/useToday';
+import { ViolationAggregate } from '../components/Violations/ViolationAggregate';
 import {
   linkedInStats, coldEmailStats, upworkStats, totalStats,
   proofPerformance, activityByDay, sentInLast, safeRate, MIN_SAMPLE,
@@ -43,47 +42,20 @@ const Kpi: React.FC<{ label: string; value: string; sub?: string; icon: React.El
 );
 
 export const Analytics: React.FC<{ onExit: () => void }> = ({ onExit }) => {
-  const { user } = useAuth();
   const { materials } = useData();
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [prospects, setProspects] = useState<Prospect[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  /*
+    The fourth copy of this read, collapsed into the one hook that already does
+    it — with the same rule it always had: a failed read must not render as zero
+    activity. Somebody working for a month should never be shown an empty
+    dashboard because a query failed, which is demoralising and false in the
+    same breath.
+  */
+  const rows = useOutreachRows();
+  const { leads, prospects, loading, loadError } = rows;
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const [l, p] = await Promise.all([
-          supabase.from('leads').select('*').eq('user_id', user.id),
-          supabase.from('prospects').select('*').eq('user_id', user.id),
-        ]);
-        if (!active) return;
-        // A failed read must not render as zero activity. Someone who has been
-        // working for a month should never be shown an empty dashboard because a
-        // query failed — that is demoralising and false in the same breath.
-        const failed = [l.error, p.error].filter(Boolean);
-        setLoadError(failed.length ? failed.map((e) => e!.message).join('; ') : null);
-        setLeads((l.data as Lead[]) ?? []);
-        setProspects((p.data as Prospect[]) ?? []);
-      } catch (err) {
-        // A rejected query, rather than one that resolves with an error, used to
-        // skip the line below and leave this page on "Loading…" forever — which
-        // is the worst of the three outcomes, because it looks like the app is
-        // still working on it.
-        if (active) setLoadError(err instanceof Error ? err.message : 'Could not reach the database.');
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-    return () => { active = false; };
-  }, [user]);
-
-  const now = useMemo(() => new Date(), []);
+  // Re-checked rather than captured at mount, so a screen left open overnight
+  // does not keep charting yesterday as today.
+  const now = useToday();
   const channels: ChannelStats[] = useMemo(
     () => [upworkStats(materials), linkedInStats(leads), coldEmailStats(prospects)],
     [materials, leads, prospects],
@@ -290,6 +262,10 @@ export const Analytics: React.FC<{ onExit: () => void }> = ({ onExit }) => {
             )}
           </>
         )}
+
+        {/* The funnels answer "how am I doing". This answers "and what am I
+            getting wrong", which is the question a teardown actually runs on. */}
+        <ViolationAggregate rows={rows} />
       </div>
     </div>
   );

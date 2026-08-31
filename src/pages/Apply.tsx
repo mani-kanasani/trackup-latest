@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Send, ExternalLink, Copy, FileText, Video, BarChart3, DollarSign, Briefcase, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { GenerateResponse, JobLevel, CompensationType, JobStatus } from '../types';
+import type { GenerationMeta } from '../apps/linkedin/types';
 import { supabase } from '../lib/supabase';
 import { loadAIConfig } from '../lib/aiConfig';
 import { loadUserContext, senderAbout } from '../lib/userContext';
@@ -78,6 +79,16 @@ export const Apply: React.FC = () => {
     `${v.message}${v.excerpt ? `, "${v.excerpt}"` : ''}`;
   const warnings = (check?.violations ?? []).filter((v) => v.level === 'hard').map(describeViolation);
   const softNotes = (check?.violations ?? []).filter((v) => v.level === 'soft').map(describeViolation);
+  /*
+    The conditions this proposal was written under, held until it is saved.
+
+    Everything in it is otherwise transient: the validator lives in component
+    state, the qualification verdict is re-derived at read time, and the
+    generation itself is replaced the moment another one runs. LinkedIn and
+    cold email have recorded this from the beginning; this screen computed the
+    same check, rendered it, and dropped it on save.
+  */
+  const [meta, setMeta] = useState<GenerationMeta | null>(null);
   const [proofUsed, setProofUsed] = useState<string | null>(null);
   /*
     Two different things, and they used to be one.
@@ -116,6 +127,7 @@ export const Apply: React.FC = () => {
     setProofUsed(null);
     setNoProof(false);
     setIndustryOnly(false);
+    setMeta(null);
 
     // Match one case study to THIS job rather than sending the whole vault, and
     // carry the screen's verdict so the copy knows what job it has to do and
@@ -181,6 +193,30 @@ export const Apply: React.FC = () => {
         );
       }
 
+      /*
+        Graded against the same doctrine that wrote it, and recorded.
+
+        Ids only. The excerpts are the user's own copy and have no business
+        being duplicated into a log, which is the same rule the other two
+        channels follow and the reason the aggregate can be counts-only.
+      */
+      setMeta({
+        at: new Date().toISOString(),
+        pack_id: method.pack.id,
+        pack_version: method.pack.version,
+        case_study_id: method.chosen?.caseStudy.id ?? null,
+        case_study_title: method.chosen?.caseStudy.title ?? null,
+        case_study_score: method.chosen?.score ?? null,
+        tier: verdict.tier,
+        rung: verdict.rung,
+        verdict: verdict.verdict,
+        violation_ids: data.steps
+          ? checkAgainstMethod('upwork', data.steps, method.evidence).violations.map(
+              (v) => v.patternId ?? v.lawId ?? 'empty-step',
+            )
+          : [],
+      });
+
       setGeneratedData(data);
     } catch (err) {
       console.error('Generation error:', err);
@@ -217,6 +253,7 @@ export const Apply: React.FC = () => {
       mermaid_code: generatedData.mermaid_code,
       video_script: generatedData.video_script,
       status,
+      generation_meta: meta ? [meta] : undefined,
       job_level: jobLevel,
       compensation_type: compensationType,
       proposed_amount: proposedAmount ? parseFloat(proposedAmount) : undefined,
@@ -239,6 +276,7 @@ export const Apply: React.FC = () => {
     setProposedAmount('');
     setActualAmount('');
     setGeneratedData(null);
+    setMeta(null);
     // The screen was answered about the job just saved. Carrying those answers
     // onto the next one would silently qualify a job nobody looked at.
     setQual(null);

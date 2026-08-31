@@ -33,19 +33,38 @@ export const useOutreachRows = (): OutreachRows => {
     let active = true;
     (async () => {
       if (!user) { setLoading(false); return; }
-      const [l, p] = await Promise.all([
-        supabase.from('leads').select('*').eq('user_id', user.id),
-        supabase.from('prospects').select('*').eq('user_id', user.id),
-      ]);
-      if (!active) return;
-      if (l.error || p.error) {
-        setLoadError((l.error ?? p.error)?.message ?? 'Could not read your activity.');
-      } else {
-        setLoadError(null);
+      try {
+        const [l, p] = await Promise.all([
+          supabase.from('leads').select('*').eq('user_id', user.id),
+          supabase.from('prospects').select('*').eq('user_id', user.id),
+        ]);
+        if (!active) return;
+        /*
+          Whatever arrived is kept, and the failure is reported alongside it.
+
+          Discarding both halves because one failed turns a partial outage
+          into an empty account: somebody who has worked for a month gets an
+          empty queue and a clean receipt, which is demoralising and false in
+          the same breath. Every screen reading this already checks
+          `loadError` before believing a zero.
+        */
+        const failed = [l.error, p.error].filter(Boolean);
+        setLoadError(failed.length ? failed.map((e) => e!.message).join('; ') : null);
         setLeads((l.data as Lead[]) ?? []);
         setProspects((p.data as Prospect[]) ?? []);
+      } catch (err) {
+        /*
+          A REJECTED promise, as opposed to one that resolves carrying an
+          error. Without this the line below never runs and the screen sits on
+          a spinner forever — the worst of the three outcomes, because it
+          looks like the app is still working on it. Analytics carried a
+          comment saying it had fixed exactly this; pointing it at this hook
+          would have handed the bug straight back to it.
+        */
+        if (active) setLoadError(err instanceof Error ? err.message : 'Could not reach the database.');
+      } finally {
+        if (active) setLoading(false);
       }
-      setLoading(false);
     })();
     return () => { active = false; };
   }, [user]);

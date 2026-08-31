@@ -1,3 +1,5 @@
+import type { GenerationMeta } from '../apps/linkedin/types';
+
 export interface User {
   id: string;
   email: string;
@@ -16,6 +18,15 @@ export interface JobMaterial {
   mermaid_code: string;
   video_script: string;
   status: JobStatus;
+  /**
+   * One entry per generation, newest last. Ids only, never excerpts.
+   *
+   * `leads` and `prospects` have carried this since the method engine landed
+   * and `jobs` did not, so Upwork graded every proposal and threw the result
+   * away — leaving any count of what a member gets wrong blind to a third of
+   * their work, silently.
+   */
+  generation_meta?: GenerationMeta[] | null;
   /* Set once, by trigger, the first time the job leaves the drafted state.
      status alone says a proposal went out, not which day, which is the one
      thing a daily receipt has to know. */

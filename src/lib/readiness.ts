@@ -89,6 +89,9 @@ export const REQUIRED_COLUMNS: { table: string; column: string; feature: string;
   { table: 'jobs', column: 'applied_at', feature: "the daily receipt's Upwork count", migration: '20260828120000_activity_timestamps.sql' },
   { table: 'leads', column: 'replied_at', feature: 'reply dates that survive a later status change', migration: '20260828120000_activity_timestamps.sql' },
   { table: 'prospects', column: 'call_booked_at', feature: 'call dates on the daily receipt', migration: '20260828120000_activity_timestamps.sql' },
+  // Without it Upwork grades every proposal and records nothing, so the
+  // violation aggregate describes two thirds of the work as all of it.
+  { table: 'jobs', column: 'generation_meta', feature: 'Upwork appearing in your doctrine check', migration: '20260831120000_job_generation_meta.sql' },
 ];
 
 /** Deployed by `npm run setup`, or pasted from the wizard. */

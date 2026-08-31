@@ -30,6 +30,16 @@ export const useData = () => {
   return context;
 };
 
+/**
+ * Did this write fail because the column is not there?
+ *
+ * PostgREST answers PGRST204 for a column missing from its schema cache and
+ * names it in the message. Matched on both, because the code alone also covers
+ * other cache misses and the message alone is not a contract.
+ */
+const missingColumn = (error: { code?: string; message?: string }, column: string): boolean =>
+  error.code === 'PGRST204' || Boolean(error.message && error.message.includes(column));
+
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [materials, setMaterials] = useState<JobMaterial[]>([]);
   const [loading, setLoading] = useState(false);
@@ -122,9 +132,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Inserting material:', insertData);
 
-      const { error } = await supabase
-        .from('jobs')
-        .insert(insertData);
+      /*
+        The violation record is added only if there is one, and its absence
+        never costs the member their proposal.
+
+        `jobs.generation_meta` is the newest column in this table. Sending it
+        unconditionally to a project that has not run that migration makes
+        PostgREST reject the whole insert — so an install one migration behind
+        would lose the ability to save an Upwork proposal at all, which is a
+        far worse trade than not recording which rules the draft broke.
+
+        So the write is attempted with it, and retried without it if the column
+        turns out not to exist. The aggregate already reports Upwork as a
+        channel it cannot see, and the install check names the file that fixes
+        it; neither of those is worth breaking a save over.
+      */
+      const withMeta = material.generation_meta?.length
+        ? { ...insertData, generation_meta: material.generation_meta }
+        : insertData;
+
+      let { error } = await supabase.from('jobs').insert(withMeta);
+
+      if (error && withMeta !== insertData && missingColumn(error, 'generation_meta')) {
+        ({ error } = await supabase.from('jobs').insert(insertData));
+      }
 
       if (error) {
         console.error('Error adding material:', error);

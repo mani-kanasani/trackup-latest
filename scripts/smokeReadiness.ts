@@ -50,28 +50,51 @@ for (const { table, migration } of REQUIRED_TABLES) {
   check(`${migration} really creates ${table}`, creates);
 }
 
+/** `ALTER TABLE <table> ADD COLUMN [IF NOT EXISTS] <column>`, on one line as these are written. */
+const addsColumn = (sql: string, table: string, column: string): boolean =>
+  new RegExp(`ALTER TABLE\\s+(public\\.)?${table}\\s+ADD COLUMN\\s+(IF NOT EXISTS\\s+)?${column}\\b`, 'i').test(sql);
+
+/** Declared inside the CREATE TABLE that this same migration introduces. */
+const declaresColumn = (sql: string, table: string, column: string): boolean => {
+  const create = new RegExp(`CREATE TABLE (IF NOT EXISTS )?(public\\.)?${table}\\s*\\(([\\s\\S]*?)\\n\\);`, 'i').exec(sql);
+  return Boolean(create) && new RegExp(`^\\s+${column}\\s+\\w`, 'im').test(create![3]);
+};
+
 for (const { table, column, migration } of REQUIRED_COLUMNS) {
   const sql = sqlOf(migration);
-  // Either added to an existing table, or declared in the CREATE TABLE that
-  // this same migration introduces.
-  const added = new RegExp(`ADD COLUMN (IF NOT EXISTS )?${column}\\b`, 'i').test(sql);
-  const declared = new RegExp(`^\\s+${column}\\s+\\w`, 'im').test(sql);
-  check(`${migration} really provides ${table}.${column}`, added || declared);
+  check(
+    `${migration} really provides ${table}.${column}`,
+    addsColumn(sql, table, column) || declaresColumn(sql, table, column),
+  );
 }
 
 /* ---- the earliest file that could provide it ------------------------------ */
 //
-// Several columns appear in more than one migration, because a later CREATE
-// TABLE declares a column of the same name on a different table. The check must
-// name the file that introduces it, not a later one that happens to mention it,
-// or a member is sent to run a migration that does nothing for their problem.
+// The check must name the file that INTRODUCES the column, not a later one that
+// happens to mention it, or a member is sent to run a migration that does
+// nothing for their problem.
+//
+// Table-aware, and it had to become so: `generation_meta` is added to `leads`
+// by one migration and to `jobs` by another, years apart, and a check that
+// matched on the column name alone called the second one wrong. Two tables
+// sharing a column name is ordinary; the first version of this passed only
+// because no such pair had come up yet.
 
-for (const { column, migration } of REQUIRED_COLUMNS) {
-  const earlier = files.filter(
-    (f) => f < migration && new RegExp(`ADD COLUMN (IF NOT EXISTS )?${column}\\b`, 'i').test(sqlOf(f)),
+for (const { table, column, migration } of REQUIRED_COLUMNS) {
+  const earlier = files.filter((f) => f < migration && addsColumn(sqlOf(f), table, column));
+  check(
+    `nothing before ${migration} already added ${table}.${column}`,
+    earlier.length === 0,
+    earlier.join(', '),
   );
-  check(`nothing before ${migration} already added ${column}`, earlier.length === 0, earlier.join(', '));
 }
+
+// And the table-awareness itself is load-bearing, so it is checked directly.
+check(
+  'the column check distinguishes two tables sharing a column name',
+  addsColumn(sqlOf('20260814160000_generation_meta.sql'), 'leads', 'generation_meta') &&
+    !addsColumn(sqlOf('20260814160000_generation_meta.sql'), 'jobs', 'generation_meta'),
+);
 
 /* ---- every migration is safe to re-run ------------------------------------ */
 //

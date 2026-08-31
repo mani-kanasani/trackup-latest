@@ -13,6 +13,7 @@
 // nothing to keep in sync.
 
 import { readSentSteps, isTerminal, type Lead } from '../apps/linkedin/types';
+import { localDateKey } from './receipt/format';
 import { isProspectTerminal, type Prospect } from '../apps/coldemail/types';
 import type { JobMaterial } from '../types';
 
@@ -196,6 +197,13 @@ export interface DayActivity {
  * Legacy rows carry an empty timestamp meaning "sent, time unknown" and are
  * excluded here rather than dated to today, which would invent a spike on
  * whichever day someone happened to open this screen.
+ *
+ * Bucketed by LOCAL day, not UTC. This used to slice an ISO string, which put
+ * an evening send in the Americas on tomorrow — and the daily receipt counts
+ * the same sends by local day. Two screens disagreeing about what happened on
+ * Tuesday is worse than either being wrong on its own, because the member
+ * reconciles them and concludes the app is broken. `localDateKey` is the one
+ * place that decides what a day is.
  */
 export const activityByDay = (
   sources: (Lead | Prospect)[],
@@ -208,15 +216,18 @@ export const activityByDay = (
       if (!at) continue;
       const d = new Date(at);
       if (Number.isNaN(d.getTime())) continue;
-      const key = d.toISOString().slice(0, 10);
+      const key = localDateKey(d);
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
   }
 
   const out: DayActivity[] = [];
   for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    const key = d.toISOString().slice(0, 10);
+    // Calendar arithmetic, not a fixed 24 hours. Subtracting milliseconds
+    // across a daylight-saving change repeats or skips a local day, so a
+    // 30-day window would quietly contain 29 or 31.
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    const key = localDateKey(d);
     out.push({ date: key, sent: counts.get(key) ?? 0 });
   }
   return out;
