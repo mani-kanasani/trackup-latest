@@ -70,6 +70,16 @@ UPDATE prospects SET replied_at = COALESCE(replied_at, status_changed_at)
 UPDATE prospects SET call_booked_at = COALESCE(call_booked_at, status_changed_at)
   WHERE call_booked_at IS NULL AND status = 'meeting';
 
+/*
+  Both functions pin their search_path.
+
+  They run as invoker and touch nothing but NEW and now(), so there is no
+  privilege-escalation path here — but a function whose search_path can be set
+  by its caller is a category Supabase's own linter flags, and a later edit that
+  adds a table lookup would inherit the hole silently. Cheaper to close now,
+  while this migration has not run anywhere yet, than to notice later.
+*/
+
 /* Jobs: applied on leaving 'drafted', then each milestone once. */
 CREATE OR REPLACE FUNCTION set_job_activity_stamps()
 RETURNS TRIGGER AS $$
@@ -85,7 +95,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SET search_path = public, pg_temp;
 
 DROP TRIGGER IF EXISTS jobs_activity_stamps ON jobs;
 CREATE TRIGGER jobs_activity_stamps BEFORE INSERT OR UPDATE ON jobs
@@ -107,7 +117,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SET search_path = public, pg_temp;
 
 DROP TRIGGER IF EXISTS leads_activity_stamps ON leads;
 CREATE TRIGGER leads_activity_stamps BEFORE INSERT OR UPDATE ON leads
